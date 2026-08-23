@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Moda Juárez · Piloto V5.1</title>
+<title>Moda Juárez · Piloto V5.2</title>
+
 <!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -282,7 +283,7 @@ body.admin-mode .admin-panel-shell{display:block}
 <body>
 
 <div class="promo-bar">
-  ENVÍO GRATIS EN COMPRAS DESDE $999 · PILOTO V5
+  ENVÍO GRATIS EN COMPRAS DESDE $999 · PILOTO V5.2
 </div>
 
 
@@ -303,7 +304,7 @@ body.admin-mode .admin-panel-shell{display:block}
   <a class="brand" href="#">MODA JUÁREZ</a>
 
   <div class="header-actions">
-    <button class="admin-login-btn" id="publicAdminBtn">Administrar</button>
+    <button type="button" class="admin-login-btn" id="publicAdminBtn">Administrar</button>
     <button class="icon-btn" id="cartBtn" aria-label="Carrito">
       🛒 <span id="cartCount">0</span>
     </button>
@@ -347,7 +348,7 @@ body.admin-mode .admin-panel-shell{display:block}
       <h3>☁️ Supabase · catálogo persistente</h3>
       <div class="supabase-grid hidden">
         <input id="supabaseUrl" value="https://bcabfavdxxzauahpbmsa.supabase.co" readonly>
-        <input id="supabaseKey" value="sb_publishable_F89WekECwWG66d4Nzpk4wag_9gN_ELBG" readonly>
+        <input id="supabaseKey" value="sb_publishable_F89WekECwWG6d4Nzpk4wag_9gN_ELBG" readonly>
       </div>
 
       <div class="supabase-actions">
@@ -654,7 +655,7 @@ body.admin-mode .admin-panel-shell{display:block}
 <script>
 
 const PUBLIC_SUPABASE_URL = "https://bcabfavdxxzauahpbmsa.supabase.co";
-const PUBLIC_SUPABASE_KEY = "sb_publishable_F89WekECwWG66d4Nzpk4wag_9gN_ELBG";
+const PUBLIC_SUPABASE_KEY = "sb_publishable_F89WekECwWG6d4Nzpk4wag_9gN_ELBG";
 
 const STORE_CONFIG = {
   whatsapp: "5216560000000",
@@ -1658,7 +1659,7 @@ async function loadCatalogFromSupabase(){
     "ok"
   );
   setPublicCatalogStatus(
-    `✅ Catálogo actualizado: ${state.products.length} productos disponibles.`,
+    `✅ Catálogo en línea: ${state.products.length} productos cargados desde Supabase.`,
     "ok"
   );
 }
@@ -2504,7 +2505,7 @@ $("whatsappBtn").onclick = sendWhatsApp;
       syncPriceFilterToCatalog();
       applyFilters();
       setPublicCatalogStatus(
-        `Mostrando copia local: ${state.products.length} productos.`,
+        `⚠️ Supabase no respondió. Mostrando respaldo local temporal: ${state.products.length} productos.`,
         "error"
       );
     }
