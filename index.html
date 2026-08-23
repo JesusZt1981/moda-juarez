@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Moda Juárez · Supabase</title>
+<title>Moda Juárez · Admin V3</title>
 
 <!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -113,6 +113,53 @@ button{cursor:pointer}
 .supabase-status{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.45}
 .admin-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#e7ece9;color:#33423a;font-size:11px;font-weight:800}
 @media(max-width:700px){.supabase-grid{grid-template-columns:1fr}}
+
+
+/* ================= ADMIN V3 ================= */
+.admin-edit-btn{
+  width:100%;margin-top:8px;padding:9px 10px;border:1px solid var(--sage-dark);
+  border-radius:9px;background:#eef3ef;color:#314039;font-weight:800
+}
+.admin-edit-btn:hover{background:var(--sage);color:#26302b}
+.admin-modal{
+  position:fixed;inset:0;z-index:220;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(30,35,35,.48);backdrop-filter:blur(3px)
+}
+.admin-modal-card{
+  width:min(900px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;
+  border:1px solid var(--border);box-shadow:0 25px 70px rgba(0,0,0,.22)
+}
+.admin-modal-head{
+  position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;
+  padding:16px 18px;background:#f7f8f6;border-bottom:1px solid var(--border)
+}
+.admin-modal-head h2{margin:0;font-size:20px}
+.admin-modal-body{padding:18px}
+.admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.admin-form-grid .full{grid-column:1/-1}
+.admin-field label{display:block;margin-bottom:5px;font-size:12px;font-weight:800;color:var(--muted)}
+.admin-field input,.admin-field textarea,.admin-field select{
+  width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:#fff
+}
+.admin-field textarea{min-height:110px;resize:vertical}
+.stock-editor{margin-top:16px;padding:14px;background:#f6f4ef;border-radius:12px}
+.stock-editor h3{margin:0 0 10px;font-size:15px}
+.stock-row{
+  display:grid;grid-template-columns:90px 1fr 1fr;gap:8px;align-items:center;margin:7px 0
+}
+.stock-row input{padding:9px;border:1px solid var(--border);border-radius:8px}
+.admin-modal-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.admin-warning{margin-top:10px;font-size:12px;color:#7a5b3e;line-height:1.45}
+.admin-status{margin-top:10px;font-size:12px;color:var(--muted)}
+.catalog-diagnostic{
+  margin-top:8px;padding:8px 10px;border-radius:9px;background:#f0f3f1;color:#58645e;font-size:11px
+}
+@media(max-width:700px){
+  .admin-form-grid{grid-template-columns:1fr}
+  .admin-form-grid .full{grid-column:auto}
+  .stock-row{grid-template-columns:70px 1fr}
+  .stock-row .stock-current{display:none}
+}
 
 @media(max-width:1150px){.product-grid{grid-template-columns:repeat(3,1fr)}.main-nav{gap:2px}.main-nav button{font-size:11px;padding:8px}}
 @media(max-width:900px){.site-header{grid-template-columns:1fr auto}.main-nav{display:none}.page-shell{grid-template-columns:1fr;padding:18px}.sidebar{position:static}.product-grid{grid-template-columns:repeat(2,1fr)}}
@@ -241,6 +288,7 @@ button{cursor:pointer}
       <div>
         <h1>Catálogo</h1>
         <p id="resultCount">0 productos</p>
+          <div id="catalogDiagnostic" class="catalog-diagnostic">Sin catálogo cargado.</div>
       </div>
 
       <select id="sortSelect">
@@ -259,6 +307,97 @@ button{cursor:pointer}
 
   </section>
 </main>
+
+
+<div class="admin-modal hidden" id="adminModal">
+  <div class="admin-modal-card">
+    <div class="admin-modal-head">
+      <h2>Editar producto</h2>
+      <button class="icon-btn" id="closeAdminModal">✕</button>
+    </div>
+
+    <div class="admin-modal-body">
+      <input type="hidden" id="adminProductDbId">
+
+      <div class="admin-form-grid">
+        <div class="admin-field">
+          <label>SKU</label>
+          <input id="adminSku" readonly>
+        </div>
+
+        <div class="admin-field">
+          <label>Categoría</label>
+          <input id="adminCategory">
+        </div>
+
+        <div class="admin-field full">
+          <label>Nombre</label>
+          <input id="adminName">
+        </div>
+
+        <div class="admin-field">
+          <label>Precio MXN</label>
+          <input id="adminPrice" type="number" min="0" step="0.01">
+        </div>
+
+        <div class="admin-field">
+          <label>Precio anterior MXN</label>
+          <input id="adminComparePrice" type="number" min="0" step="0.01">
+        </div>
+
+        <div class="admin-field">
+          <label>Badge / etiqueta</label>
+          <input id="adminBadge" placeholder="NUEVO, OFERTA, DESTACADO...">
+        </div>
+
+        <div class="admin-field">
+          <label>Estado</label>
+          <select id="adminActive">
+            <option value="true">Activo</option>
+            <option value="false">Oculto</option>
+          </select>
+        </div>
+
+        <div class="admin-field full">
+          <label>Descripción</label>
+          <textarea id="adminDescription"></textarea>
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 1</label>
+          <input id="adminImage1">
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 2</label>
+          <input id="adminImage2">
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 3</label>
+          <input id="adminImage3">
+        </div>
+      </div>
+
+      <div class="stock-editor">
+        <h3>Stock por talla</h3>
+        <div id="adminStockRows"></div>
+        <div class="admin-warning">
+          Los cambios de stock se registran como ajuste manual en el kardex
+          <code>shop_inventory_movements</code>.
+        </div>
+      </div>
+
+      <div class="admin-modal-actions">
+        <button class="primary-btn" id="saveAdminProduct">Guardar cambios</button>
+        <button class="danger-btn" id="disableAdminProduct">Ocultar producto</button>
+        <button class="secondary-btn" id="cancelAdminProduct">Cancelar</button>
+      </div>
+
+      <div id="adminEditorStatus" class="admin-status"></div>
+    </div>
+  </div>
+</div>
 
 <aside class="cart-drawer" id="cartDrawer">
   <div class="cart-head">
@@ -320,7 +459,9 @@ const ACCESSORY_CATEGORIES = [
 const state = {
   products: JSON.parse(localStorage.getItem("moda_catalog") || "[]"),
   filtered: [],
-  cart: JSON.parse(localStorage.getItem("moda_cart") || "[]")
+  cart: JSON.parse(localStorage.getItem("moda_cart") || "[]"),
+  admin: false,
+  adminEmail: null
 };
 
 const $ = id => document.getElementById(id);
@@ -429,6 +570,7 @@ async function importExcel(file){
     );
 
     fillCategoryFilter();
+    syncPriceFilterToCatalog();
     applyFilters();
 
     status.textContent =
@@ -466,6 +608,37 @@ function escapeHtml(value){
     .replaceAll('"',"&quot;");
 }
 
+
+function syncPriceFilterToCatalog(){
+  if(!state.products.length) return;
+
+  const prices = state.products
+    .map(p=>Number(p.price)||0)
+    .filter(n=>n>0);
+
+  if(!prices.length) return;
+
+  const actualMax = Math.ceil(Math.max(...prices)/100)*100;
+  const range = $("filterPrice");
+
+  // V3: evita ocultar productos solo porque el slider tenía tope fijo de 3000.
+  range.max = String(Math.max(3000,actualMax));
+  range.value = range.max;
+  $("filterPriceLabel").textContent = money(range.value);
+}
+
+function updateCatalogDiagnostic(){
+  const el = $("catalogDiagnostic");
+  if(!el) return;
+
+  const total = state.products.length;
+  const shown = state.filtered.length;
+  const max = Number($("filterPrice")?.value || 0);
+
+  el.textContent =
+    `Base: ${total} productos · Mostrando: ${shown} · Precio máximo aplicado: ${money(max)}`;
+}
+
 function applyFilters(){
   const search = $("searchInput").value.trim().toLowerCase();
   const category = $("filterCategory").value;
@@ -501,6 +674,7 @@ function applyFilters(){
 
   state.filtered = products;
   renderProducts();
+  updateCatalogDiagnostic();
 }
 
 function renderProducts(){
@@ -591,6 +765,10 @@ function renderProducts(){
         <button class="add-btn">
           Agregar al carrito
         </button>
+
+        ${state.admin && product.dbId
+          ? `<button class="admin-edit-btn" data-admin-edit="${product.dbId}">✎ Editar producto</button>`
+          : ""}
       </div>
     `;
 
@@ -605,6 +783,11 @@ function renderProducts(){
 
         addToCart(product,select.value);
       });
+
+    const editBtn = card.querySelector("[data-admin-edit]");
+    if(editBtn){
+      editBtn.addEventListener("click",()=>openAdminEditor(product));
+    }
 
     grid.appendChild(card);
   });
@@ -887,11 +1070,17 @@ function initSupabaseClient(){
   localStorage.setItem("moda_supabase_url", url);
   localStorage.setItem("moda_supabase_key", key);
 
+  // V3: una sola instancia de GoTrueClient.
+  if(shopSupabase){
+    return shopSupabase;
+  }
+
   shopSupabase = window.supabase.createClient(url,key,{
     auth:{
       persistSession:true,
       autoRefreshToken:true,
-      detectSessionInUrl:true
+      detectSessionInUrl:true,
+      storageKey:"moda-juarez-auth-token"
     }
   });
 
@@ -940,17 +1129,25 @@ async function refreshSupabaseStatus(){
   try{
     const auth = await getAdminState();
 
+    state.admin = false;
+    state.adminEmail = null;
+
     if(!auth.logged){
       setSupabaseStatus("Supabase conectado. Sin sesión ADMIN.");
+      renderProducts();
       return;
     }
 
     if(!auth.admin){
       setSupabaseStatus(`Sesión iniciada: ${auth.email}. Esta cuenta no tiene role=admin.`,"error");
+      renderProducts();
       return;
     }
 
+    state.admin = true;
+    state.adminEmail = auth.email;
     setSupabaseStatus(`✅ ADMIN conectado: ${auth.email}`,"ok");
+    renderProducts();
   }catch(error){
     setSupabaseStatus(`❌ ${error.message}`,"error");
   }
@@ -1215,6 +1412,12 @@ async function loadCatalogFromSupabase(){
       sizes: sizes.length ? sizes : ["UNITALLA"],
       colors: [],
       stock,
+      variants: vs.map(v=>({
+        id:v.id,
+        size:v.size || "UNITALLA",
+        color:v.color || null,
+        quantity:inventoryByVariant[v.id] || 0
+      })),
       totalStock:Object.values(stock).reduce((a,b)=>a+Number(b||0),0),
       images:[row.image_1,row.image_2,row.image_3].filter(Boolean),
       description:row.description || "",
@@ -1227,6 +1430,7 @@ async function loadCatalogFromSupabase(){
   localStorage.setItem("moda_catalog",JSON.stringify(state.products));
 
   fillCategoryFilter();
+  syncPriceFilterToCatalog();
   applyFilters();
 
   setSupabaseStatus(
@@ -1301,8 +1505,8 @@ $("clearFilters").onclick = ()=>{
   $("searchInput").value = "";
   $("filterCategory").value = "Todos";
   $("filterSize").value = "";
-  $("filterPrice").value = "3000";
-  $("filterPriceLabel").textContent = money(3000);
+  $("filterPrice").value = $("filterPrice").max || "3000";
+  $("filterPriceLabel").textContent = money($("filterPrice").value);
   $("sortSelect").value = "featured";
 
   applyFilters();
@@ -1337,6 +1541,202 @@ document.querySelectorAll(
     applyFilters();
   });
 });
+
+
+
+/* =========================================================
+   ADMIN EDITOR V3
+   ========================================================= */
+
+function setAdminEditorStatus(message,type="info"){
+  const el = $("adminEditorStatus");
+  if(!el) return;
+  el.textContent = message;
+  el.style.color =
+    type === "ok" ? "#527160" :
+    type === "error" ? "#9b4f4f" :
+    "var(--muted)";
+}
+
+function openAdminEditor(product){
+  if(!state.admin){
+    alert("Solo ADMIN puede editar productos.");
+    return;
+  }
+
+  $("adminProductDbId").value = product.dbId || "";
+  $("adminSku").value = product.sku || "";
+  $("adminCategory").value = product.category || "";
+  $("adminName").value = product.name || "";
+  $("adminPrice").value = Number(product.price || 0);
+  $("adminComparePrice").value =
+    product.compareAtPrice == null ? "" : Number(product.compareAtPrice);
+  $("adminBadge").value = product.badge || "";
+  $("adminActive").value = product.active === false ? "false" : "true";
+  $("adminDescription").value = product.description || "";
+  $("adminImage1").value = product.images?.[0] || "";
+  $("adminImage2").value = product.images?.[1] || "";
+  $("adminImage3").value = product.images?.[2] || "";
+
+  const rows = $("adminStockRows");
+  rows.innerHTML = "";
+
+  const variants =
+    Array.isArray(product.variants) && product.variants.length
+      ? product.variants
+      : (product.sizes || []).map(size=>({
+          id:null,
+          size,
+          quantity:Number(product.stock?.[size] || 0)
+        }));
+
+  variants.forEach(v=>{
+    const row = document.createElement("div");
+    row.className = "stock-row";
+    row.dataset.variantId = v.id || "";
+    row.dataset.size = v.size || "UNITALLA";
+    row.dataset.previous = String(Number(v.quantity || 0));
+
+    row.innerHTML = `
+      <strong>${escapeHtml(v.size || "UNITALLA")}</strong>
+      <input class="admin-stock-input" type="number" min="0" step="1" value="${Number(v.quantity || 0)}">
+      <span class="stock-current">Actual: ${Number(v.quantity || 0)}</span>
+    `;
+
+    rows.appendChild(row);
+  });
+
+  setAdminEditorStatus("");
+  $("adminModal").classList.remove("hidden");
+}
+
+function closeAdminEditor(){
+  $("adminModal").classList.add("hidden");
+}
+
+async function saveAdminProductChanges(){
+  await requireShopAdmin();
+
+  const dbId = Number($("adminProductDbId").value);
+  if(!dbId){
+    throw new Error("No se encontró el ID del producto en Supabase.");
+  }
+
+  const sku = $("adminSku").value.trim();
+
+  setAdminEditorStatus("Guardando producto…");
+
+  const update = {
+    name:$("adminName").value.trim(),
+    category:$("adminCategory").value.trim() || "Sin categoría",
+    price:Number($("adminPrice").value || 0),
+    compare_at_price:
+      $("adminComparePrice").value === ""
+        ? null
+        : Number($("adminComparePrice").value),
+    badge:$("adminBadge").value.trim() || null,
+    active:$("adminActive").value === "true",
+    description:$("adminDescription").value.trim() || null,
+    image_1:$("adminImage1").value.trim() || null,
+    image_2:$("adminImage2").value.trim() || null,
+    image_3:$("adminImage3").value.trim() || null
+  };
+
+  const {error:productError} = await shopSupabase
+    .from("shop_products")
+    .update(update)
+    .eq("id",dbId);
+
+  if(productError) throw productError;
+
+  const stockRows = [...document.querySelectorAll("#adminStockRows .stock-row")];
+
+  for(const row of stockRows){
+    const variantId = Number(row.dataset.variantId);
+    if(!variantId) continue;
+
+    const previous = Number(row.dataset.previous || 0);
+    const next = Math.max(0,Number(row.querySelector(".admin-stock-input").value || 0));
+
+    if(next === previous) continue;
+
+    const {error:inventoryError} = await shopSupabase
+      .from("shop_inventory")
+      .update({quantity:next})
+      .eq("variant_id",variantId);
+
+    if(inventoryError) throw inventoryError;
+
+    const {error:movementError} = await shopSupabase
+      .from("shop_inventory_movements")
+      .insert({
+        variant_id:variantId,
+        movement_type:"manual_adjustment",
+        quantity:next-previous,
+        previous_stock:previous,
+        new_stock:next,
+        reason:"Ajuste manual desde panel ADMIN",
+        reference:sku
+      });
+
+    if(movementError) throw movementError;
+  }
+
+  setAdminEditorStatus("✅ Producto y stock guardados.","ok");
+
+  await loadCatalogFromSupabase();
+  closeAdminEditor();
+}
+
+async function hideAdminProduct(){
+  await requireShopAdmin();
+
+  const dbId = Number($("adminProductDbId").value);
+  if(!dbId) return;
+
+  if(!confirm("¿Ocultar este producto del catálogo? No se borrará de Supabase.")){
+    return;
+  }
+
+  const {error} = await shopSupabase
+    .from("shop_products")
+    .update({active:false})
+    .eq("id",dbId);
+
+  if(error) throw error;
+
+  await loadCatalogFromSupabase();
+  closeAdminEditor();
+}
+
+
+
+$("closeAdminModal").onclick = closeAdminEditor;
+$("cancelAdminProduct").onclick = closeAdminEditor;
+
+$("adminModal").addEventListener("click",event=>{
+  if(event.target === $("adminModal")){
+    closeAdminEditor();
+  }
+});
+
+$("saveAdminProduct").onclick = async ()=>{
+  try{
+    await saveAdminProductChanges();
+  }catch(error){
+    console.error(error);
+    setAdminEditorStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("disableAdminProduct").onclick = async ()=>{
+  try{
+    await hideAdminProduct();
+  }catch(error){
+    console.error(error);
+    setAdminEditorStatus(`❌ ${error.message}`,"error");
+  }
+};
 
 
 $("connectSupabaseBtn").onclick = async ()=>{
@@ -1402,9 +1802,12 @@ if(savedSupabaseKey){
   try{
     initSupabaseClient();
 
-    shopSupabase.auth.onAuthStateChange(()=>{
-      setTimeout(refreshSupabaseStatus,0);
-    });
+    if(!window.__modaAuthListenerInstalled){
+      window.__modaAuthListenerInstalled = true;
+      shopSupabase.auth.onAuthStateChange(()=>{
+        setTimeout(refreshSupabaseStatus,0);
+      });
+    }
 
     setTimeout(refreshSupabaseStatus,100);
   }catch(error){
@@ -1413,6 +1816,7 @@ if(savedSupabaseKey){
 }
 
 fillCategoryFilter();
+syncPriceFilterToCatalog();
 applyFilters();
 renderCart();
 
