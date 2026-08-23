@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Moda Juárez · Admin V3</title>
+<title>Moda Juárez · Piloto V5</title>
 
 <!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -161,6 +161,119 @@ button{cursor:pointer}
   .stock-row .stock-current{display:none}
 }
 
+
+/* ================= ADMIN V4 · ALTAS + STORAGE ================= */
+.admin-top-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.image-admin-box{
+  display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:start;
+  padding:12px;border:1px solid var(--border);border-radius:12px;background:#fafafa
+}
+.image-preview{
+  width:110px;height:138px;object-fit:cover;border-radius:10px;background:#ece9e4;
+  border:1px solid var(--border)
+}
+.image-controls{display:flex;flex-direction:column;gap:7px}
+.image-controls input[type="text"]{
+  width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;background:#fff
+}
+.image-button-row{display:flex;gap:7px;flex-wrap:wrap}
+.upload-image-btn,.clear-image-btn{
+  border:0;border-radius:9px;padding:9px 11px;font-weight:800
+}
+.upload-image-btn{background:var(--blue);color:#26343d}
+.clear-image-btn{background:#ead7d7;color:#714747}
+.variant-builder{
+  margin-top:16px;padding:14px;background:#f6f4ef;border-radius:12px
+}
+.variant-builder h3{margin:0 0 10px;font-size:15px}
+.variant-add-row{
+  display:grid;grid-template-columns:1fr 120px auto;gap:8px;align-items:end;margin-bottom:10px
+}
+.variant-add-row input,.variant-add-row select{
+  width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#fff
+}
+.variant-list-row{
+  display:grid;grid-template-columns:100px 1fr 1fr auto;gap:8px;align-items:center;
+  padding:7px 0;border-bottom:1px solid #e4e1dc
+}
+.variant-list-row:last-child{border-bottom:0}
+.variant-remove{
+  border:0;background:#ead7d7;color:#714747;border-radius:8px;padding:8px 10px;font-weight:800
+}
+.new-product-note{
+  margin:8px 0 0;padding:10px;border-radius:9px;background:#eef3ef;
+  color:#43544a;font-size:12px;line-height:1.45
+}
+@media(max-width:700px){
+  .image-admin-box{grid-template-columns:1fr}
+  .image-preview{width:100%;height:220px}
+  .variant-add-row{grid-template-columns:1fr}
+  .variant-list-row{grid-template-columns:70px 1fr auto}
+  .variant-list-row .variant-color{display:none}
+}
+
+
+/* ================= PILOTO V5 · PUBLICO/ADMIN + RESPONSIVE ================= */
+.mobile-menu-btn{display:none;border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 11px;font-weight:800}
+.mobile-nav{
+  display:none;position:fixed;z-index:180;left:0;right:0;top:78px;background:#fff;
+  border-bottom:1px solid var(--border);box-shadow:var(--shadow);padding:12px
+}
+.mobile-nav.open{display:block}
+.mobile-nav button{
+  display:block;width:100%;text-align:left;border:0;background:transparent;padding:12px 14px;
+  border-radius:10px;font-weight:800;color:var(--text)
+}
+.mobile-nav button:hover,.mobile-nav button.active{background:var(--sage)}
+.admin-login-btn{
+  border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 11px;
+  font-size:11px;font-weight:800;color:var(--muted)
+}
+.admin-panel-shell{display:none}
+body.admin-mode .admin-panel-shell{display:block}
+.admin-collapsed{
+  max-width:1500px;margin:12px auto 0;padding:0 28px
+}
+.admin-collapsed-inner{
+  border:1px dashed var(--blue-dark);border-radius:12px;background:#f5f7f8;padding:12px
+}
+.public-status{
+  max-width:1500px;margin:10px auto 0;padding:0 28px;font-size:12px;color:var(--muted)
+}
+.public-status.ok{color:#527160}
+.public-status.error{color:#9b4f4f}
+@media(max-width:1100px){
+  .site-header{grid-template-columns:auto 1fr auto;gap:10px}
+  .main-nav{display:none}
+  .mobile-menu-btn{display:inline-flex;align-items:center;justify-content:center}
+  .brand{justify-self:center}
+}
+@media(max-width:760px){
+  .site-header{min-height:66px;padding:0 12px}
+  .mobile-nav{top:66px}
+  .brand{font-size:18px}
+  .header-actions{gap:5px}
+  .admin-login-btn{padding:7px 9px;font-size:10px}
+  .page-shell{padding:12px}
+  .sidebar{order:2}
+  .catalog-section{order:1}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .catalog-toolbar{align-items:stretch}
+  .admin-collapsed,.public-status{padding:0 12px}
+}
+@media(max-width:480px){
+  .product-grid{grid-template-columns:1fr}
+  .product-card{display:grid;grid-template-columns:42% 58%}
+  .image-wrap{aspect-ratio:3/4}
+  .product-info{padding:10px}
+  .product-name{min-height:auto}
+  .site-header{grid-template-columns:auto 1fr auto}
+  .brand{font-size:16px}
+  .promo-bar{font-size:10px;padding:7px 10px}
+  .cart-drawer{width:100%}
+  .admin-login-btn{max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
 @media(max-width:1150px){.product-grid{grid-template-columns:repeat(3,1fr)}.main-nav{gap:2px}.main-nav button{font-size:11px;padding:8px}}
 @media(max-width:900px){.site-header{grid-template-columns:1fr auto}.main-nav{display:none}.page-shell{grid-template-columns:1fr;padding:18px}.sidebar{position:static}.product-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.site-header{padding:0 12px}.brand{font-size:18px}.import-bar{padding:0 12px}.page-shell{padding:12px}.catalog-toolbar{flex-direction:column;align-items:stretch}.product-grid{gap:9px}.product-info{padding:10px}.product-name{font-size:12px}.sidebar{padding:14px}}
@@ -170,10 +283,13 @@ button{cursor:pointer}
 <body>
 
 <div class="promo-bar">
-  ENVÍO GRATIS EN COMPRAS DESDE $999 · PILOTO
+  ENVÍO GRATIS EN COMPRAS DESDE $999 · PILOTO V5
 </div>
 
+
 <header class="site-header">
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">☰ Menú</button>
+
   <nav class="main-nav" id="mainNav">
     <button class="active" data-category="Todos">NOVEDADES</button>
     <button data-category="Vestidos">VESTIDOS</button>
@@ -188,12 +304,26 @@ button{cursor:pointer}
   <a class="brand" href="#">MODA JUÁREZ</a>
 
   <div class="header-actions">
+    <button class="admin-login-btn" id="publicAdminBtn">Administrar</button>
     <button class="icon-btn" id="cartBtn" aria-label="Carrito">
       🛒 <span id="cartCount">0</span>
     </button>
   </div>
 </header>
 
+<nav class="mobile-nav" id="mobileNav">
+  <button class="active" data-category="Todos">NOVEDADES</button>
+  <button data-category="Vestidos">VESTIDOS</button>
+  <button data-category="Faldas">FALDAS</button>
+  <button data-category="Shorts">SHORTS</button>
+  <button data-category="Blusas">BLUSAS</button>
+  <button data-category="Tops">TOPS</button>
+  <button data-category="Ropa interior">ROPA INTERIOR</button>
+  <button data-category="Accesorios">ACCESORIOS</button>
+</nav>
+
+
+<div class="admin-panel-shell" id="adminPanelShell">
 <section class="import-bar">
   <div class="import-panel">
     <div class="import-head">
@@ -216,9 +346,9 @@ button{cursor:pointer}
 
     <div class="supabase-box">
       <h3>☁️ Supabase · catálogo persistente</h3>
-      <div class="supabase-grid">
+      <div class="supabase-grid hidden">
         <input id="supabaseUrl" value="https://bcabfavdxxzauahpbmsa.supabase.co" readonly>
-        <input id="supabaseKey" placeholder="Pega aquí tu Publishable key: sb_publishable_...">
+        <input id="supabaseKey" value="sb_publishable_F89WekECwWG66d4Nzpk4wag_9gN_ELBG" readonly>
       </div>
 
       <div class="supabase-actions">
@@ -229,12 +359,19 @@ button{cursor:pointer}
         <button class="danger-btn" id="logoutSupabaseBtn">Cerrar sesión ADMIN</button>
       </div>
 
+      <div class="admin-top-actions hidden" id="adminTopActions">
+        <button class="primary-btn" id="newProductBtn">＋ Agregar producto</button>
+      </div>
+
       <div class="supabase-status" id="supabaseStatus">
         Sin conectar. La Publishable key puede estar en el navegador; no uses aquí una Secret key.
       </div>
     </div>
   </div>
 </section>
+</div>
+
+<div id="publicCatalogStatus" class="public-status">Cargando catálogo…</div>
 
 <div class="search-panel">
   <input id="searchInput" placeholder="Buscar producto, SKU o categoría…">
@@ -309,25 +446,41 @@ button{cursor:pointer}
 </main>
 
 
+
 <div class="admin-modal hidden" id="adminModal">
   <div class="admin-modal-card">
     <div class="admin-modal-head">
-      <h2>Editar producto</h2>
+      <h2 id="adminModalTitle">Editar producto</h2>
       <button class="icon-btn" id="closeAdminModal">✕</button>
     </div>
 
     <div class="admin-modal-body">
       <input type="hidden" id="adminProductDbId">
+      <input type="hidden" id="adminEditorMode" value="edit">
 
       <div class="admin-form-grid">
         <div class="admin-field">
           <label>SKU</label>
-          <input id="adminSku" readonly>
+          <input id="adminSku">
         </div>
 
         <div class="admin-field">
           <label>Categoría</label>
-          <input id="adminCategory">
+          <input id="adminCategory" list="categorySuggestions">
+          <datalist id="categorySuggestions">
+            <option>Vestidos</option>
+            <option>Blusas</option>
+            <option>Tops</option>
+            <option>Pantalones</option>
+            <option>Shorts</option>
+            <option>Faldas</option>
+            <option>Ropa interior</option>
+            <option>Conjuntos</option>
+            <option>Trajes de baño</option>
+            <option>Suéteres y cardigans</option>
+            <option>Chamarras y blazers</option>
+            <option>Accesorios</option>
+          </datalist>
         </div>
 
         <div class="admin-field full">
@@ -365,26 +518,84 @@ button{cursor:pointer}
 
         <div class="admin-field full">
           <label>Imagen 1</label>
-          <input id="adminImage1">
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview1" alt="Vista previa imagen 1">
+            <div class="image-controls">
+              <input id="adminImage1" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile1" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row">
+                <button type="button" class="upload-image-btn" data-upload-slot="1">Subir desde PC</button>
+                <button type="button" class="clear-image-btn" data-clear-slot="1">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="admin-field full">
           <label>Imagen 2</label>
-          <input id="adminImage2">
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview2" alt="Vista previa imagen 2">
+            <div class="image-controls">
+              <input id="adminImage2" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile2" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row">
+                <button type="button" class="upload-image-btn" data-upload-slot="2">Subir desde PC</button>
+                <button type="button" class="clear-image-btn" data-clear-slot="2">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="admin-field full">
           <label>Imagen 3</label>
-          <input id="adminImage3">
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview3" alt="Vista previa imagen 3">
+            <div class="image-controls">
+              <input id="adminImage3" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile3" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row">
+                <button type="button" class="upload-image-btn" data-upload-slot="3">Subir desde PC</button>
+                <button type="button" class="clear-image-btn" data-clear-slot="3">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="stock-editor">
+      <div class="stock-editor" id="existingStockEditor">
         <h3>Stock por talla</h3>
         <div id="adminStockRows"></div>
         <div class="admin-warning">
-          Los cambios de stock se registran como ajuste manual en el kardex
+          Los cambios de stock se registran como ajuste manual en
           <code>shop_inventory_movements</code>.
+        </div>
+      </div>
+
+      <div class="variant-builder hidden" id="newVariantBuilder">
+        <h3>Tallas y stock inicial</h3>
+        <div class="variant-add-row">
+          <div>
+            <label>Talla</label>
+            <select id="newVariantSize">
+              <option>CH</option>
+              <option>M</option>
+              <option>G</option>
+              <option>EG</option>
+              <option>UNITALLA</option>
+            </select>
+          </div>
+          <div>
+            <label>Stock</label>
+            <input id="newVariantQty" type="number" min="0" step="1" value="0">
+          </div>
+          <button class="secondary-btn" type="button" id="addNewVariantBtn">Agregar talla</button>
+        </div>
+
+        <div id="newVariantRows"></div>
+
+        <div class="new-product-note">
+          Puedes agregar CH, M, G, EG o UNITALLA. El stock inicial quedará guardado
+          en Supabase al crear el producto.
         </div>
       </div>
 
@@ -442,6 +653,10 @@ button{cursor:pointer}
 <div class="overlay hidden" id="overlay"></div>
 
 <script>
+
+const PUBLIC_SUPABASE_URL = "https://bcabfavdxxzauahpbmsa.supabase.co";
+const PUBLIC_SUPABASE_KEY = "sb_publishable_F89WekECwWG66d4Nzpk4wag_9gN_ELBG";
+
 const STORE_CONFIG = {
   whatsapp: "5216560000000",
   shipping: {
@@ -1056,33 +1271,22 @@ function setSupabaseStatus(message, type="info"){
 }
 
 function initSupabaseClient(){
-  const url = $("supabaseUrl").value.trim();
-  const key = $("supabaseKey").value.trim();
-
-  if(!url){
-    throw new Error("Falta SUPABASE_URL.");
-  }
-
-  if(!key || !key.startsWith("sb_publishable_")){
-    throw new Error("Pega la Publishable key de Supabase (sb_publishable_...).");
-  }
-
-  localStorage.setItem("moda_supabase_url", url);
-  localStorage.setItem("moda_supabase_key", key);
-
-  // V3: una sola instancia de GoTrueClient.
   if(shopSupabase){
     return shopSupabase;
   }
 
-  shopSupabase = window.supabase.createClient(url,key,{
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true,
-      storageKey:"moda-juarez-auth-token"
+  shopSupabase = window.supabase.createClient(
+    PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true,
+        storageKey:"moda-juarez-auth-token"
+      }
     }
-  });
+  );
 
   return shopSupabase;
 }
@@ -1131,6 +1335,9 @@ async function refreshSupabaseStatus(){
 
     state.admin = false;
     state.adminEmail = null;
+    document.body.classList.remove("admin-mode");
+    $("adminTopActions")?.classList.add("hidden");
+    $("publicAdminBtn").textContent = "Administrar";
 
     if(!auth.logged){
       setSupabaseStatus("Supabase conectado. Sin sesión ADMIN.");
@@ -1146,6 +1353,9 @@ async function refreshSupabaseStatus(){
 
     state.admin = true;
     state.adminEmail = auth.email;
+    document.body.classList.add("admin-mode");
+    $("adminTopActions")?.classList.remove("hidden");
+    $("publicAdminBtn").textContent = "ADMIN";
     setSupabaseStatus(`✅ ADMIN conectado: ${auth.email}`,"ok");
     renderProducts();
   }catch(error){
@@ -1319,12 +1529,23 @@ async function saveCatalogToSupabase(){
   );
 }
 
+
+function setPublicCatalogStatus(message,type="info"){
+  const el = $("publicCatalogStatus");
+  if(!el) return;
+  el.textContent = message;
+  el.classList.remove("ok","error");
+  if(type === "ok") el.classList.add("ok");
+  if(type === "error") el.classList.add("error");
+}
+
 async function loadCatalogFromSupabase(){
   if(!shopSupabase){
     initSupabaseClient();
   }
 
   setSupabaseStatus("Cargando productos desde Supabase…");
+  setPublicCatalogStatus("Cargando catálogo…");
 
   const {data:products,error:productsError} = await shopSupabase
     .from("shop_products")
@@ -1437,6 +1658,10 @@ async function loadCatalogFromSupabase(){
     `✅ Catálogo cargado desde Supabase: ${state.products.length} productos.`,
     "ok"
   );
+  setPublicCatalogStatus(
+    `✅ Catálogo actualizado: ${state.products.length} productos disponibles.`,
+    "ok"
+  );
 }
 
 async function logoutShopAdmin(){
@@ -1445,7 +1670,9 @@ async function logoutShopAdmin(){
   }
 
   await shopSupabase.auth.signOut();
+  document.body.classList.remove("admin-mode");
   await refreshSupabaseStatus();
+  await loadCatalogFromSupabase();
 }
 
 
@@ -1544,9 +1771,13 @@ document.querySelectorAll(
 
 
 
+
 /* =========================================================
-   ADMIN EDITOR V3
+   ADMIN EDITOR V4 · STORAGE + ALTAS
    ========================================================= */
+
+const PRODUCT_IMAGE_BUCKET = "productos";
+let newProductVariants = [];
 
 function setAdminEditorStatus(message,type="info"){
   const el = $("adminEditorStatus");
@@ -1558,14 +1789,258 @@ function setAdminEditorStatus(message,type="info"){
     "var(--muted)";
 }
 
+function safeFilePart(value){
+  return String(value || "archivo")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9._-]+/g,"-")
+    .replace(/-+/g,"-")
+    .replace(/^-|-$/g,"")
+    .toLowerCase();
+}
+
+function imageInput(slot){
+  return $(`adminImage${slot}`);
+}
+
+function imagePreview(slot){
+  return $(`adminImagePreview${slot}`);
+}
+
+function refreshImagePreview(slot){
+  const url = imageInput(slot).value.trim();
+  const preview = imagePreview(slot);
+
+  preview.src = url ||
+    "https://placehold.co/440x550/f2f0eb/6d7474?text=Sin+imagen";
+
+  preview.onerror = ()=>{
+    preview.src =
+      "https://placehold.co/440x550/f2f0eb/6d7474?text=Imagen+no+disponible";
+  };
+}
+
+function refreshAllImagePreviews(){
+  [1,2,3].forEach(refreshImagePreview);
+}
+
+async function uploadProductImage(slot,file){
+  await requireShopAdmin();
+
+  if(!file){
+    return;
+  }
+
+  const allowed = ["image/jpeg","image/png","image/webp"];
+
+  if(!allowed.includes(file.type)){
+    throw new Error("Solo se permiten JPG, PNG o WEBP.");
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    throw new Error("La imagen supera el límite de 5 MB.");
+  }
+
+  const sku = $("adminSku").value.trim();
+
+  if(!sku){
+    throw new Error("Primero escribe el SKU del producto.");
+  }
+
+  const ext =
+    file.name.includes(".")
+      ? file.name.split(".").pop().toLowerCase()
+      : (file.type === "image/png" ? "png" :
+         file.type === "image/webp" ? "webp" : "jpg");
+
+  const path =
+    `${safeFilePart(sku)}/${Date.now()}-imagen-${slot}.${safeFilePart(ext)}`;
+
+  setAdminEditorStatus(`Subiendo imagen ${slot}…`);
+
+  const {error} = await shopSupabase
+    .storage
+    .from(PRODUCT_IMAGE_BUCKET)
+    .upload(path,file,{
+      cacheControl:"3600",
+      upsert:false,
+      contentType:file.type
+    });
+
+  if(error){
+    throw error;
+  }
+
+  const {data} = shopSupabase
+    .storage
+    .from(PRODUCT_IMAGE_BUCKET)
+    .getPublicUrl(path);
+
+  if(!data?.publicUrl){
+    throw new Error("Supabase no devolvió la URL pública.");
+  }
+
+  imageInput(slot).value = data.publicUrl;
+  refreshImagePreview(slot);
+
+  setAdminEditorStatus(`✅ Imagen ${slot} subida a Supabase Storage.`,"ok");
+}
+
+function storagePathFromPublicUrl(url){
+  const marker = `/storage/v1/object/public/${PRODUCT_IMAGE_BUCKET}/`;
+  const pos = String(url || "").indexOf(marker);
+
+  if(pos === -1){
+    return null;
+  }
+
+  return decodeURIComponent(
+    String(url).slice(pos + marker.length)
+  );
+}
+
+async function clearProductImage(slot){
+  await requireShopAdmin();
+
+  const currentUrl = imageInput(slot).value.trim();
+  const storagePath = storagePathFromPublicUrl(currentUrl);
+
+  if(storagePath){
+    const {error} = await shopSupabase
+      .storage
+      .from(PRODUCT_IMAGE_BUCKET)
+      .remove([storagePath]);
+
+    if(error){
+      throw error;
+    }
+  }
+
+  imageInput(slot).value = "";
+  refreshImagePreview(slot);
+
+  setAdminEditorStatus(
+    storagePath
+      ? `✅ Imagen ${slot} eliminada de Storage. Guarda el producto para confirmar el cambio.`
+      : `Imagen ${slot} quitada del producto. Guarda los cambios.`,
+    "ok"
+  );
+}
+
+function renderNewVariantRows(){
+  const wrap = $("newVariantRows");
+  wrap.innerHTML = "";
+
+  if(!newProductVariants.length){
+    wrap.innerHTML =
+      `<div class="admin-status">Aún no agregas tallas.</div>`;
+    return;
+  }
+
+  newProductVariants.forEach((variant,index)=>{
+    const row = document.createElement("div");
+    row.className = "variant-list-row";
+
+    row.innerHTML = `
+      <strong>${escapeHtml(variant.size)}</strong>
+      <span>Stock: ${variant.quantity}</span>
+      <span class="variant-color">Color: —</span>
+      <button type="button" class="variant-remove" data-remove-variant="${index}">
+        Quitar
+      </button>
+    `;
+
+    row.querySelector("[data-remove-variant]").onclick = ()=>{
+      newProductVariants.splice(index,1);
+      renderNewVariantRows();
+    };
+
+    wrap.appendChild(row);
+  });
+}
+
+function addNewProductVariant(){
+  const size = $("newVariantSize").value;
+  const quantity =
+    Math.max(0,Math.floor(Number($("newVariantQty").value || 0)));
+
+  const existing = newProductVariants.find(v=>v.size===size);
+
+  if(existing){
+    existing.quantity = quantity;
+  }else{
+    newProductVariants.push({size,quantity});
+  }
+
+  renderNewVariantRows();
+}
+
+function resetAdminForm(){
+  $("adminProductDbId").value = "";
+  $("adminSku").value = "";
+  $("adminCategory").value = "";
+  $("adminName").value = "";
+  $("adminPrice").value = "";
+  $("adminComparePrice").value = "";
+  $("adminBadge").value = "";
+  $("adminActive").value = "true";
+  $("adminDescription").value = "";
+  $("adminImage1").value = "";
+  $("adminImage2").value = "";
+  $("adminImage3").value = "";
+  $("adminStockRows").innerHTML = "";
+
+  [1,2,3].forEach(slot=>{
+    $(`adminImageFile${slot}`).value = "";
+  });
+
+  refreshAllImagePreviews();
+  setAdminEditorStatus("");
+}
+
+function openNewProductEditor(){
+  if(!state.admin){
+    alert("Solo ADMIN puede crear productos.");
+    return;
+  }
+
+  resetAdminForm();
+
+  $("adminEditorMode").value = "new";
+  $("adminModalTitle").textContent = "Agregar producto";
+  $("saveAdminProduct").textContent = "Crear producto";
+  $("disableAdminProduct").classList.add("hidden");
+
+  $("existingStockEditor").classList.add("hidden");
+  $("newVariantBuilder").classList.remove("hidden");
+
+  $("adminSku").readOnly = false;
+
+  newProductVariants = [];
+  renderNewVariantRows();
+
+  $("adminModal").classList.remove("hidden");
+}
+
 function openAdminEditor(product){
   if(!state.admin){
     alert("Solo ADMIN puede editar productos.");
     return;
   }
 
+  resetAdminForm();
+
+  $("adminEditorMode").value = "edit";
+  $("adminModalTitle").textContent = "Editar producto";
+  $("saveAdminProduct").textContent = "Guardar cambios";
+  $("disableAdminProduct").classList.remove("hidden");
+
+  $("existingStockEditor").classList.remove("hidden");
+  $("newVariantBuilder").classList.add("hidden");
+
   $("adminProductDbId").value = product.dbId || "";
   $("adminSku").value = product.sku || "";
+  $("adminSku").readOnly = true;
   $("adminCategory").value = product.category || "";
   $("adminName").value = product.name || "";
   $("adminPrice").value = Number(product.price || 0);
@@ -1577,6 +2052,8 @@ function openAdminEditor(product){
   $("adminImage1").value = product.images?.[0] || "";
   $("adminImage2").value = product.images?.[1] || "";
   $("adminImage3").value = product.images?.[2] || "";
+
+  refreshAllImagePreviews();
 
   const rows = $("adminStockRows");
   rows.innerHTML = "";
@@ -1614,6 +2091,133 @@ function closeAdminEditor(){
   $("adminModal").classList.add("hidden");
 }
 
+function collectAdminProductValues(){
+  const sku = $("adminSku").value.trim();
+  const name = $("adminName").value.trim();
+  const category = $("adminCategory").value.trim();
+
+  if(!sku){
+    throw new Error("Falta el SKU.");
+  }
+
+  if(!name){
+    throw new Error("Falta el nombre del producto.");
+  }
+
+  if(!category){
+    throw new Error("Falta la categoría.");
+  }
+
+  const price = Number($("adminPrice").value || 0);
+
+  if(price < 0){
+    throw new Error("El precio no puede ser negativo.");
+  }
+
+  return {
+    sku,
+    name,
+    category,
+    description:$("adminDescription").value.trim() || null,
+    price,
+    compare_at_price:
+      $("adminComparePrice").value === ""
+        ? null
+        : Number($("adminComparePrice").value),
+    currency:"MXN",
+    image_1:$("adminImage1").value.trim() || null,
+    image_2:$("adminImage2").value.trim() || null,
+    image_3:$("adminImage3").value.trim() || null,
+    badge:$("adminBadge").value.trim() || null,
+    active:$("adminActive").value === "true"
+  };
+}
+
+async function createAdminProduct(){
+  await requireShopAdmin();
+
+  const productValues = collectAdminProductValues();
+
+  if(!newProductVariants.length){
+    throw new Error("Agrega por lo menos una talla con su stock.");
+  }
+
+  setAdminEditorStatus("Creando producto…");
+
+  const {data:product,error:productError} = await shopSupabase
+    .from("shop_products")
+    .insert(productValues)
+    .select("id,sku")
+    .single();
+
+  if(productError){
+    if(String(productError.message).toLowerCase().includes("duplicate")){
+      throw new Error("Ese SKU ya existe.");
+    }
+    throw productError;
+  }
+
+  const variants = newProductVariants.map(v=>({
+    product_id:product.id,
+    variant_sku:`${productValues.sku}-${v.size}`,
+    size:v.size,
+    color:null,
+    active:true
+  }));
+
+  const {data:variantRows,error:variantError} = await shopSupabase
+    .from("shop_product_variants")
+    .insert(variants)
+    .select("id,size");
+
+  if(variantError){
+    throw variantError;
+  }
+
+  const qtyBySize =
+    Object.fromEntries(newProductVariants.map(v=>[v.size,v.quantity]));
+
+  const inventoryRows = variantRows.map(v=>({
+    variant_id:v.id,
+    quantity:qtyBySize[v.size] || 0
+  }));
+
+  const {error:inventoryError} = await shopSupabase
+    .from("shop_inventory")
+    .insert(inventoryRows);
+
+  if(inventoryError){
+    throw inventoryError;
+  }
+
+  const movementRows = variantRows
+    .map(v=>({
+      variant_id:v.id,
+      movement_type:"initial_stock",
+      quantity:qtyBySize[v.size] || 0,
+      previous_stock:0,
+      new_stock:qtyBySize[v.size] || 0,
+      reason:"Stock inicial al crear producto",
+      reference:productValues.sku
+    }))
+    .filter(row=>row.quantity !== 0);
+
+  if(movementRows.length){
+    const {error:movementError} = await shopSupabase
+      .from("shop_inventory_movements")
+      .insert(movementRows);
+
+    if(movementError){
+      throw movementError;
+    }
+  }
+
+  setAdminEditorStatus("✅ Producto creado.","ok");
+
+  await loadCatalogFromSupabase();
+  closeAdminEditor();
+}
+
 async function saveAdminProductChanges(){
   await requireShopAdmin();
 
@@ -1622,29 +2226,17 @@ async function saveAdminProductChanges(){
     throw new Error("No se encontró el ID del producto en Supabase.");
   }
 
-  const sku = $("adminSku").value.trim();
+  const productValues = collectAdminProductValues();
+  const sku = productValues.sku;
 
   setAdminEditorStatus("Guardando producto…");
 
-  const update = {
-    name:$("adminName").value.trim(),
-    category:$("adminCategory").value.trim() || "Sin categoría",
-    price:Number($("adminPrice").value || 0),
-    compare_at_price:
-      $("adminComparePrice").value === ""
-        ? null
-        : Number($("adminComparePrice").value),
-    badge:$("adminBadge").value.trim() || null,
-    active:$("adminActive").value === "true",
-    description:$("adminDescription").value.trim() || null,
-    image_1:$("adminImage1").value.trim() || null,
-    image_2:$("adminImage2").value.trim() || null,
-    image_3:$("adminImage3").value.trim() || null
-  };
+  // SKU no se modifica en productos existentes desde este editor.
+  delete productValues.sku;
 
   const {error:productError} = await shopSupabase
     .from("shop_products")
-    .update(update)
+    .update(productValues)
     .eq("id",dbId);
 
   if(productError) throw productError;
@@ -1656,7 +2248,10 @@ async function saveAdminProductChanges(){
     if(!variantId) continue;
 
     const previous = Number(row.dataset.previous || 0);
-    const next = Math.max(0,Number(row.querySelector(".admin-stock-input").value || 0));
+    const next = Math.max(
+      0,
+      Math.floor(Number(row.querySelector(".admin-stock-input").value || 0))
+    );
 
     if(next === previous) continue;
 
@@ -1709,10 +2304,10 @@ async function hideAdminProduct(){
   closeAdminEditor();
 }
 
-
-
 $("closeAdminModal").onclick = closeAdminEditor;
 $("cancelAdminProduct").onclick = closeAdminEditor;
+$("newProductBtn").onclick = openNewProductEditor;
+$("addNewVariantBtn").onclick = addNewProductVariant;
 
 $("adminModal").addEventListener("click",event=>{
   if(event.target === $("adminModal")){
@@ -1720,9 +2315,53 @@ $("adminModal").addEventListener("click",event=>{
   }
 });
 
+[1,2,3].forEach(slot=>{
+  imageInput(slot).addEventListener("input",()=>refreshImagePreview(slot));
+
+  document
+    .querySelector(`[data-upload-slot="${slot}"]`)
+    .addEventListener("click",()=>{
+      $(`adminImageFile${slot}`).click();
+    });
+
+  $(`adminImageFile${slot}`).addEventListener("change",async event=>{
+    const file = event.target.files?.[0];
+
+    if(!file){
+      return;
+    }
+
+    try{
+      await uploadProductImage(slot,file);
+    }catch(error){
+      console.error(error);
+      setAdminEditorStatus(`❌ ${error.message}`,"error");
+    }finally{
+      event.target.value = "";
+    }
+  });
+
+  document
+    .querySelector(`[data-clear-slot="${slot}"]`)
+    .addEventListener("click",async ()=>{
+      try{
+        await clearProductImage(slot);
+      }catch(error){
+        console.error(error);
+        setAdminEditorStatus(`❌ ${error.message}`,"error");
+      }
+    });
+});
+
 $("saveAdminProduct").onclick = async ()=>{
   try{
-    await saveAdminProductChanges();
+    const mode = $("adminEditorMode").value;
+
+    if(mode === "new"){
+      await createAdminProduct();
+    }else{
+      await saveAdminProductChanges();
+    }
   }catch(error){
     console.error(error);
     setAdminEditorStatus(`❌ ${error.message}`,"error");
@@ -1783,22 +2422,64 @@ $("logoutSupabaseBtn").onclick = async ()=>{
 };
 
 
+
+$("mobileMenuBtn").onclick = ()=>{
+  $("mobileNav").classList.toggle("open");
+};
+
+$("mobileNav").querySelectorAll("button[data-category]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    $("mobileNav").classList.remove("open");
+
+    document
+      .querySelectorAll('#mainNav button, #mobileNav button')
+      .forEach(x=>x.classList.remove("active"));
+
+    button.classList.add("active");
+
+    const category = button.dataset.category;
+
+    if(category === "Accesorios"){
+      $("filterCategory").value = "Todos";
+      const accessorySet = new Set(ACCESSORY_CATEGORIES);
+      state.filtered = state.products.filter(
+        product => accessorySet.has(product.category)
+      );
+      renderProducts();
+      updateCatalogDiagnostic();
+      return;
+    }
+
+    $("filterCategory").value = category;
+    applyFilters();
+  });
+});
+
+$("publicAdminBtn").onclick = async ()=>{
+  try{
+    initSupabaseClient();
+    const auth = await getAdminState();
+
+    if(auth.admin){
+      document.body.classList.toggle("admin-mode");
+      return;
+    }
+
+    await loginAdminGoogle();
+  }catch(error){
+    setPublicCatalogStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+
 $("cartBtn").onclick = openCart;
 $("closeCart").onclick = closeCart;
 $("overlay").onclick = closeCart;
 $("postalCode").addEventListener("input",renderCart);
 $("whatsappBtn").onclick = sendWhatsApp;
 
-const savedSupabaseUrl = localStorage.getItem("moda_supabase_url");
-const savedSupabaseKey = localStorage.getItem("moda_supabase_key");
 
-if(savedSupabaseUrl){
-  $("supabaseUrl").value = savedSupabaseUrl;
-}
-
-if(savedSupabaseKey){
-  $("supabaseKey").value = savedSupabaseKey;
-
+(async function bootModaJuarez(){
   try{
     initSupabaseClient();
 
@@ -1809,21 +2490,30 @@ if(savedSupabaseKey){
       });
     }
 
-    setTimeout(refreshSupabaseStatus,100);
+    await refreshSupabaseStatus();
+    await loadCatalogFromSupabase();
   }catch(error){
-    setSupabaseStatus(`❌ ${error.message}`,"error");
+    console.error(error);
+    setPublicCatalogStatus(
+      `❌ No se pudo cargar el catálogo: ${error.message}`,
+      "error"
+    );
+
+    // Fallback local solo si existe algo guardado en este dispositivo.
+    if(state.products.length){
+      fillCategoryFilter();
+      syncPriceFilterToCatalog();
+      applyFilters();
+      setPublicCatalogStatus(
+        `Mostrando copia local: ${state.products.length} productos.`,
+        "error"
+      );
+    }
   }
-}
 
-fillCategoryFilter();
-syncPriceFilterToCatalog();
-applyFilters();
-renderCart();
+  renderCart();
+})();
 
-if(state.products.length){
-  $("importStatus").textContent =
-    `Catálogo recuperado del dispositivo: ${state.products.length} productos.`;
-}
 </script>
 
 </body>
