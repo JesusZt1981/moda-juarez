@@ -1,0 +1,2641 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moda Juárez · Piloto V5.3</title>
+
+<!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#f6f4ef;
+  --surface:#ffffff;
+  --surface-soft:#eef2ef;
+  --text:#303638;
+  --muted:#6d7474;
+  --border:#d9dfdc;
+  --sage:#a8b9ad;
+  --sage-dark:#73877a;
+  --blue:#aebdca;
+  --blue-dark:#73899b;
+  --sand:#d8c8ae;
+  --sand-dark:#a88f6d;
+  --lavender:#c6c2d5;
+  --peach:#dcc4b5;
+  --danger:#b67f7f;
+  --shadow:0 8px 24px rgba(44,52,52,.08);
+  --shadow-hover:0 14px 30px rgba(44,52,52,.14);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.promo-bar{background:var(--sage-dark);color:#fff;text-align:center;padding:9px 20px;font-size:12px;font-weight:700;letter-spacing:.08em}
+.site-header{position:sticky;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:78px;padding:0 28px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.brand{font-size:24px;font-weight:800;letter-spacing:.04em;text-decoration:none;color:var(--text)}
+.main-nav{display:flex;gap:6px;align-items:center}
+.main-nav button{border:0;background:transparent;color:var(--muted);padding:10px 11px;border-radius:20px;font-size:12px;font-weight:700}
+.main-nav button.active,.main-nav button:hover{background:var(--sage);color:#26302b}
+.header-actions{justify-self:end;display:flex;gap:8px;align-items:center}
+.icon-btn{position:relative;border:1px solid var(--border);background:#fff;min-width:42px;height:42px;border-radius:50%;font-size:18px}
+#cartCount{position:absolute;right:-4px;top:-5px;min-width:20px;height:20px;border-radius:20px;background:var(--sand-dark);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.import-bar{max-width:1500px;margin:18px auto 0;padding:0 28px}
+.import-panel{background:linear-gradient(135deg,#edf3ef,#f4f1ec);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.import-head{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
+.import-head h2{margin:0 0 4px;font-size:18px}
+.import-head p{margin:0;color:var(--muted);font-size:12px}
+.import-actions{display:flex;gap:8px;flex-wrap:wrap}
+.primary-btn,.secondary-btn,.danger-btn{border:0;border-radius:10px;padding:11px 14px;font-weight:800}
+.primary-btn{background:var(--sage-dark);color:#fff}
+.secondary-btn{background:var(--blue);color:#26343d}
+.danger-btn{background:#ead7d7;color:#714747}
+#importStatus{margin-top:10px;font-size:12px;color:var(--muted)}
+.search-panel{padding:14px 28px;background:#fff;border-bottom:1px solid var(--border)}
+.search-panel input{display:block;width:min(700px,100%);margin:auto;border:1px solid var(--border);border-radius:30px;padding:13px 20px;background:var(--surface-soft)}
+.page-shell{max-width:1500px;margin:auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;padding:28px}
+.sidebar{align-self:start;position:sticky;top:105px;padding:22px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.sidebar h3{margin:0 0 20px}
+.sidebar label{display:block;margin-bottom:18px;color:var(--muted);font-size:13px;font-weight:700}
+.sidebar select,.sidebar input{width:100%;margin-top:8px}
+.sidebar select{padding:10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-soft)}
+.outline-btn{width:100%;padding:10px;border:1px solid var(--sage-dark);border-radius:9px;background:transparent;color:var(--sage-dark);font-weight:800}
+.sidebar-note{margin-top:22px;padding:14px;background:#f2eee7;border-radius:11px;font-size:12px;line-height:1.5}
+.catalog-toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:20px}
+.catalog-toolbar h1{margin:0;font-size:28px}
+.catalog-toolbar p{margin:5px 0 0;color:var(--muted)}
+.catalog-toolbar select{padding:10px 14px;border:1px solid var(--border);border-radius:9px;background:#fff}
+.product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.product-card{overflow:hidden;background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);transition:.22s}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+.image-wrap{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;background:#ebe9e4}
+.product-image{width:100%;height:100%;object-fit:cover;display:block}
+.badge{position:absolute;left:10px;top:10px;padding:6px 9px;border-radius:18px;background:var(--peach);font-size:10px;font-weight:800}
+.product-info{padding:14px}
+.product-name{min-height:40px;margin:0 0 8px;font-size:14px}
+.sku{font-size:10px;color:var(--muted);margin-bottom:7px}
+.price-row{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+.product-price{font-size:18px}
+.old-price{text-decoration:line-through;color:#999;font-size:12px}
+.stock-line{font-size:11px;color:var(--muted);margin:7px 0}
+.size-select{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#fff;margin-bottom:8px}
+.add-btn{width:100%;border:0;border-radius:9px;background:var(--blue);color:#27333a;padding:10px;font-weight:800}
+.add-btn:hover{background:var(--blue-dark);color:#fff}
+.cart-drawer{position:fixed;z-index:100;right:0;top:0;width:min(440px,100%);height:100vh;display:flex;flex-direction:column;background:#fff;box-shadow:-12px 0 35px rgba(0,0,0,.16);transform:translateX(100%);transition:.28s}
+.cart-drawer.open{transform:translateX(0)}
+.cart-head{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border)}
+.cart-items{flex:1;overflow:auto;padding:18px}
+.cart-item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.cart-item img{width:64px;height:82px;object-fit:cover;border-radius:8px;background:#eee}
+.cart-item h4{margin:0 0 4px;font-size:13px}
+.cart-item p{margin:2px 0;color:var(--muted);font-size:11px}
+.qty-controls{display:flex;gap:8px;align-items:center;margin:6px 0}
+.qty-controls button{border:1px solid var(--border);background:#fff;border-radius:7px;width:28px;height:28px}
+.remove-btn{border:0;background:transparent;color:var(--danger);font-size:11px}
+.cart-summary{padding:18px;background:#f7f5f1;border-top:1px solid var(--border)}
+.cart-summary>div{display:flex;justify-content:space-between;margin-bottom:9px}
+.cart-summary .total{font-size:18px;padding-top:12px;border-top:1px solid var(--border)}
+.postal-label{display:block;margin:14px 0;color:var(--muted);font-size:12px;font-weight:700}
+.postal-label input{width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);border-radius:8px}
+.whatsapp-btn{width:100%;border:0;border-radius:9px;background:var(--sand);color:#453d33;padding:12px;font-weight:800;margin-top:8px}
+.overlay{position:fixed;z-index:90;inset:0;background:rgba(30,35,35,.38);backdrop-filter:blur(2px)}
+.empty{padding:30px;text-align:center;color:var(--muted);grid-column:1/-1}
+
+.supabase-box{margin-top:14px;padding:14px;border:1px dashed var(--blue-dark);border-radius:12px;background:#f5f7f8}
+.supabase-box h3{margin:0 0 6px;font-size:15px}
+.supabase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.supabase-grid input{width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;background:#fff}
+.supabase-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.supabase-status{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.45}
+.admin-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#e7ece9;color:#33423a;font-size:11px;font-weight:800}
+@media(max-width:700px){.supabase-grid{grid-template-columns:1fr}}
+
+
+/* ================= ADMIN V3 ================= */
+.admin-edit-btn{
+  width:100%;margin-top:8px;padding:9px 10px;border:1px solid var(--sage-dark);
+  border-radius:9px;background:#eef3ef;color:#314039;font-weight:800
+}
+.admin-edit-btn:hover{background:var(--sage);color:#26302b}
+.admin-modal{
+  position:fixed;inset:0;z-index:220;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(30,35,35,.48);backdrop-filter:blur(3px)
+}
+.admin-modal-card{
+  width:min(900px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;
+  border:1px solid var(--border);box-shadow:0 25px 70px rgba(0,0,0,.22)
+}
+.admin-modal-head{
+  position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;
+  padding:16px 18px;background:#f7f8f6;border-bottom:1px solid var(--border)
+}
+.admin-modal-head h2{margin:0;font-size:20px}
+.admin-modal-body{padding:18px}
+.admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.admin-form-grid .full{grid-column:1/-1}
+.admin-field label{display:block;margin-bottom:5px;font-size:12px;font-weight:800;color:var(--muted)}
+.admin-field input,.admin-field textarea,.admin-field select{
+  width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:#fff
+}
+.admin-field textarea{min-height:110px;resize:vertical}
+.stock-editor{margin-top:16px;padding:14px;background:#f6f4ef;border-radius:12px}
+.stock-editor h3{margin:0 0 10px;font-size:15px}
+.stock-row{
+  display:grid;grid-template-columns:90px 1fr 1fr;gap:8px;align-items:center;margin:7px 0
+}
+.stock-row input{padding:9px;border:1px solid var(--border);border-radius:8px}
+.admin-modal-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.admin-warning{margin-top:10px;font-size:12px;color:#7a5b3e;line-height:1.45}
+.admin-status{margin-top:10px;font-size:12px;color:var(--muted)}
+.catalog-diagnostic{
+  margin-top:8px;padding:8px 10px;border-radius:9px;background:#f0f3f1;color:#58645e;font-size:11px
+}
+@media(max-width:700px){
+  .admin-form-grid{grid-template-columns:1fr}
+  .admin-form-grid .full{grid-column:auto}
+  .stock-row{grid-template-columns:70px 1fr}
+  .stock-row .stock-current{display:none}
+}
+
+
+/* ================= ADMIN V4 · ALTAS + STORAGE ================= */
+.admin-top-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.image-admin-box{
+  display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:start;
+  padding:12px;border:1px solid var(--border);border-radius:12px;background:#fafafa
+}
+.image-preview{
+  width:110px;height:138px;object-fit:cover;border-radius:10px;background:#ece9e4;
+  border:1px solid var(--border)
+}
+.image-controls{display:flex;flex-direction:column;gap:7px}
+.image-controls input[type="text"]{
+  width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;background:#fff
+}
+.image-button-row{display:flex;gap:7px;flex-wrap:wrap}
+.upload-image-btn,.clear-image-btn{
+  border:0;border-radius:9px;padding:9px 11px;font-weight:800
+}
+.upload-image-btn{background:var(--blue);color:#26343d}
+.clear-image-btn{background:#ead7d7;color:#714747}
+.variant-builder{
+  margin-top:16px;padding:14px;background:#f6f4ef;border-radius:12px
+}
+.variant-builder h3{margin:0 0 10px;font-size:15px}
+.variant-add-row{
+  display:grid;grid-template-columns:1fr 120px auto;gap:8px;align-items:end;margin-bottom:10px
+}
+.variant-add-row input,.variant-add-row select{
+  width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:#fff
+}
+.variant-list-row{
+  display:grid;grid-template-columns:100px 1fr 1fr auto;gap:8px;align-items:center;
+  padding:7px 0;border-bottom:1px solid #e4e1dc
+}
+.variant-list-row:last-child{border-bottom:0}
+.variant-remove{
+  border:0;background:#ead7d7;color:#714747;border-radius:8px;padding:8px 10px;font-weight:800
+}
+.new-product-note{
+  margin:8px 0 0;padding:10px;border-radius:9px;background:#eef3ef;
+  color:#43544a;font-size:12px;line-height:1.45
+}
+@media(max-width:700px){
+  .image-admin-box{grid-template-columns:1fr}
+  .image-preview{width:100%;height:220px}
+  .variant-add-row{grid-template-columns:1fr}
+  .variant-list-row{grid-template-columns:70px 1fr auto}
+  .variant-list-row .variant-color{display:none}
+}
+
+
+/* ================= PILOTO V5 · PUBLICO/ADMIN + RESPONSIVE ================= */
+.mobile-menu-btn{display:none;border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 11px;font-weight:800}
+.mobile-nav{
+  display:none;position:fixed;z-index:180;left:0;right:0;top:78px;background:#fff;
+  border-bottom:1px solid var(--border);box-shadow:var(--shadow);padding:12px
+}
+.mobile-nav.open{display:block}
+.mobile-nav button{
+  display:block;width:100%;text-align:left;border:0;background:transparent;padding:12px 14px;
+  border-radius:10px;font-weight:800;color:var(--text)
+}
+.mobile-nav button:hover,.mobile-nav button.active{background:var(--sage)}
+.admin-login-btn{
+  border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 11px;
+  font-size:11px;font-weight:800;color:var(--muted)
+}
+.admin-panel-shell{display:none}
+body.admin-mode .admin-panel-shell{display:block}
+.admin-collapsed{
+  max-width:1500px;margin:12px auto 0;padding:0 28px
+}
+.admin-collapsed-inner{
+  border:1px dashed var(--blue-dark);border-radius:12px;background:#f5f7f8;padding:12px
+}
+.public-status{
+  max-width:1500px;margin:10px auto 0;padding:0 28px;font-size:12px;color:var(--muted)
+}
+.public-status.ok{color:#527160}
+.public-status.error{color:#9b4f4f}
+@media(max-width:1100px){
+  .site-header{grid-template-columns:auto 1fr auto;gap:10px}
+  .main-nav{display:none}
+  .mobile-menu-btn{display:inline-flex;align-items:center;justify-content:center}
+  .brand{justify-self:center}
+}
+@media(max-width:760px){
+  .site-header{min-height:66px;padding:0 12px}
+  .mobile-nav{top:66px}
+  .brand{font-size:18px}
+  .header-actions{gap:5px}
+  .admin-login-btn{padding:7px 9px;font-size:10px}
+  .page-shell{padding:12px}
+  .sidebar{order:2}
+  .catalog-section{order:1}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .catalog-toolbar{align-items:stretch}
+  .admin-collapsed,.public-status{padding:0 12px}
+}
+@media(max-width:480px){
+  .product-grid{grid-template-columns:1fr}
+  .product-card{display:grid;grid-template-columns:42% 58%}
+  .image-wrap{aspect-ratio:3/4}
+  .product-info{padding:10px}
+  .product-name{min-height:auto}
+  .site-header{grid-template-columns:auto 1fr auto}
+  .brand{font-size:16px}
+  .promo-bar{font-size:10px;padding:7px 10px}
+  .cart-drawer{width:100%}
+  .admin-login-btn{max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+@media(max-width:1150px){.product-grid{grid-template-columns:repeat(3,1fr)}.main-nav{gap:2px}.main-nav button{font-size:11px;padding:8px}}
+@media(max-width:900px){.site-header{grid-template-columns:1fr auto}.main-nav{display:none}.page-shell{grid-template-columns:1fr;padding:18px}.sidebar{position:static}.product-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.site-header{padding:0 12px}.brand{font-size:18px}.import-bar{padding:0 12px}.page-shell{padding:12px}.catalog-toolbar{flex-direction:column;align-items:stretch}.product-grid{gap:9px}.product-info{padding:10px}.product-name{font-size:12px}.sidebar{padding:14px}}
+
+/* ===== V5.3 · móvil, ordenamiento y paginación ===== */
+.catalog-toolbar select{
+  background:rgba(255,255,255,.74);
+  backdrop-filter:blur(10px);
+  border-color:rgba(115,135,125,.28);
+  box-shadow:0 8px 24px rgba(38,50,46,.06);
+}
+.catalog-pagination{
+  margin:26px 0 4px;display:flex;align-items:center;justify-content:center;gap:14px
+}
+.page-nav-btn{
+  width:42px;height:42px;border-radius:50%;border:1px solid rgba(115,135,125,.3);
+  background:rgba(255,255,255,.76);backdrop-filter:blur(9px);font-size:28px;line-height:1;
+  color:#52645c;box-shadow:0 8px 22px rgba(38,50,46,.07);cursor:pointer
+}
+.page-nav-btn:disabled{opacity:.28;cursor:default}
+.page-status{font-size:12px;color:var(--muted);min-width:110px;text-align:center}
+.floating-page-arrow{
+  position:fixed;z-index:45;top:55%;transform:translateY(-50%);width:36px;height:54px;
+  border:1px solid rgba(115,135,125,.24);background:rgba(255,255,255,.48);backdrop-filter:blur(8px);
+  color:rgba(54,72,64,.6);font-size:28px;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.05);
+  cursor:pointer;transition:.2s
+}
+.floating-page-arrow:hover{background:rgba(255,255,255,.82);color:#384a42}
+.floating-page-arrow:disabled{opacity:.12;pointer-events:none}
+.floating-prev{left:8px}.floating-next{right:8px}
+
+/* Selector propio, compacto y semitransparente */
+.sort-shell{position:relative;min-width:220px}
+.sort-trigger{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 14px;border-radius:12px;border:1px solid rgba(115,135,125,.28);
+  background:rgba(255,255,255,.72);backdrop-filter:blur(12px);color:var(--text);font-weight:700;
+  box-shadow:0 8px 24px rgba(38,50,46,.06)
+}
+.sort-popover{
+  position:absolute;z-index:70;right:0;top:calc(100% + 7px);width:min(310px,88vw);padding:7px;
+  border:1px solid rgba(145,156,151,.28);border-radius:16px;background:rgba(34,43,47,.88);
+  backdrop-filter:blur(18px);box-shadow:0 18px 44px rgba(0,0,0,.2)
+}
+.sort-popover.hidden{display:none}
+.sort-option{
+  width:100%;border:0;background:transparent;color:#f5f7f6;padding:11px 12px;border-radius:10px;
+  text-align:left;font-size:14px;display:flex;align-items:center;justify-content:space-between
+}
+.sort-option:hover,.sort-option.active{background:rgba(255,255,255,.1)}
+.sort-dot{width:16px;height:16px;border:2px solid rgba(255,255,255,.65);border-radius:50%}
+.sort-option.active .sort-dot{border:5px solid #9fc4d6}
+
+@media(max-width:560px){
+  .page-shell{padding:14px 12px 24px!important}
+  .catalog-toolbar{gap:14px!important;margin-bottom:16px}
+  .catalog-toolbar h1{font-size:30px}
+  .sort-shell{width:100%;min-width:0}
+  #sortSelect{display:none!important}
+  .product-grid{grid-template-columns:1fr!important;gap:12px!important}
+  .product-card{
+    display:grid!important;grid-template-columns:42% 58%!important;min-height:220px;
+    border-radius:18px!important;overflow:hidden!important;box-shadow:0 8px 22px rgba(45,56,52,.07)!important
+  }
+  .image-wrap{height:100%!important;min-height:220px;aspect-ratio:auto!important}
+  .product-image{height:100%!important;min-height:220px;object-fit:cover}
+  .product-info{padding:12px 12px 12px 14px!important;display:flex;flex-direction:column;min-width:0}
+  .sku{font-size:10px;margin-bottom:5px}
+  .product-name{
+    min-height:0!important;margin:0 0 7px!important;font-size:15px!important;line-height:1.18;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden
+  }
+  .price-row{margin:2px 0 5px!important;flex-wrap:wrap;gap:5px 8px}
+  .product-price{font-size:21px!important}
+  .old-price{font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .stock-line{font-size:11px;margin:4px 0!important}
+  .size-select{margin-top:auto!important;margin-bottom:7px!important;padding:9px 8px!important;font-size:12px}
+  .add-btn{padding:9px 8px!important;font-size:13px;line-height:1.15}
+  .badge{left:8px;top:8px;padding:5px 8px;font-size:9px}
+  .floating-page-arrow{top:62%;width:30px;height:48px;font-size:24px;background:rgba(255,255,255,.38)}
+  .floating-prev{left:3px}.floating-next{right:3px}
+  .page-status{min-width:92px}
+}
+
+@media(max-width:380px){
+  .product-card{grid-template-columns:40% 60%!important;min-height:208px}
+  .image-wrap,.product-image{min-height:208px}
+  .product-name{font-size:14px!important}
+  .product-price{font-size:19px!important}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="promo-bar">
+  ENVÍO GRATIS EN COMPRAS DESDE $999 · PILOTO V5.3
+</div>
+
+
+<header class="site-header">
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">☰ Menú</button>
+
+  <nav class="main-nav" id="mainNav">
+    <button class="active" data-category="Todos">NOVEDADES</button>
+    <button data-category="Vestidos">VESTIDOS</button>
+    <button data-category="Faldas">FALDAS</button>
+    <button data-category="Shorts">SHORTS</button>
+    <button data-category="Blusas">BLUSAS</button>
+    <button data-category="Tops">TOPS</button>
+    <button data-category="Ropa interior">ROPA INTERIOR</button>
+    <button data-category="Accesorios">ACCESORIOS</button>
+  </nav>
+
+  <a class="brand" href="#">MODA JUÁREZ</a>
+
+  <div class="header-actions">
+    <button type="button" class="admin-login-btn" id="publicAdminBtn">Administrar</button>
+    <button class="icon-btn" id="cartBtn" aria-label="Carrito">
+      🛒 <span id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button class="active" data-category="Todos">NOVEDADES</button>
+  <button data-category="Vestidos">VESTIDOS</button>
+  <button data-category="Faldas">FALDAS</button>
+  <button data-category="Shorts">SHORTS</button>
+  <button data-category="Blusas">BLUSAS</button>
+  <button data-category="Tops">TOPS</button>
+  <button data-category="Ropa interior">ROPA INTERIOR</button>
+  <button data-category="Accesorios">ACCESORIOS</button>
+</nav>
+
+
+<div class="admin-panel-shell" id="adminPanelShell">
+<section class="import-bar">
+  <div class="import-panel">
+    <div class="import-head">
+      <div>
+        <h2>📥 Importar catálogo desde Excel</h2>
+        <p>Selecciona el archivo <b>catalogo_100_productos_moda_juarez.xlsx</b>. Se leerá la hoja <b>Productos</b>.</p>
+      </div>
+
+      <div class="import-actions">
+        <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden>
+        <button class="primary-btn" id="importExcelBtn">Seleccionar Excel</button>
+        <button class="secondary-btn" id="saveCatalogBtn">Guardar catálogo en este dispositivo</button>
+        <button class="danger-btn" id="clearCatalogBtn">Borrar catálogo cargado</button>
+      </div>
+    </div>
+
+    <div id="importStatus">
+      Puedes importar el catálogo desde Excel y después guardarlo en Supabase.
+    </div>
+
+    <div class="supabase-box">
+      <h3>☁️ Supabase · catálogo persistente</h3>
+      <div class="supabase-grid hidden">
+        <input id="supabaseUrl" value="https://bcabfavdxxzauahpbmsa.supabase.co" readonly>
+        <input id="supabaseKey" value="sb_publishable_F89WekECwWG6d4Nzpk4wag_9gN_ELBG" readonly>
+      </div>
+
+      <div class="supabase-actions">
+        <button class="secondary-btn" id="connectSupabaseBtn">Conectar Supabase</button>
+        <button class="secondary-btn" id="loginGoogleBtn">Entrar como ADMIN con Google</button>
+        <button class="primary-btn" id="saveSupabaseBtn">Guardar catálogo en Supabase</button>
+        <button class="primary-btn" id="loadSupabaseBtn">Cargar catálogo desde Supabase</button>
+        <button class="danger-btn" id="logoutSupabaseBtn">Cerrar sesión ADMIN</button>
+      </div>
+
+      <div class="admin-top-actions hidden" id="adminTopActions">
+        <button class="primary-btn" id="newProductBtn">＋ Agregar producto</button>
+      </div>
+
+      <div class="supabase-status" id="supabaseStatus">
+        Sin conectar. La Publishable key puede estar en el navegador; no uses aquí una Secret key.
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<div id="publicCatalogStatus" class="public-status">Cargando catálogo…</div>
+
+<div class="search-panel">
+  <input id="searchInput" placeholder="Buscar producto, SKU o categoría…">
+</div>
+
+<main class="page-shell">
+
+  <aside class="sidebar">
+    <h3>Comprar por</h3>
+
+    <label>
+      Categoría
+      <select id="filterCategory">
+        <option value="Todos">Todos</option>
+      </select>
+    </label>
+
+    <label>
+      Talla
+      <select id="filterSize">
+        <option value="">Todas</option>
+        <option>CH</option>
+        <option>M</option>
+        <option>G</option>
+        <option>EG</option>
+        <option>UNITALLA</option>
+      </select>
+    </label>
+
+    <label>
+      Precio máximo
+      <input id="filterPrice" type="range" min="50" max="3000" step="50" value="3000">
+      <span id="filterPriceLabel">$3,000.00</span>
+    </label>
+
+    <button class="outline-btn" id="clearFilters">Limpiar filtros</button>
+
+    <div class="sidebar-note">
+      <strong>Envío piloto</strong>
+      <p>
+        Ciudad Juárez: $79.<br>
+        Nacional: $129.<br>
+        Gratis desde $999.
+      </p>
+    </div>
+  </aside>
+
+  <section class="catalog-section">
+
+    <div class="catalog-toolbar">
+      <div>
+        <h1>Catálogo</h1>
+        <p id="resultCount">0 productos</p>
+          <div id="catalogDiagnostic" class="catalog-diagnostic">Sin catálogo cargado.</div>
+      </div>
+
+      <select id="sortSelect">
+        <option value="featured">Destacados</option>
+        <option value="priceAsc">Precio: menor a mayor</option>
+        <option value="priceDesc">Precio: mayor a menor</option>
+        <option value="nameAsc">Nombre: A → Z</option>
+        <option value="nameDesc">Nombre: Z → A</option>
+      </select>
+    </div>
+
+    <div class="product-grid" id="productGrid">
+      <div class="empty">
+        Importa el Excel para mostrar los productos.
+      </div>
+    </div>
+
+    <div class="catalog-pagination" id="catalogPagination">
+      <button type="button" class="page-nav-btn" id="prevPageBtn" aria-label="Página anterior">‹</button>
+      <div class="page-status" id="pageStatus">Página 1</div>
+      <button type="button" class="page-nav-btn" id="nextPageBtn" aria-label="Página siguiente">›</button>
+    </div>
+
+    <button type="button" class="floating-page-arrow floating-prev" id="floatingPrev" aria-label="Página anterior">‹</button>
+    <button type="button" class="floating-page-arrow floating-next" id="floatingNext" aria-label="Página siguiente">›</button>
+
+  </section>
+</main>
+
+
+
+<div class="admin-modal hidden" id="adminModal">
+  <div class="admin-modal-card">
+    <div class="admin-modal-head">
+      <h2 id="adminModalTitle">Editar producto</h2>
+      <button class="icon-btn" id="closeAdminModal">✕</button>
+    </div>
+
+    <div class="admin-modal-body">
+      <input type="hidden" id="adminProductDbId">
+      <input type="hidden" id="adminEditorMode" value="edit">
+
+      <div class="admin-form-grid">
+        <div class="admin-field">
+          <label>SKU</label>
+          <input id="adminSku">
+        </div>
+
+        <div class="admin-field">
+          <label>Categoría</label>
+          <input id="adminCategory" list="categorySuggestions">
+          <datalist id="categorySuggestions">
+            <option>Vestidos</option>
+            <option>Blusas</option>
+            <option>Tops</option>
+            <option>Pantalones</option>
+            <option>Shorts</option>
+            <option>Faldas</option>
+            <option>Ropa interior</option>
+            <option>Conjuntos</option>
+            <option>Trajes de baño</option>
+            <option>Suéteres y cardigans</option>
+            <option>Chamarras y blazers</option>
+            <option>Accesorios</option>
+          </datalist>
+        </div>
+
+        <div class="admin-field full">
+          <label>Nombre</label>
+          <input id="adminName">
+        </div>
+
+        <div class="admin-field">
+          <label>Precio MXN</label>
+          <input id="adminPrice" type="number" min="0" step="0.01">
+        </div>
+
+        <div class="admin-field">
+          <label>Precio anterior MXN</label>
+          <input id="adminComparePrice" type="number" min="0" step="0.01">
+        </div>
+
+        <div class="admin-field">
+          <label>Badge / etiqueta</label>
+          <input id="adminBadge" placeholder="NUEVO, OFERTA, DESTACADO...">
+        </div>
+
+        <div class="admin-field">
+          <label>Estado</label>
+          <select id="adminActive">
+            <option value="true">Activo</option>
+            <option value="false">Oculto</option>
+          </select>
+        </div>
+
+        <div class="admin-field full">
+          <label>Descripción</label>
+          <textarea id="adminDescription"></textarea>
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 1</label>
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview1" alt="Vista previa imagen 1">
+            <div class="image-controls">
+              <input id="adminImage1" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile1" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row">
+                <button type="button" class="upload-image-btn" data-upload-slot="1">Subir desde PC</button>
+                <button type="button" class="clear-image-btn" data-clear-slot="1">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 2</label>
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview2" alt="Vista previa imagen 2">
+            <div class="image-controls">
+              <input id="adminImage2" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile2" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row">
+                <button type="button" class="upload-image-btn" data-upload-slot="2">Subir desde PC</button>
+                <button type="button" class="clear-image-btn" data-clear-slot="2">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 3</label>
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview3" alt="Vista previa imagen 3">
+            <div class="image-controls">
+              <input id="adminImage3" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile3" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row">
+                <button type="button" class="upload-image-btn" data-upload-slot="3">Subir desde PC</button>
+                <button type="button" class="clear-image-btn" data-clear-slot="3">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stock-editor" id="existingStockEditor">
+        <h3>Stock por talla</h3>
+        <div id="adminStockRows"></div>
+        <div class="admin-warning">
+          Los cambios de stock se registran como ajuste manual en
+          <code>shop_inventory_movements</code>.
+        </div>
+      </div>
+
+      <div class="variant-builder hidden" id="newVariantBuilder">
+        <h3>Tallas y stock inicial</h3>
+        <div class="variant-add-row">
+          <div>
+            <label>Talla</label>
+            <select id="newVariantSize">
+              <option>CH</option>
+              <option>M</option>
+              <option>G</option>
+              <option>EG</option>
+              <option>UNITALLA</option>
+            </select>
+          </div>
+          <div>
+            <label>Stock</label>
+            <input id="newVariantQty" type="number" min="0" step="1" value="0">
+          </div>
+          <button class="secondary-btn" type="button" id="addNewVariantBtn">Agregar talla</button>
+        </div>
+
+        <div id="newVariantRows"></div>
+
+        <div class="new-product-note">
+          Puedes agregar CH, M, G, EG o UNITALLA. El stock inicial quedará guardado
+          en Supabase al crear el producto.
+        </div>
+      </div>
+
+      <div class="admin-modal-actions">
+        <button class="primary-btn" id="saveAdminProduct">Guardar cambios</button>
+        <button class="danger-btn" id="disableAdminProduct">Ocultar producto</button>
+        <button class="secondary-btn" id="cancelAdminProduct">Cancelar</button>
+      </div>
+
+      <div id="adminEditorStatus" class="admin-status"></div>
+    </div>
+  </div>
+</div>
+
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-head">
+    <h2>Tu carrito</h2>
+    <button class="icon-btn" id="closeCart">✕</button>
+  </div>
+
+  <div class="cart-items" id="cartItems"></div>
+
+  <div class="cart-summary">
+    <div>
+      <span>Subtotal</span>
+      <strong id="cartSubtotal">$0.00</strong>
+    </div>
+
+    <div>
+      <span>Descuento</span>
+      <strong id="cartDiscount">$0.00</strong>
+    </div>
+
+    <div>
+      <span>Envío</span>
+      <strong id="cartShipping">$0.00</strong>
+    </div>
+
+    <div class="total">
+      <span>Total</span>
+      <strong id="cartTotal">$0.00</strong>
+    </div>
+
+    <label class="postal-label">
+      Código postal
+      <input id="postalCode" maxlength="5" inputmode="numeric" placeholder="32500">
+    </label>
+
+    <button class="whatsapp-btn" id="whatsappBtn">
+      Pedir por WhatsApp
+    </button>
+  </div>
+</aside>
+
+<div class="overlay hidden" id="overlay"></div>
+
+<script>
+
+const PUBLIC_SUPABASE_URL = "https://bcabfavdxxzauahpbmsa.supabase.co";
+const PUBLIC_SUPABASE_KEY = "sb_publishable_F89WekECwWG6d4Nzpk4wag_9gN_ELBG";
+
+const STORE_CONFIG = {
+  whatsapp: "5216567770986",
+  storeName: "MODA JUÁREZ",
+  shipping: {
+    freeFrom: 999,
+    local: 79,
+    national: 129,
+    localPostalPrefix: "32"
+  }
+};
+
+function applyStoreIdentity(){
+  const brand=document.querySelector(".brand");
+  if(brand) brand.textContent=STORE_CONFIG.storeName;
+}
+
+const ACCESSORY_CATEGORIES = [
+  "Pulseras","Cadenas","Broches","Diademas","Cepillos","Peines"
+];
+
+const state = {
+  products: JSON.parse(localStorage.getItem("moda_catalog") || "[]"),
+  filtered: [],
+  cart: JSON.parse(localStorage.getItem("moda_cart") || "[]"),
+  admin: false,
+  adminEmail: null,
+  page: 1,
+  pageSize: 20
+};
+
+const $ = id => document.getElementById(id);
+
+const money = value =>
+  new Intl.NumberFormat("es-MX",{
+    style:"currency",
+    currency:"MXN"
+  }).format(Number(value)||0);
+
+function normalizeText(value){
+  return String(value ?? "").trim();
+}
+
+function numberValue(value){
+  if(value === null || value === undefined || value === "") return null;
+  const n = Number(String(value).replace(/[$,\s]/g,""));
+  return Number.isFinite(n) ? n : null;
+}
+
+function splitList(value){
+  return normalizeText(value)
+    .split(",")
+    .map(x=>x.trim())
+    .filter(Boolean);
+}
+
+function normalizeCategory(category){
+  const c = normalizeText(category);
+  return ACCESSORY_CATEGORIES.includes(c) ? c : c;
+}
+
+function mapExcelRow(row,index){
+  const category = normalizeCategory(row["Categoría"]);
+  const sizes = splitList(row["Tallas"]);
+
+  const stock = {};
+  if(sizes.includes("UNITALLA")){
+    stock.UNITALLA = numberValue(row["Stock_Unitalla"]) || 0;
+  }else{
+    stock.CH = numberValue(row["Stock_CH"]) || 0;
+    stock.M = numberValue(row["Stock_M"]) || 0;
+    stock.G = numberValue(row["Stock_G"]) || 0;
+    stock.EG = numberValue(row["Stock_EG"]) || 0;
+  }
+
+  const colors = splitList(row["Colores"]);
+
+  return {
+    id: normalizeText(row["SKU"]) || `PROD-${index+1}`,
+    sku: normalizeText(row["SKU"]) || `PROD-${index+1}`,
+    name: normalizeText(row["Nombre"]) || "Producto",
+    category,
+    price: numberValue(row["Precio_MXN"]) || 0,
+    compareAtPrice: numberValue(row["Precio_Anterior_MXN"]),
+    badge: normalizeText(row["Badge"]),
+    sizes,
+    colors,
+    stock,
+    totalStock: numberValue(row["Stock_Total"]) || 0,
+    images: [
+      normalizeText(row["Imagen_1"]),
+      normalizeText(row["Imagen_2"]),
+      normalizeText(row["Imagen_3"])
+    ].filter(Boolean),
+    description: normalizeText(row["Descripción"]),
+    active: normalizeText(row["Activo"]).toLowerCase() !== "no",
+    promotion: normalizeText(row["Promoción"]) || "Ninguna",
+    discountPct: numberValue(row["Descuento_Pct"]) || 0
+  };
+}
+
+async function importExcel(file){
+  const status = $("importStatus");
+
+  try{
+    status.textContent = "Leyendo archivo Excel…";
+
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer,{type:"array"});
+
+    const sheetName = workbook.SheetNames.includes("Productos")
+      ? "Productos"
+      : workbook.SheetNames[0];
+
+    const worksheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(worksheet,{
+      defval:"",
+      raw:false
+    });
+
+    if(!rows.length){
+      throw new Error("La hoja no contiene productos.");
+    }
+
+    const products = rows
+      .map(mapExcelRow)
+      .filter(p => p.active && p.name && p.price > 0);
+
+    state.products = products;
+
+    localStorage.setItem(
+      "moda_catalog",
+      JSON.stringify(products)
+    );
+
+    fillCategoryFilter();
+    syncPriceFilterToCatalog();
+    applyFilters();
+
+    status.textContent =
+      `✅ Importación terminada: ${products.length} productos cargados desde la hoja "${sheetName}".`;
+
+  }catch(error){
+    console.error(error);
+    status.textContent = `❌ No se pudo importar: ${error.message}`;
+  }
+}
+
+function fillCategoryFilter(){
+  const current = $("filterCategory").value;
+
+  const categories = [
+    "Todos",
+    ...new Set(state.products.map(p=>p.category).filter(Boolean))
+  ];
+
+  $("filterCategory").innerHTML =
+    categories
+      .map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+      .join("");
+
+  if(categories.includes(current)){
+    $("filterCategory").value = current;
+  }
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+
+function syncPriceFilterToCatalog(){
+  if(!state.products.length) return;
+
+  const prices = state.products
+    .map(p=>Number(p.price)||0)
+    .filter(n=>n>0);
+
+  if(!prices.length) return;
+
+  const actualMax = Math.ceil(Math.max(...prices)/100)*100;
+  const range = $("filterPrice");
+
+  // V3: evita ocultar productos solo porque el slider tenía tope fijo de 3000.
+  range.max = String(Math.max(3000,actualMax));
+  range.value = range.max;
+  $("filterPriceLabel").textContent = money(range.value);
+}
+
+function updateCatalogDiagnostic(){
+  const el = $("catalogDiagnostic");
+  if(!el) return;
+
+  const total = state.products.length;
+  const shown = state.filtered.length;
+  const max = Number($("filterPrice")?.value || 0);
+
+  el.textContent =
+    `Base: ${total} productos · Mostrando: ${shown} · Precio máximo aplicado: ${money(max)}`;
+}
+
+function applyFilters(){
+  const search = $("searchInput").value.trim().toLowerCase();
+  const category = $("filterCategory").value;
+  const size = $("filterSize").value;
+  const maxPrice = Number($("filterPrice").value);
+
+  let products = state.products.filter(product=>{
+    const text =
+      `${product.name} ${product.sku} ${product.category} ${product.description}`
+        .toLowerCase();
+
+    return (
+      (!search || text.includes(search)) &&
+      (category === "Todos" || product.category === category) &&
+      (!size || product.sizes.includes(size)) &&
+      Number(product.price) <= maxPrice
+    );
+  });
+
+  const sort = $("sortSelect").value;
+
+  if(sort === "priceAsc"){
+    products.sort((a,b)=>a.price-b.price);
+  }
+
+  if(sort === "priceDesc"){
+    products.sort((a,b)=>b.price-a.price);
+  }
+
+  if(sort === "nameAsc"){
+    products.sort((a,b)=>a.name.localeCompare(b.name,"es"));
+  }
+
+  if(sort === "nameDesc"){
+    products.sort((a,b)=>b.name.localeCompare(a.name,"es"));
+  }
+
+  state.filtered = products;
+  state.page = 1;
+  renderProducts();
+  updateCatalogDiagnostic();
+}
+
+function renderProducts(){
+  const grid = $("productGrid");
+  grid.innerHTML = "";
+
+  const total = state.filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+  if(state.page > totalPages) state.page = totalPages;
+  if(state.page < 1) state.page = 1;
+
+  $("resultCount").textContent = `${total} productos`;
+
+  if(!total){
+    grid.innerHTML = `<div class="empty">No hay productos para mostrar.</div>`;
+    updatePagination(0,1);
+    return;
+  }
+
+  const from = (state.page - 1) * state.pageSize;
+  const visible = state.filtered.slice(from, from + state.pageSize);
+
+  visible.forEach(product=>{
+    const card = document.createElement("article");
+    card.className = "product-card";
+
+    const image = product.images?.[0] ||
+      `https://placehold.co/800x1067/f2f0eb/4a5355?text=${encodeURIComponent(product.sku)}`;
+
+    const oldPrice = product.compareAtPrice && product.compareAtPrice > product.price
+      ? `<span class="old-price">${money(product.compareAtPrice)}</span>` : "";
+
+    const badge = product.badge
+      ? `<span class="badge">${escapeHtml(product.badge)}</span>` : "";
+
+    const sizeOptions = product.sizes.map(size=>{
+      const stock = Number(product.stock?.[size] || 0);
+      return `<option value="${escapeHtml(size)}" ${stock <= 0 ? "disabled" : ""}>${escapeHtml(size)} · ${stock > 0 ? stock + " disponibles" : "Agotado"}</option>`;
+    }).join("");
+
+    const promotion = product.promotion && product.promotion !== "Ninguna"
+      ? `<div class="stock-line">Promoción: <b>${escapeHtml(product.promotion)}</b></div>` : "";
+
+    card.innerHTML = `
+      <div class="image-wrap">
+        <img class="product-image" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}">
+        ${badge}
+      </div>
+      <div class="product-info">
+        <div class="sku">${escapeHtml(product.sku)}</div>
+        <h2 class="product-name">${escapeHtml(product.name)}</h2>
+        <div class="price-row"><strong class="product-price">${money(product.price)}</strong>${oldPrice}</div>
+        <div class="stock-line">Stock total: ${product.totalStock}</div>
+        ${promotion}
+        <select class="size-select"><option value="">Selecciona talla</option>${sizeOptions}</select>
+        <button class="add-btn">Agregar al carrito</button>
+        ${state.admin && product.dbId ? `<button class="admin-edit-btn" data-admin-edit="${product.dbId}">✎ Editar producto</button>` : ""}
+      </div>`;
+
+    const select = card.querySelector(".size-select");
+    card.querySelector(".add-btn").addEventListener("click",()=>{
+      if(!select.value){ alert("Selecciona una talla."); return; }
+      addToCart(product,select.value);
+    });
+
+    const editBtn = card.querySelector("[data-admin-edit]");
+    if(editBtn) editBtn.addEventListener("click",()=>openAdminEditor(product));
+    grid.appendChild(card);
+  });
+
+  updatePagination(total,totalPages);
+}
+
+function updatePagination(total,totalPages){
+  const status=$("pageStatus");
+  const prev=$("prevPageBtn"), next=$("nextPageBtn");
+  const fprev=$("floatingPrev"), fnext=$("floatingNext");
+  if(status) status.textContent = total ? `Página ${state.page} de ${totalPages}` : "Sin resultados";
+  [prev,fprev].forEach(b=>{if(b)b.disabled = state.page <= 1 || !total;});
+  [next,fnext].forEach(b=>{if(b)b.disabled = state.page >= totalPages || !total;});
+}
+
+function goToPage(delta){
+  const totalPages=Math.max(1,Math.ceil(state.filtered.length/state.pageSize));
+  const next=Math.min(totalPages,Math.max(1,state.page+delta));
+  if(next===state.page)return;
+  state.page=next;
+  renderProducts();
+  document.querySelector(".catalog-section")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function addToCart(product,size){
+  const key = `${product.id}_${size}`;
+  const maxStock = Number(product.stock?.[size] || 0);
+
+  if(maxStock <= 0){
+    alert("Ese producto está agotado.");
+    return;
+  }
+
+  const existing = state.cart.find(x=>x.key===key);
+
+  if(existing){
+    if(existing.qty >= maxStock){
+      alert("No hay más unidades disponibles.");
+      return;
+    }
+    existing.qty++;
+  }else{
+    state.cart.push({
+      key,
+      productId: product.id,
+      sku: product.sku,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0] || "",
+      size,
+      qty: 1,
+      maxStock,
+      promotion: product.promotion,
+      discountPct: product.discountPct
+    });
+  }
+
+  saveCart();
+  renderCart();
+  openCart();
+  clearTimeout(window.__modaCartAutoClose);
+  window.__modaCartAutoClose = setTimeout(()=>{
+    closeCart();
+  },850);
+}
+
+function saveCart(){
+  localStorage.setItem(
+    "moda_cart",
+    JSON.stringify(state.cart)
+  );
+
+  $("cartCount").textContent =
+    state.cart.reduce((sum,x)=>sum+x.qty,0);
+}
+
+function changeQuantity(key,delta){
+  const item = state.cart.find(x=>x.key===key);
+  if(!item) return;
+
+  const next = item.qty + delta;
+
+  if(next <= 0){
+    removeFromCart(key);
+    return;
+  }
+
+  if(next > item.maxStock){
+    alert("No hay suficiente stock.");
+    return;
+  }
+
+  item.qty = next;
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(key){
+  state.cart = state.cart.filter(x=>x.key!==key);
+  saveCart();
+  renderCart();
+}
+
+function calculateSubtotal(){
+  return state.cart.reduce(
+    (sum,item)=>sum + item.price * item.qty,
+    0
+  );
+}
+
+function calculateDiscount(){
+  return state.cart.reduce((sum,item)=>{
+    const pct = Number(item.discountPct || 0);
+
+    if(pct <= 0){
+      return sum;
+    }
+
+    return sum + (
+      item.price *
+      item.qty *
+      pct / 100
+    );
+  },0);
+}
+
+function calculateShipping(afterDiscount){
+  if(afterDiscount <= 0){
+    return 0;
+  }
+
+  if(afterDiscount >= STORE_CONFIG.shipping.freeFrom){
+    return 0;
+  }
+
+  const cp = $("postalCode").value.trim();
+
+  if(cp.startsWith(STORE_CONFIG.shipping.localPostalPrefix)){
+    return STORE_CONFIG.shipping.local;
+  }
+
+  return STORE_CONFIG.shipping.national;
+}
+
+function renderCart(){
+  const wrap = $("cartItems");
+  wrap.innerHTML = "";
+
+  saveCart();
+
+  if(!state.cart.length){
+    wrap.innerHTML =
+      `<div class="empty">Tu carrito está vacío.</div>`;
+  }
+
+  state.cart.forEach(item=>{
+    const div = document.createElement("div");
+    div.className = "cart-item";
+
+    div.innerHTML = `
+      <img src="${escapeHtml(
+        item.image ||
+        `https://placehold.co/160x200?text=${encodeURIComponent(item.sku)}`
+      )}" alt="">
+
+      <div>
+        <h4>${escapeHtml(item.name)}</h4>
+
+        <p>
+          ${escapeHtml(item.sku)} · Talla ${escapeHtml(item.size)}
+        </p>
+
+        <p>
+          ${money(item.price)} c/u
+        </p>
+
+        <div class="qty-controls">
+          <button data-action="minus">−</button>
+          <strong>${item.qty}</strong>
+          <button data-action="plus">+</button>
+        </div>
+
+        <strong>
+          ${money(item.price * item.qty)}
+        </strong>
+      </div>
+
+      <button class="remove-btn" data-action="remove">
+        Eliminar
+      </button>
+    `;
+
+    div.querySelector('[data-action="minus"]')
+      .onclick = ()=>changeQuantity(item.key,-1);
+
+    div.querySelector('[data-action="plus"]')
+      .onclick = ()=>changeQuantity(item.key,1);
+
+    div.querySelector('[data-action="remove"]')
+      .onclick = ()=>removeFromCart(item.key);
+
+    wrap.appendChild(div);
+  });
+
+  const subtotal = calculateSubtotal();
+  const discount = calculateDiscount();
+  const afterDiscount = Math.max(0,subtotal-discount);
+  const shipping = calculateShipping(afterDiscount);
+  const total = afterDiscount + shipping;
+
+  $("cartSubtotal").textContent = money(subtotal);
+  $("cartDiscount").textContent =
+    discount > 0
+      ? `-${money(discount)}`
+      : money(0);
+
+  $("cartShipping").textContent =
+    shipping === 0 && subtotal > 0
+      ? "Gratis"
+      : money(shipping);
+
+  $("cartTotal").textContent = money(total);
+}
+
+function openCart(){
+  $("cartDrawer").classList.add("open");
+  $("overlay").classList.remove("hidden");
+}
+
+function closeCart(){
+  $("cartDrawer").classList.remove("open");
+  $("overlay").classList.add("hidden");
+}
+
+function sendWhatsApp(){
+  if(!state.cart.length){
+    alert("Tu carrito está vacío.");
+    return;
+  }
+
+  const subtotal = calculateSubtotal();
+  const discount = calculateDiscount();
+  const afterDiscount = Math.max(0,subtotal-discount);
+  const shipping = calculateShipping(afterDiscount);
+  const total = afterDiscount + shipping;
+
+  const lines = state.cart.map(item=>
+    `• ${item.name} | ${item.sku} | Talla ${item.size} | x${item.qty} | ${money(item.price*item.qty)}`
+  );
+
+  const storeName = (STORE_CONFIG.storeName || document.querySelector(".brand")?.textContent || "MODA JUÁREZ").trim();
+  const message = [
+    `Hola ${storeName}, quiero hacer este pedido:`,
+    "",
+    ...lines,
+    "",
+    `Subtotal: ${money(subtotal)}`,
+    discount > 0
+      ? `Descuento: -${money(discount)}`
+      : null,
+    `Envío: ${shipping===0 ? "Gratis" : money(shipping)}`,
+    `TOTAL: ${money(total)}`,
+    "",
+    `C.P.: ${$("postalCode").value || "No indicado"}`
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  window.open(
+    `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+}
+
+
+/* =========================================================
+   SUPABASE · CATÁLOGO PERSISTENTE
+   ========================================================= */
+
+let shopSupabase = null;
+
+function setSupabaseStatus(message, type="info"){
+  const el = $("supabaseStatus");
+  if(!el) return;
+  el.textContent = message;
+  el.style.color =
+    type === "ok" ? "#527160" :
+    type === "error" ? "#9b4f4f" :
+    "var(--muted)";
+}
+
+function initSupabaseClient(){
+  if(shopSupabase){
+    return shopSupabase;
+  }
+
+  shopSupabase = window.supabase.createClient(
+    PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true,
+        storageKey:"moda-juarez-auth-token"
+      }
+    }
+  );
+
+  return shopSupabase;
+}
+
+async function getAdminState(){
+  if(!shopSupabase){
+    return {logged:false,admin:false,email:null};
+  }
+
+  const {data:{session}} = await shopSupabase.auth.getSession();
+
+  if(!session?.user){
+    return {logged:false,admin:false,email:null};
+  }
+
+  const user = session.user;
+
+  const {data:profile,error} = await shopSupabase
+    .from("profiles")
+    .select("email,role")
+    .eq("id",user.id)
+    .maybeSingle();
+
+  if(error){
+    console.warn("No se pudo leer profile:",error.message);
+  }
+
+  const admin =
+    String(profile?.role || "").toLowerCase() === "admin";
+
+  return {
+    logged:true,
+    admin,
+    email:profile?.email || user.email || ""
+  };
+}
+
+async function refreshSupabaseStatus(){
+  if(!shopSupabase){
+    setSupabaseStatus("Sin conectar.");
+    return;
+  }
+
+  try{
+    const auth = await getAdminState();
+
+    state.admin = false;
+    state.adminEmail = null;
+    document.body.classList.remove("admin-mode");
+    $("adminTopActions")?.classList.add("hidden");
+    $("publicAdminBtn").textContent = "Administrar";
+
+    if(!auth.logged){
+      setSupabaseStatus("Supabase conectado. Sin sesión ADMIN.");
+      renderProducts();
+      return;
+    }
+
+    if(!auth.admin){
+      setSupabaseStatus(`Sesión iniciada: ${auth.email}. Esta cuenta no tiene role=admin.`,"error");
+      renderProducts();
+      return;
+    }
+
+    state.admin = true;
+    state.adminEmail = auth.email;
+    document.body.classList.add("admin-mode");
+    $("adminTopActions")?.classList.remove("hidden");
+    $("publicAdminBtn").textContent = "ADMIN";
+    setSupabaseStatus(`✅ ADMIN conectado: ${auth.email}`,"ok");
+    renderProducts();
+  }catch(error){
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+}
+
+async function loginAdminGoogle(){
+  if(!shopSupabase){
+    initSupabaseClient();
+  }
+
+  if(location.protocol === "file:"){
+    throw new Error(
+      "El inicio con Google debe probarse cuando la tienda esté publicada en Render/HTTP. " +
+      "En archivo local file:// Google no puede regresar correctamente a esta página."
+    );
+  }
+
+  const redirectTo =
+    location.origin + location.pathname;
+
+  const {error} = await shopSupabase.auth.signInWithOAuth({
+    provider:"google",
+    options:{redirectTo}
+  });
+
+  if(error){
+    throw error;
+  }
+}
+
+async function requireShopAdmin(){
+  if(!shopSupabase){
+    initSupabaseClient();
+  }
+
+  const state = await getAdminState();
+
+  if(!state.logged){
+    throw new Error("Primero inicia sesión como ADMIN.");
+  }
+
+  if(!state.admin){
+    throw new Error("La sesión actual no tiene permisos ADMIN.");
+  }
+
+  return state;
+}
+
+function toDbProduct(product){
+  return {
+    sku: product.sku,
+    name: product.name,
+    category: product.category || "Sin categoría",
+    description: product.description || null,
+    price: Number(product.price) || 0,
+    compare_at_price:
+      Number.isFinite(Number(product.compareAtPrice))
+        ? Number(product.compareAtPrice)
+        : null,
+    currency: "MXN",
+    image_1: product.images?.[0] || null,
+    image_2: product.images?.[1] || null,
+    image_3: product.images?.[2] || null,
+    badge: product.badge || null,
+    active: product.active !== false
+  };
+}
+
+function productVariantRows(product, productId){
+  const sizes =
+    Array.isArray(product.sizes) && product.sizes.length
+      ? product.sizes
+      : ["UNITALLA"];
+
+  // En este piloto el stock está por talla, no por color.
+  // Por eso se crea 1 variante por talla. Después ampliaremos a talla+color.
+  return sizes.map(size=>({
+    product_id: productId,
+    variant_sku: `${product.sku}-${size}`,
+    size,
+    color: null,
+    active: true
+  }));
+}
+
+async function saveCatalogToSupabase(){
+  await requireShopAdmin();
+
+  if(!state.products.length){
+    throw new Error("No hay productos cargados para guardar.");
+  }
+
+  setSupabaseStatus(`Guardando ${state.products.length} productos…`);
+
+  const dbProducts = state.products.map(toDbProduct);
+
+  const {data:productRows,error:productError} = await shopSupabase
+    .from("shop_products")
+    .upsert(dbProducts,{onConflict:"sku"})
+    .select("id,sku");
+
+  if(productError){
+    throw productError;
+  }
+
+  const productIdBySku =
+    Object.fromEntries(productRows.map(row=>[row.sku,row.id]));
+
+  let variantsSaved = 0;
+  let inventorySaved = 0;
+
+  // Pilot: por claridad se procesa producto por producto.
+  for(let i=0;i<state.products.length;i++){
+    const product = state.products[i];
+    const productId = productIdBySku[product.sku];
+
+    if(!productId){
+      continue;
+    }
+
+    setSupabaseStatus(
+      `Guardando variantes e inventario ${i+1}/${state.products.length}: ${product.sku}`
+    );
+
+    // Reemplazar variantes de ese producto para evitar duplicados.
+    const {error:deleteVariantsError} = await shopSupabase
+      .from("shop_product_variants")
+      .delete()
+      .eq("product_id",productId);
+
+    if(deleteVariantsError){
+      throw deleteVariantsError;
+    }
+
+    const variants = productVariantRows(product,productId);
+
+    const {data:variantRows,error:variantError} = await shopSupabase
+      .from("shop_product_variants")
+      .insert(variants)
+      .select("id,size");
+
+    if(variantError){
+      throw variantError;
+    }
+
+    variantsSaved += variantRows.length;
+
+    const inventoryRows = variantRows.map(v=>({
+      variant_id:v.id,
+      quantity:Math.max(0,Number(product.stock?.[v.size] || 0))
+    }));
+
+    if(inventoryRows.length){
+      const {error:inventoryError} = await shopSupabase
+        .from("shop_inventory")
+        .insert(inventoryRows);
+
+      if(inventoryError){
+        throw inventoryError;
+      }
+
+      inventorySaved += inventoryRows.length;
+    }
+  }
+
+  setSupabaseStatus(
+    `✅ Guardado en Supabase: ${productRows.length} productos, ${variantsSaved} variantes y ${inventorySaved} registros de stock.`,
+    "ok"
+  );
+}
+
+
+function setPublicCatalogStatus(message,type="info"){
+  const el = $("publicCatalogStatus");
+  if(!el) return;
+  el.textContent = message;
+  el.classList.remove("ok","error");
+  if(type === "ok") el.classList.add("ok");
+  if(type === "error") el.classList.add("error");
+}
+
+async function loadCatalogFromSupabase(){
+  if(!shopSupabase){
+    initSupabaseClient();
+  }
+
+  setSupabaseStatus("Cargando productos desde Supabase…");
+  setPublicCatalogStatus("Cargando catálogo…");
+
+  const {data:products,error:productsError} = await shopSupabase
+    .from("shop_products")
+    .select("*")
+    .order("name",{ascending:true});
+
+  if(productsError){
+    throw productsError;
+  }
+
+  const productIds = products.map(p=>p.id);
+
+  let variants = [];
+  let inventory = [];
+
+  if(productIds.length){
+    const variantResult = await shopSupabase
+      .from("shop_product_variants")
+      .select("*")
+      .in("product_id",productIds);
+
+    if(variantResult.error){
+      throw variantResult.error;
+    }
+
+    variants = variantResult.data || [];
+
+    const variantIds = variants.map(v=>v.id);
+
+    if(variantIds.length){
+      const inventoryResult = await shopSupabase
+        .from("shop_inventory")
+        .select("*")
+        .in("variant_id",variantIds);
+
+      if(inventoryResult.error){
+        throw inventoryResult.error;
+      }
+
+      inventory = inventoryResult.data || [];
+    }
+  }
+
+  const inventoryByVariant =
+    Object.fromEntries(inventory.map(i=>[i.variant_id,Number(i.quantity)||0]));
+
+  const variantsByProduct = {};
+
+  variants.forEach(v=>{
+    if(!variantsByProduct[v.product_id]){
+      variantsByProduct[v.product_id] = [];
+    }
+    variantsByProduct[v.product_id].push(v);
+  });
+
+  state.products = products.map(row=>{
+    const vs = variantsByProduct[row.id] || [];
+    const stock = {};
+    const sizes = [];
+
+    vs.forEach(v=>{
+      const size = v.size || "UNITALLA";
+
+      if(!sizes.includes(size)){
+        sizes.push(size);
+      }
+
+      stock[size] =
+        (stock[size] || 0) +
+        (inventoryByVariant[v.id] || 0);
+    });
+
+    return {
+      id: row.sku,
+      dbId: row.id,
+      sku: row.sku,
+      name: row.name,
+      category: row.category,
+      price: Number(row.price) || 0,
+      compareAtPrice:
+        row.compare_at_price === null
+          ? null
+          : Number(row.compare_at_price),
+      badge: row.badge || "",
+      sizes: sizes.length ? sizes : ["UNITALLA"],
+      colors: [],
+      stock,
+      variants: vs.map(v=>({
+        id:v.id,
+        size:v.size || "UNITALLA",
+        color:v.color || null,
+        quantity:inventoryByVariant[v.id] || 0
+      })),
+      totalStock:Object.values(stock).reduce((a,b)=>a+Number(b||0),0),
+      images:[row.image_1,row.image_2,row.image_3].filter(Boolean),
+      description:row.description || "",
+      active:row.active !== false,
+      promotion:"Ninguna",
+      discountPct:0
+    };
+  });
+
+  localStorage.setItem("moda_catalog",JSON.stringify(state.products));
+
+  fillCategoryFilter();
+  syncPriceFilterToCatalog();
+  applyFilters();
+
+  setSupabaseStatus(
+    `✅ Catálogo cargado desde Supabase: ${state.products.length} productos.`,
+    "ok"
+  );
+  setPublicCatalogStatus(
+    `✅ Catálogo en línea: ${state.products.length} productos cargados desde Supabase.`,
+    "ok"
+  );
+}
+
+async function logoutShopAdmin(){
+  if(!shopSupabase){
+    return;
+  }
+
+  await shopSupabase.auth.signOut();
+  document.body.classList.remove("admin-mode");
+  await refreshSupabaseStatus();
+  await loadCatalogFromSupabase();
+}
+
+
+$("importExcelBtn").onclick =
+  ()=>$("excelFile").click();
+
+$("excelFile").addEventListener("change",event=>{
+  const file = event.target.files?.[0];
+
+  if(file){
+    importExcel(file);
+  }
+
+  event.target.value = "";
+});
+
+$("saveCatalogBtn").onclick = ()=>{
+  localStorage.setItem(
+    "moda_catalog",
+    JSON.stringify(state.products)
+  );
+
+  $("importStatus").textContent =
+    `✅ Catálogo guardado localmente: ${state.products.length} productos.`;
+};
+
+$("clearCatalogBtn").onclick = ()=>{
+  if(!confirm("¿Borrar el catálogo importado de este dispositivo?")){
+    return;
+  }
+
+  state.products = [];
+  state.filtered = [];
+
+  localStorage.removeItem("moda_catalog");
+
+  fillCategoryFilter();
+  applyFilters();
+
+  $("importStatus").textContent =
+    "Catálogo eliminado. Puedes volver a importar el Excel.";
+};
+
+$("searchInput").addEventListener("input",applyFilters);
+$("filterCategory").addEventListener("change",applyFilters);
+$("filterSize").addEventListener("change",applyFilters);
+
+function installCustomSort(){
+  const select=$("sortSelect");
+  if(!select || document.getElementById("customSortShell")) return;
+  const labels={
+    featured:"Destacados",
+    priceAsc:"Precio: menor a mayor",
+    priceDesc:"Precio: mayor a menor",
+    nameAsc:"Nombre: A → Z",
+    nameDesc:"Nombre: Z → A"
+  };
+  const shell=document.createElement("div"); shell.className="sort-shell"; shell.id="customSortShell";
+  const trigger=document.createElement("button"); trigger.type="button"; trigger.className="sort-trigger";
+  const pop=document.createElement("div"); pop.className="sort-popover hidden";
+  function paint(){
+    trigger.innerHTML=`<span>${labels[select.value]||"Ordenar"}</span><span>⌄</span>`;
+    pop.innerHTML=Object.entries(labels).map(([value,label])=>`<button type="button" class="sort-option ${select.value===value?"active":""}" data-sort-value="${value}"><span>${label}</span><span class="sort-dot"></span></button>`).join("");
+    pop.querySelectorAll("[data-sort-value]").forEach(btn=>btn.onclick=()=>{
+      select.value=btn.dataset.sortValue; select.dispatchEvent(new Event("change")); pop.classList.add("hidden"); paint();
+    });
+  }
+  trigger.onclick=()=>pop.classList.toggle("hidden");
+  document.addEventListener("click",e=>{if(!shell.contains(e.target))pop.classList.add("hidden");});
+  shell.append(trigger,pop); select.insertAdjacentElement("afterend",shell); paint();
+}
+
+["prevPageBtn","floatingPrev"].forEach(id=>$(id)?.addEventListener("click",()=>goToPage(-1)));
+["nextPageBtn","floatingNext"].forEach(id=>$(id)?.addEventListener("click",()=>goToPage(1)));
+document.addEventListener("DOMContentLoaded",installCustomSort);
+setTimeout(installCustomSort,0);
+
+$("sortSelect").addEventListener("change",applyFilters);
+
+$("filterPrice").addEventListener("input",()=>{
+  $("filterPriceLabel").textContent =
+    money($("filterPrice").value);
+
+  applyFilters();
+});
+
+$("clearFilters").onclick = ()=>{
+  $("searchInput").value = "";
+  $("filterCategory").value = "Todos";
+  $("filterSize").value = "";
+  $("filterPrice").value = $("filterPrice").max || "3000";
+  $("filterPriceLabel").textContent = money($("filterPrice").value);
+  $("sortSelect").value = "featured";
+
+  applyFilters();
+};
+
+document.querySelectorAll(
+  ".main-nav button[data-category]"
+).forEach(button=>{
+  button.addEventListener("click",()=>{
+    document
+      .querySelectorAll(".main-nav button")
+      .forEach(x=>x.classList.remove("active"));
+
+    button.classList.add("active");
+
+    const category = button.dataset.category;
+
+    if(category === "Accesorios"){
+      $("filterCategory").value = "Todos";
+
+      const accessorySet = new Set(ACCESSORY_CATEGORIES);
+
+      state.filtered = state.products.filter(
+        product => accessorySet.has(product.category)
+      );
+
+      renderProducts();
+      return;
+    }
+
+    $("filterCategory").value = category;
+    applyFilters();
+  });
+});
+
+
+
+
+/* =========================================================
+   ADMIN EDITOR V4 · STORAGE + ALTAS
+   ========================================================= */
+
+const PRODUCT_IMAGE_BUCKET = "productos";
+let newProductVariants = [];
+
+function setAdminEditorStatus(message,type="info"){
+  const el = $("adminEditorStatus");
+  if(!el) return;
+  el.textContent = message;
+  el.style.color =
+    type === "ok" ? "#527160" :
+    type === "error" ? "#9b4f4f" :
+    "var(--muted)";
+}
+
+function safeFilePart(value){
+  return String(value || "archivo")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9._-]+/g,"-")
+    .replace(/-+/g,"-")
+    .replace(/^-|-$/g,"")
+    .toLowerCase();
+}
+
+function imageInput(slot){
+  return $(`adminImage${slot}`);
+}
+
+function imagePreview(slot){
+  return $(`adminImagePreview${slot}`);
+}
+
+function refreshImagePreview(slot){
+  const url = imageInput(slot).value.trim();
+  const preview = imagePreview(slot);
+
+  preview.src = url ||
+    "https://placehold.co/440x550/f2f0eb/6d7474?text=Sin+imagen";
+
+  preview.onerror = ()=>{
+    preview.src =
+      "https://placehold.co/440x550/f2f0eb/6d7474?text=Imagen+no+disponible";
+  };
+}
+
+function refreshAllImagePreviews(){
+  [1,2,3].forEach(refreshImagePreview);
+}
+
+async function uploadProductImage(slot,file){
+  await requireShopAdmin();
+
+  if(!file){
+    return;
+  }
+
+  const allowed = ["image/jpeg","image/png","image/webp"];
+
+  if(!allowed.includes(file.type)){
+    throw new Error("Solo se permiten JPG, PNG o WEBP.");
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    throw new Error("La imagen supera el límite de 5 MB.");
+  }
+
+  const sku = $("adminSku").value.trim();
+
+  if(!sku){
+    throw new Error("Primero escribe el SKU del producto.");
+  }
+
+  const ext =
+    file.name.includes(".")
+      ? file.name.split(".").pop().toLowerCase()
+      : (file.type === "image/png" ? "png" :
+         file.type === "image/webp" ? "webp" : "jpg");
+
+  const path =
+    `${safeFilePart(sku)}/${Date.now()}-imagen-${slot}.${safeFilePart(ext)}`;
+
+  setAdminEditorStatus(`Subiendo imagen ${slot}…`);
+
+  const {error} = await shopSupabase
+    .storage
+    .from(PRODUCT_IMAGE_BUCKET)
+    .upload(path,file,{
+      cacheControl:"3600",
+      upsert:false,
+      contentType:file.type
+    });
+
+  if(error){
+    throw error;
+  }
+
+  const {data} = shopSupabase
+    .storage
+    .from(PRODUCT_IMAGE_BUCKET)
+    .getPublicUrl(path);
+
+  if(!data?.publicUrl){
+    throw new Error("Supabase no devolvió la URL pública.");
+  }
+
+  imageInput(slot).value = data.publicUrl;
+  refreshImagePreview(slot);
+
+  setAdminEditorStatus(`✅ Imagen ${slot} subida a Supabase Storage.`,"ok");
+}
+
+function storagePathFromPublicUrl(url){
+  const marker = `/storage/v1/object/public/${PRODUCT_IMAGE_BUCKET}/`;
+  const pos = String(url || "").indexOf(marker);
+
+  if(pos === -1){
+    return null;
+  }
+
+  return decodeURIComponent(
+    String(url).slice(pos + marker.length)
+  );
+}
+
+async function clearProductImage(slot){
+  await requireShopAdmin();
+
+  const currentUrl = imageInput(slot).value.trim();
+  const storagePath = storagePathFromPublicUrl(currentUrl);
+
+  if(storagePath){
+    const {error} = await shopSupabase
+      .storage
+      .from(PRODUCT_IMAGE_BUCKET)
+      .remove([storagePath]);
+
+    if(error){
+      throw error;
+    }
+  }
+
+  imageInput(slot).value = "";
+  refreshImagePreview(slot);
+
+  setAdminEditorStatus(
+    storagePath
+      ? `✅ Imagen ${slot} eliminada de Storage. Guarda el producto para confirmar el cambio.`
+      : `Imagen ${slot} quitada del producto. Guarda los cambios.`,
+    "ok"
+  );
+}
+
+function renderNewVariantRows(){
+  const wrap = $("newVariantRows");
+  wrap.innerHTML = "";
+
+  if(!newProductVariants.length){
+    wrap.innerHTML =
+      `<div class="admin-status">Aún no agregas tallas.</div>`;
+    return;
+  }
+
+  newProductVariants.forEach((variant,index)=>{
+    const row = document.createElement("div");
+    row.className = "variant-list-row";
+
+    row.innerHTML = `
+      <strong>${escapeHtml(variant.size)}</strong>
+      <span>Stock: ${variant.quantity}</span>
+      <span class="variant-color">Color: —</span>
+      <button type="button" class="variant-remove" data-remove-variant="${index}">
+        Quitar
+      </button>
+    `;
+
+    row.querySelector("[data-remove-variant]").onclick = ()=>{
+      newProductVariants.splice(index,1);
+      renderNewVariantRows();
+    };
+
+    wrap.appendChild(row);
+  });
+}
+
+function addNewProductVariant(){
+  const size = $("newVariantSize").value;
+  const quantity =
+    Math.max(0,Math.floor(Number($("newVariantQty").value || 0)));
+
+  const existing = newProductVariants.find(v=>v.size===size);
+
+  if(existing){
+    existing.quantity = quantity;
+  }else{
+    newProductVariants.push({size,quantity});
+  }
+
+  renderNewVariantRows();
+}
+
+function resetAdminForm(){
+  $("adminProductDbId").value = "";
+  $("adminSku").value = "";
+  $("adminCategory").value = "";
+  $("adminName").value = "";
+  $("adminPrice").value = "";
+  $("adminComparePrice").value = "";
+  $("adminBadge").value = "";
+  $("adminActive").value = "true";
+  $("adminDescription").value = "";
+  $("adminImage1").value = "";
+  $("adminImage2").value = "";
+  $("adminImage3").value = "";
+  $("adminStockRows").innerHTML = "";
+
+  [1,2,3].forEach(slot=>{
+    $(`adminImageFile${slot}`).value = "";
+  });
+
+  refreshAllImagePreviews();
+  setAdminEditorStatus("");
+}
+
+function openNewProductEditor(){
+  if(!state.admin){
+    alert("Solo ADMIN puede crear productos.");
+    return;
+  }
+
+  resetAdminForm();
+
+  $("adminEditorMode").value = "new";
+  $("adminModalTitle").textContent = "Agregar producto";
+  $("saveAdminProduct").textContent = "Crear producto";
+  $("disableAdminProduct").classList.add("hidden");
+
+  $("existingStockEditor").classList.add("hidden");
+  $("newVariantBuilder").classList.remove("hidden");
+
+  $("adminSku").readOnly = false;
+
+  newProductVariants = [];
+  renderNewVariantRows();
+
+  $("adminModal").classList.remove("hidden");
+}
+
+function openAdminEditor(product){
+  if(!state.admin){
+    alert("Solo ADMIN puede editar productos.");
+    return;
+  }
+
+  resetAdminForm();
+
+  $("adminEditorMode").value = "edit";
+  $("adminModalTitle").textContent = "Editar producto";
+  $("saveAdminProduct").textContent = "Guardar cambios";
+  $("disableAdminProduct").classList.remove("hidden");
+
+  $("existingStockEditor").classList.remove("hidden");
+  $("newVariantBuilder").classList.add("hidden");
+
+  $("adminProductDbId").value = product.dbId || "";
+  $("adminSku").value = product.sku || "";
+  $("adminSku").readOnly = true;
+  $("adminCategory").value = product.category || "";
+  $("adminName").value = product.name || "";
+  $("adminPrice").value = Number(product.price || 0);
+  $("adminComparePrice").value =
+    product.compareAtPrice == null ? "" : Number(product.compareAtPrice);
+  $("adminBadge").value = product.badge || "";
+  $("adminActive").value = product.active === false ? "false" : "true";
+  $("adminDescription").value = product.description || "";
+  $("adminImage1").value = product.images?.[0] || "";
+  $("adminImage2").value = product.images?.[1] || "";
+  $("adminImage3").value = product.images?.[2] || "";
+
+  refreshAllImagePreviews();
+
+  const rows = $("adminStockRows");
+  rows.innerHTML = "";
+
+  const variants =
+    Array.isArray(product.variants) && product.variants.length
+      ? product.variants
+      : (product.sizes || []).map(size=>({
+          id:null,
+          size,
+          quantity:Number(product.stock?.[size] || 0)
+        }));
+
+  variants.forEach(v=>{
+    const row = document.createElement("div");
+    row.className = "stock-row";
+    row.dataset.variantId = v.id || "";
+    row.dataset.size = v.size || "UNITALLA";
+    row.dataset.previous = String(Number(v.quantity || 0));
+
+    row.innerHTML = `
+      <strong>${escapeHtml(v.size || "UNITALLA")}</strong>
+      <input class="admin-stock-input" type="number" min="0" step="1" value="${Number(v.quantity || 0)}">
+      <span class="stock-current">Actual: ${Number(v.quantity || 0)}</span>
+    `;
+
+    rows.appendChild(row);
+  });
+
+  setAdminEditorStatus("");
+  $("adminModal").classList.remove("hidden");
+}
+
+function closeAdminEditor(){
+  $("adminModal").classList.add("hidden");
+}
+
+function collectAdminProductValues(){
+  const sku = $("adminSku").value.trim();
+  const name = $("adminName").value.trim();
+  const category = $("adminCategory").value.trim();
+
+  if(!sku){
+    throw new Error("Falta el SKU.");
+  }
+
+  if(!name){
+    throw new Error("Falta el nombre del producto.");
+  }
+
+  if(!category){
+    throw new Error("Falta la categoría.");
+  }
+
+  const price = Number($("adminPrice").value || 0);
+
+  if(price < 0){
+    throw new Error("El precio no puede ser negativo.");
+  }
+
+  return {
+    sku,
+    name,
+    category,
+    description:$("adminDescription").value.trim() || null,
+    price,
+    compare_at_price:
+      $("adminComparePrice").value === ""
+        ? null
+        : Number($("adminComparePrice").value),
+    currency:"MXN",
+    image_1:$("adminImage1").value.trim() || null,
+    image_2:$("adminImage2").value.trim() || null,
+    image_3:$("adminImage3").value.trim() || null,
+    badge:$("adminBadge").value.trim() || null,
+    active:$("adminActive").value === "true"
+  };
+}
+
+async function createAdminProduct(){
+  await requireShopAdmin();
+
+  const productValues = collectAdminProductValues();
+
+  if(!newProductVariants.length){
+    throw new Error("Agrega por lo menos una talla con su stock.");
+  }
+
+  setAdminEditorStatus("Creando producto…");
+
+  const {data:product,error:productError} = await shopSupabase
+    .from("shop_products")
+    .insert(productValues)
+    .select("id,sku")
+    .single();
+
+  if(productError){
+    if(String(productError.message).toLowerCase().includes("duplicate")){
+      throw new Error("Ese SKU ya existe.");
+    }
+    throw productError;
+  }
+
+  const variants = newProductVariants.map(v=>({
+    product_id:product.id,
+    variant_sku:`${productValues.sku}-${v.size}`,
+    size:v.size,
+    color:null,
+    active:true
+  }));
+
+  const {data:variantRows,error:variantError} = await shopSupabase
+    .from("shop_product_variants")
+    .insert(variants)
+    .select("id,size");
+
+  if(variantError){
+    throw variantError;
+  }
+
+  const qtyBySize =
+    Object.fromEntries(newProductVariants.map(v=>[v.size,v.quantity]));
+
+  const inventoryRows = variantRows.map(v=>({
+    variant_id:v.id,
+    quantity:qtyBySize[v.size] || 0
+  }));
+
+  const {error:inventoryError} = await shopSupabase
+    .from("shop_inventory")
+    .insert(inventoryRows);
+
+  if(inventoryError){
+    throw inventoryError;
+  }
+
+  const movementRows = variantRows
+    .map(v=>({
+      variant_id:v.id,
+      movement_type:"initial_stock",
+      quantity:qtyBySize[v.size] || 0,
+      previous_stock:0,
+      new_stock:qtyBySize[v.size] || 0,
+      reason:"Stock inicial al crear producto",
+      reference:productValues.sku
+    }))
+    .filter(row=>row.quantity !== 0);
+
+  if(movementRows.length){
+    const {error:movementError} = await shopSupabase
+      .from("shop_inventory_movements")
+      .insert(movementRows);
+
+    if(movementError){
+      throw movementError;
+    }
+  }
+
+  setAdminEditorStatus("✅ Producto creado.","ok");
+
+  await loadCatalogFromSupabase();
+  closeAdminEditor();
+}
+
+async function saveAdminProductChanges(){
+  await requireShopAdmin();
+
+  const dbId = Number($("adminProductDbId").value);
+  if(!dbId){
+    throw new Error("No se encontró el ID del producto en Supabase.");
+  }
+
+  const productValues = collectAdminProductValues();
+  const sku = productValues.sku;
+
+  setAdminEditorStatus("Guardando producto…");
+
+  // SKU no se modifica en productos existentes desde este editor.
+  delete productValues.sku;
+
+  const {error:productError} = await shopSupabase
+    .from("shop_products")
+    .update(productValues)
+    .eq("id",dbId);
+
+  if(productError) throw productError;
+
+  const stockRows = [...document.querySelectorAll("#adminStockRows .stock-row")];
+
+  for(const row of stockRows){
+    const variantId = Number(row.dataset.variantId);
+    if(!variantId) continue;
+
+    const previous = Number(row.dataset.previous || 0);
+    const next = Math.max(
+      0,
+      Math.floor(Number(row.querySelector(".admin-stock-input").value || 0))
+    );
+
+    if(next === previous) continue;
+
+    const {error:inventoryError} = await shopSupabase
+      .from("shop_inventory")
+      .update({quantity:next})
+      .eq("variant_id",variantId);
+
+    if(inventoryError) throw inventoryError;
+
+    const {error:movementError} = await shopSupabase
+      .from("shop_inventory_movements")
+      .insert({
+        variant_id:variantId,
+        movement_type:"manual_adjustment",
+        quantity:next-previous,
+        previous_stock:previous,
+        new_stock:next,
+        reason:"Ajuste manual desde panel ADMIN",
+        reference:sku
+      });
+
+    if(movementError) throw movementError;
+  }
+
+  setAdminEditorStatus("✅ Producto y stock guardados.","ok");
+
+  await loadCatalogFromSupabase();
+  closeAdminEditor();
+}
+
+async function hideAdminProduct(){
+  await requireShopAdmin();
+
+  const dbId = Number($("adminProductDbId").value);
+  if(!dbId) return;
+
+  if(!confirm("¿Ocultar este producto del catálogo? No se borrará de Supabase.")){
+    return;
+  }
+
+  const {error} = await shopSupabase
+    .from("shop_products")
+    .update({active:false})
+    .eq("id",dbId);
+
+  if(error) throw error;
+
+  await loadCatalogFromSupabase();
+  closeAdminEditor();
+}
+
+$("closeAdminModal").onclick = closeAdminEditor;
+$("cancelAdminProduct").onclick = closeAdminEditor;
+$("newProductBtn").onclick = openNewProductEditor;
+$("addNewVariantBtn").onclick = addNewProductVariant;
+
+$("adminModal").addEventListener("click",event=>{
+  if(event.target === $("adminModal")){
+    closeAdminEditor();
+  }
+});
+
+[1,2,3].forEach(slot=>{
+  imageInput(slot).addEventListener("input",()=>refreshImagePreview(slot));
+
+  document
+    .querySelector(`[data-upload-slot="${slot}"]`)
+    .addEventListener("click",()=>{
+      $(`adminImageFile${slot}`).click();
+    });
+
+  $(`adminImageFile${slot}`).addEventListener("change",async event=>{
+    const file = event.target.files?.[0];
+
+    if(!file){
+      return;
+    }
+
+    try{
+      await uploadProductImage(slot,file);
+    }catch(error){
+      console.error(error);
+      setAdminEditorStatus(`❌ ${error.message}`,"error");
+    }finally{
+      event.target.value = "";
+    }
+  });
+
+  document
+    .querySelector(`[data-clear-slot="${slot}"]`)
+    .addEventListener("click",async ()=>{
+      try{
+        await clearProductImage(slot);
+      }catch(error){
+        console.error(error);
+        setAdminEditorStatus(`❌ ${error.message}`,"error");
+      }
+    });
+});
+
+$("saveAdminProduct").onclick = async ()=>{
+  try{
+    const mode = $("adminEditorMode").value;
+
+    if(mode === "new"){
+      await createAdminProduct();
+    }else{
+      await saveAdminProductChanges();
+    }
+  }catch(error){
+    console.error(error);
+    setAdminEditorStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("disableAdminProduct").onclick = async ()=>{
+  try{
+    await hideAdminProduct();
+  }catch(error){
+    console.error(error);
+    setAdminEditorStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+
+$("connectSupabaseBtn").onclick = async ()=>{
+  try{
+    initSupabaseClient();
+    await refreshSupabaseStatus();
+  }catch(error){
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("loginGoogleBtn").onclick = async ()=>{
+  try{
+    await loginAdminGoogle();
+  }catch(error){
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("saveSupabaseBtn").onclick = async ()=>{
+  try{
+    await saveCatalogToSupabase();
+  }catch(error){
+    console.error(error);
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("loadSupabaseBtn").onclick = async ()=>{
+  try{
+    await loadCatalogFromSupabase();
+  }catch(error){
+    console.error(error);
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("logoutSupabaseBtn").onclick = async ()=>{
+  try{
+    await logoutShopAdmin();
+  }catch(error){
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+
+
+$("mobileMenuBtn").onclick = ()=>{
+  $("mobileNav").classList.toggle("open");
+};
+
+$("mobileNav").querySelectorAll("button[data-category]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    $("mobileNav").classList.remove("open");
+
+    document
+      .querySelectorAll('#mainNav button, #mobileNav button')
+      .forEach(x=>x.classList.remove("active"));
+
+    button.classList.add("active");
+
+    const category = button.dataset.category;
+
+    if(category === "Accesorios"){
+      $("filterCategory").value = "Todos";
+      const accessorySet = new Set(ACCESSORY_CATEGORIES);
+      state.filtered = state.products.filter(
+        product => accessorySet.has(product.category)
+      );
+      renderProducts();
+      updateCatalogDiagnostic();
+      return;
+    }
+
+    $("filterCategory").value = category;
+    applyFilters();
+  });
+});
+
+$("publicAdminBtn").onclick = async ()=>{
+  try{
+    initSupabaseClient();
+    const auth = await getAdminState();
+
+    if(auth.admin){
+      document.body.classList.toggle("admin-mode");
+      return;
+    }
+
+    await loginAdminGoogle();
+  }catch(error){
+    setPublicCatalogStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+
+$("cartBtn").onclick = openCart;
+$("closeCart").onclick = closeCart;
+$("overlay").onclick = closeCart;
+$("postalCode").addEventListener("input",renderCart);
+$("whatsappBtn").onclick = sendWhatsApp;
+
+
+(async function bootModaJuarez(){
+  applyStoreIdentity();
+  try{
+    initSupabaseClient();
+
+    if(!window.__modaAuthListenerInstalled){
+      window.__modaAuthListenerInstalled = true;
+      shopSupabase.auth.onAuthStateChange(()=>{
+        setTimeout(refreshSupabaseStatus,0);
+      });
+    }
+
+    await refreshSupabaseStatus();
+    await loadCatalogFromSupabase();
+  }catch(error){
+    console.error(error);
+    setPublicCatalogStatus(
+      `❌ No se pudo cargar el catálogo: ${error.message}`,
+      "error"
+    );
+
+    // Fallback local solo si existe algo guardado en este dispositivo.
+    if(state.products.length){
+      fillCategoryFilter();
+      syncPriceFilterToCatalog();
+      applyFilters();
+      setPublicCatalogStatus(
+        `⚠️ Supabase no respondió. Mostrando respaldo local temporal: ${state.products.length} productos.`,
+        "error"
+      );
+    }
+  }
+
+  renderCart();
+})();
+
+</script>
+
+</body>
+</html>
