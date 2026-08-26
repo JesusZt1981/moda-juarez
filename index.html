@@ -394,7 +394,7 @@ body.admin-mode .admin-panel-shell{display:block}
   <a class="brand" href="#">MODA JUÁREZ</a>
 
   <div class="header-actions">
-    <button type="button" class="admin-login-btn" id="publicAdminBtn">Administrar</button>
+    <button type="button" class="admin-login-btn hidden" id="publicAdminBtn">ADMIN</button>
     <button class="icon-btn" id="cartBtn" aria-label="Carrito">
       🛒 <span id="cartCount">0</span>
     </button>
@@ -1558,7 +1558,7 @@ async function refreshSupabaseStatus(){
     state.adminEmail = null;
     document.body.classList.remove("admin-mode");
     $("adminTopActions")?.classList.add("hidden");
-    $("publicAdminBtn").textContent = "Administrar";
+    $("publicAdminBtn")?.classList.add("hidden");
 
     if(!auth.logged){
       setSupabaseStatus("Supabase conectado. Sin sesión ADMIN.");
@@ -1576,6 +1576,7 @@ async function refreshSupabaseStatus(){
     state.adminEmail = auth.email;
     document.body.classList.add("admin-mode");
     $("adminTopActions")?.classList.remove("hidden");
+    $("publicAdminBtn")?.classList.remove("hidden");
     $("publicAdminBtn").textContent = "ADMIN";
     setSupabaseStatus(`✅ ADMIN conectado: ${auth.email}`,"ok");
     renderProducts();
@@ -2807,6 +2808,25 @@ $("whatsappBtn").onclick = sendWhatsApp;
 
     await refreshSupabaseStatus();
     await loadCatalogFromSupabase();
+
+    // El acceso administrativo no se anuncia en la tienda pública. Esta ruta
+    // sólo inicia Google; el panel permanece protegido por profiles.role=admin.
+    const adminAccessRequested =
+      new URLSearchParams(location.search).get("admin") === "1";
+
+    if(adminAccessRequested){
+      const auth = await getAdminState();
+      if(!auth.logged){
+        await loginAdminGoogle();
+        return;
+      }
+      if(!auth.admin){
+        setPublicCatalogStatus(
+          "🔒 Área restringida. Esta cuenta no está autorizada como administradora.",
+          "error"
+        );
+      }
+    }
   }catch(error){
     console.error(error);
     setPublicCatalogStatus(
