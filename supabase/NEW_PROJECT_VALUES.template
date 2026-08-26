@@ -1,0 +1,10 @@
+# Completar localmente después de crear el proyecto nuevo.
+# La URL y publishable key pueden estar en el frontend.
+# DATABASE_URL contiene contraseña: guardarla solo como Secret en Render.
+
+SUPABASE_URL=https://<PROJECT_REF>.supabase.co
+SUPABASE_PUBLISHABLE_KEY=<PUBLISHABLE_KEY>
+DATABASE_URL=<TRANSACTION_POOLER_CONNECTION_STRING>
+
+STORE_REDIRECT_URL=https://moda-juarez.onrender.com
+BOT_ALLOWED_ORIGIN=https://moda-juarez.onrender.com

@@ -424,8 +424,11 @@ body.admin-mode .admin-panel-shell{display:block}
 
       <div class="import-actions">
         <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden>
+        <input id="catalogBackupFile" type="file" accept="application/json,.json" hidden>
         <button class="primary-btn" id="importExcelBtn">Seleccionar Excel</button>
         <button class="secondary-btn" id="saveCatalogBtn">Guardar catálogo en este dispositivo</button>
+        <button class="secondary-btn" id="downloadCatalogBackupBtn">Descargar respaldo JSON</button>
+        <button class="secondary-btn" id="restoreCatalogBackupBtn">Restaurar respaldo JSON</button>
         <button class="danger-btn" id="clearCatalogBtn">Borrar catálogo cargado</button>
       </div>
     </div>
@@ -2719,6 +2722,52 @@ $("publicAdminBtn").onclick = async ()=>{
     setPublicCatalogStatus(`❌ ${error.message}`,"error");
   }
 };
+
+$("downloadCatalogBackupBtn").onclick = ()=>{
+  if(!state.products.length){
+    $("importStatus").textContent = "No hay productos para respaldar.";
+    return;
+  }
+  const payload = {
+    format:"moda-juarez-catalog-backup",
+    version:1,
+    exportedAt:new Date().toISOString(),
+    products:state.products
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `moda-juarez-catalogo-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  $("importStatus").textContent = `✅ Respaldo descargado: ${state.products.length} productos.`;
+};
+
+$("restoreCatalogBackupBtn").onclick = ()=>$('catalogBackupFile').click();
+
+$("catalogBackupFile").addEventListener("change",async event=>{
+  try{
+    const file = event.target.files?.[0];
+    if(!file) return;
+    const payload = JSON.parse(await file.text());
+    if(payload?.format !== "moda-juarez-catalog-backup" || !Array.isArray(payload.products)){
+      throw new Error("El archivo no es un respaldo válido de Moda Juárez.");
+    }
+    state.products = payload.products;
+    localStorage.setItem("moda_catalog",JSON.stringify(state.products));
+    fillCategoryFilter();
+    syncPriceFilterToCatalog();
+    applyFilters();
+    $("importStatus").textContent = `✅ Respaldo restaurado: ${state.products.length} productos. Ya puedes guardarlos en Supabase.`;
+  }catch(error){
+    $("importStatus").textContent = `❌ ${error.message}`;
+  }finally{
+    event.target.value = "";
+  }
+});
 
 $("openBotAdminBtn").onclick = async ()=>{
   try{
