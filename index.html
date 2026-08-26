@@ -451,6 +451,7 @@ body.admin-mode .admin-panel-shell{display:block}
 
       <div class="admin-top-actions hidden" id="adminTopActions">
         <button class="primary-btn" id="newProductBtn">＋ Agregar producto</button>
+        <button class="secondary-btn" id="openBotAdminBtn">🤖 Abrir panel del bot</button>
       </div>
 
       <div class="supabase-status" id="supabaseStatus">
@@ -2716,6 +2717,21 @@ $("publicAdminBtn").onclick = async ()=>{
     await loginAdminGoogle();
   }catch(error){
     setPublicCatalogStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("openBotAdminBtn").onclick = async ()=>{
+  try{
+    initSupabaseClient();
+    const auth = await getAdminState();
+    const {data:{session}} = await shopSupabase.auth.getSession();
+    if(!auth.admin || !session?.access_token){
+      throw new Error("Primero inicia sesión con una cuenta que tenga role=admin.");
+    }
+    const botUrl = String(STORE_CONFIG.botApiUrl||"").replace(/\/$/,"");
+    window.open(`${botUrl}/#access_token=${encodeURIComponent(session.access_token)}`,"_blank","noopener,noreferrer");
+  }catch(error){
+    setSupabaseStatus(`❌ ${error.message}`,"error");
   }
 };
 
