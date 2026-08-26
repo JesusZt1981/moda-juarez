@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Moda Juárez · Piloto V5.3</title>
+<title>WOMAN 656 · Moda con actitud</title>
+<meta name="theme-color" content="#0d0b0d">
+<meta name="description" content="WOMAN 656 · Moda femenina con actitud.">
+<link rel="icon" type="image/png" href="assets/woman-656-logo.png">
 
 <!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -367,13 +370,66 @@ body.admin-mode .admin-panel-shell{display:block}
   .product-price{font-size:19px!important}
 }
 
+/* ===== WOMAN 656 · identidad y temas ===== */
+:root,[data-theme="normal"]{
+  --bg:#f9f2f5;--surface:#fff;--surface-soft:#f8e8ef;--text:#171417;--muted:#72656b;
+  --border:#ead5df;--sage:#efbfd1;--sage-dark:#161216;--blue:#e9a9c2;--blue-dark:#b75f83;
+  --sand:#f2cfdd;--sand-dark:#c26c8e;--lavender:#d8cad8;--peach:#f5c8d8;--danger:#b65070;
+  --shadow:0 10px 30px rgba(64,22,40,.08);--shadow-hover:0 18px 38px rgba(64,22,40,.15)
+}
+[data-theme="pink"]{
+  --bg:#fff0f6;--surface:#fff8fb;--surface-soft:#ffe1ed;--text:#3a1725;--muted:#8b596d;
+  --border:#f1bed2;--sage:#f4b2cd;--sage-dark:#a93f69;--blue:#ed91b4;--blue-dark:#963b60;
+  --sand:#f6c8da;--sand-dark:#b8577d;--peach:#ffc9dc;--danger:#a92f57
+}
+[data-theme="light"]{
+  --bg:#fafafa;--surface:#fff;--surface-soft:#f4f1f3;--text:#1b191a;--muted:#706b6e;
+  --border:#ded9dc;--sage:#e8cbd6;--sage-dark:#272126;--blue:#e7b9ca;--blue-dark:#9e6079;
+  --sand:#eee4e8;--sand-dark:#8b6775;--peach:#f2d2de;--danger:#a34f69
+}
+[data-theme="dark"]{
+  --bg:#0d0b0d;--surface:#181418;--surface-soft:#241c21;--text:#fff4f8;--muted:#c7b4bd;
+  --border:#3c2b33;--sage:#d98caa;--sage-dark:#f0acc5;--blue:#c86f92;--blue-dark:#f1a8c4;
+  --sand:#6d4555;--sand-dark:#eca5c0;--peach:#7d4259;--danger:#f08aaa;
+  --shadow:0 12px 32px rgba(0,0,0,.34);--shadow-hover:0 18px 42px rgba(0,0,0,.5)
+}
+body,.site-header,.search-panel,.sidebar,.product-card,.cart-drawer,.admin-modal-card,
+.campaign-popup,.supabase-box,.import-panel,.cart-summary,.admin-modal-head{
+  background-color:var(--surface);color:var(--text);border-color:var(--border)
+}
+body{background:var(--bg);transition:background-color .25s,color .25s}
+.promo-bar{background:#050405;color:#f8dce7}
+.site-header{min-height:96px;background:color-mix(in srgb,var(--surface) 94%,transparent)}
+.brand{display:flex;align-items:center;justify-content:center;width:150px;height:86px}
+.brand img{display:block;width:100%;height:100%;object-fit:contain;border-radius:8px}
+.theme-control{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.theme-control select{border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);padding:8px 28px 8px 10px;font-size:11px}
+.icon-btn,.admin-login-btn,.catalog-toolbar select,.size-select,.qty-controls button,
+.admin-field input,.admin-field textarea,.admin-field select,.supabase-grid input{
+  background:var(--surface);color:var(--text);border-color:var(--border)
+}
+.main-nav button.active,.main-nav button:hover{background:var(--sage);color:#20141a}
+.primary-btn{background:var(--sage-dark);color:var(--surface)}
+.secondary-btn,.add-btn{background:var(--blue);color:#24161c}
+.outline-btn{border-color:var(--blue-dark);color:var(--blue-dark)}
+.product-card:hover{border-color:var(--blue)}
+[data-theme="dark"] .import-panel,[data-theme="dark"] .supabase-box,
+[data-theme="dark"] .sidebar-note,[data-theme="dark"] .stock-editor,
+[data-theme="dark"] .variant-builder,[data-theme="dark"] .admin-modal-head,
+[data-theme="dark"] .cart-summary{background:var(--surface-soft)}
+@media(max-width:760px){
+  .site-header{min-height:78px}.mobile-nav{top:78px}.brand{width:104px;height:68px}
+  .theme-control span{display:none}.theme-control select{width:76px;padding:7px 22px 7px 8px}
+}
+@media(max-width:480px){.brand{width:88px;height:62px}.theme-control select{width:68px;font-size:10px}}
+
 </style>
 </head>
 
 <body>
 
 <div class="promo-bar">
-  ENVÍO GRATIS EN COMPRAS DESDE $999 · PILOTO V5.3
+  ENVÍO GRATIS EN COMPRAS DESDE $999 · WOMAN 656
 </div>
 
 
@@ -391,9 +447,20 @@ body.admin-mode .admin-panel-shell{display:block}
     <button data-category="Accesorios">ACCESORIOS</button>
   </nav>
 
-  <a class="brand" href="#">MODA JUÁREZ</a>
+  <a class="brand" href="#" aria-label="WOMAN 656 · Inicio">
+    <img src="assets/woman-656-logo.png" alt="WOMAN 656">
+  </a>
 
   <div class="header-actions">
+    <label class="theme-control" aria-label="Apariencia de la tienda">
+      <span>Tema</span>
+      <select id="themeSelect">
+        <option value="normal">Normal</option>
+        <option value="pink">Rosa</option>
+        <option value="light">Claro</option>
+        <option value="dark">Oscuro</option>
+      </select>
+    </label>
     <button type="button" class="admin-login-btn hidden" id="publicAdminBtn">ADMIN</button>
     <button class="icon-btn" id="cartBtn" aria-label="Carrito">
       🛒 <span id="cartCount">0</span>
@@ -494,7 +561,7 @@ body.admin-mode .admin-panel-shell{display:block}
     <div class="marketing-card">
       <h3>2. Mensaje de campaña</h3>
       <label>Título
-        <input id="marketingTitle" value="Nuevos estilos en Moda Juárez">
+        <input id="marketingTitle" value="Nuevos estilos en WOMAN 656">
       </label>
       <label>Promoción
         <input id="marketingOffer" value="Entrega local en Ciudad Juárez">
@@ -826,7 +893,7 @@ body.admin-mode .admin-panel-shell{display:block}
 
 <aside class="campaign-popup hidden" id="campaignPopup" role="dialog" aria-modal="true" aria-labelledby="campaignPopupTitle">
   <button class="campaign-popup-close" id="campaignPopupClose" aria-label="Cerrar promoción">×</button>
-  <span>MODA JUÁREZ</span>
+  <span>WOMAN 656</span>
   <h2 id="campaignPopupTitle"></h2>
   <p id="campaignPopupText"></p>
   <button class="campaign-popup-cta" id="campaignPopupCta"></button>
@@ -839,7 +906,7 @@ const PUBLIC_SUPABASE_KEY = "sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK";
 
 const STORE_CONFIG = {
   whatsapp: "5216567770986",
-  storeName: "MODA JUÁREZ",
+  storeName: "WOMAN 656",
   // The bot runs as a separate Render Web Service; secrets remain server-side.
   botApiUrl: "https://bot-moda-juarez.onrender.com",
   shipping: {
@@ -892,8 +959,18 @@ function trackMarketingEvent(eventName,details={}){
 }
 
 function applyStoreIdentity(){
-  const brand=document.querySelector(".brand");
-  if(brand) brand.textContent=STORE_CONFIG.storeName;
+  document.title=`${STORE_CONFIG.storeName} · Moda con actitud`;
+}
+
+const THEME_STORAGE_KEY="woman656_theme";
+const VALID_THEMES=new Set(["normal","pink","light","dark"]);
+
+function applyTheme(theme){
+  const selected=VALID_THEMES.has(theme) ? theme : "normal";
+  document.documentElement.dataset.theme=selected;
+  localStorage.setItem(THEME_STORAGE_KEY,selected);
+  const selector=document.getElementById("themeSelect");
+  if(selector) selector.value=selected;
 }
 
 const ACCESSORY_CATEGORIES = [
@@ -1443,7 +1520,7 @@ function sendWhatsApp(){
     `• ${item.name} | ${item.sku} | Talla ${item.size} | x${item.qty} | ${money(item.price*item.qty)}`
   );
 
-  const storeName = (STORE_CONFIG.storeName || document.querySelector(".brand")?.textContent || "MODA JUÁREZ").trim();
+  const storeName = (STORE_CONFIG.storeName || "WOMAN 656").trim();
   const message = [
     `Hola ${storeName}, quiero hacer este pedido:`,
     "",
@@ -1598,7 +1675,7 @@ async function loginAdminGoogle(){
   }
 
   const redirectTo =
-    location.origin + location.pathname;
+    location.origin + location.pathname + "?admin=1";
 
   const {error} = await shopSupabase.auth.signInWithOAuth({
     provider:"google",
@@ -2724,6 +2801,10 @@ $("publicAdminBtn").onclick = async ()=>{
   }
 };
 
+$("themeSelect").addEventListener("change",event=>{
+  applyTheme(event.target.value);
+});
+
 $("downloadCatalogBackupBtn").onclick = ()=>{
   if(!state.products.length){
     $("importStatus").textContent = "No hay productos para respaldar.";
@@ -2755,7 +2836,7 @@ $("catalogBackupFile").addEventListener("change",async event=>{
     if(!file) return;
     const payload = JSON.parse(await file.text());
     if(payload?.format !== "moda-juarez-catalog-backup" || !Array.isArray(payload.products)){
-      throw new Error("El archivo no es un respaldo válido de Moda Juárez.");
+      throw new Error("El archivo no es un respaldo válido de WOMAN 656.");
     }
     state.products = payload.products;
     localStorage.setItem("moda_catalog",JSON.stringify(state.products));
@@ -2794,6 +2875,7 @@ $("whatsappBtn").onclick = sendWhatsApp;
 
 
 (async function bootModaJuarez(){
+  applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "normal");
   trackMarketingEvent("PageView");
   applyStoreIdentity();
   try{

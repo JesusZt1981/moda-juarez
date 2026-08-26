@@ -19,7 +19,7 @@
 
   function campaignCopy() {
     return {
-      title: byId('marketingTitle').value.trim() || 'Nuevos estilos en Moda Juárez',
+      title: byId('marketingTitle').value.trim() || 'Nuevos estilos en WOMAN 656',
       offer: byId('marketingOffer').value.trim() || 'Entrega local en Ciudad Juárez',
       cta: byId('marketingCta').value.trim() || 'Compra ahora',
       color: byId('marketingColor').value || '#7f1d3f'
@@ -101,7 +101,7 @@
     context.fillStyle = copy.color; context.fillRect(0, h * .63, w, h * .37);
 
     context.textAlign = 'left'; context.fillStyle = '#fff';
-    context.font = `800 ${Math.round(w * .035)}px system-ui`; context.fillText('MODA JUÁREZ', w * .06, h * .055);
+    context.font = `800 ${Math.round(w * .035)}px system-ui`; context.fillText('WOMAN 656', w * .06, h * .055);
     context.font = `700 ${Math.round(w * .025)}px system-ui`; context.fillText(String(product.sku || 'NUEVO'), w * .06, h * .58);
     fitText(context, String(product.name || 'Producto destacado'), w * .88, Math.round(w * .07));
     context.fillText(String(product.name || 'Producto destacado'), w * .06, h * .71);
