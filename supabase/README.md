@@ -6,6 +6,9 @@ Estos archivos preparan un proyecto nuevo sin modificar el Supabase de
 ## Orden seguro
 
 1. Crear un proyecto Supabase llamado `moda-juarez` en la misma organización.
+   Mantener **Enable Data API** activado y desactivar **Automatically expose new
+   tables**; el script concede únicamente los privilegios necesarios para la
+   tienda.
 2. Guardar la contraseña de base de datos en un gestor de contraseñas. No ponerla
    en Git, capturas ni mensajes.
 3. Abrir **SQL Editor** en el proyecto nuevo.

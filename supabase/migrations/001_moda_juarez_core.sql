@@ -105,6 +105,19 @@ alter table public.shop_product_variants enable row level security;
 alter table public.shop_inventory enable row level security;
 alter table public.shop_inventory_movements enable row level security;
 
+-- Privilegios explícitos. Permiten desactivar "Automatically expose new tables"
+-- al crear el proyecto; las tablas bot_* no reciben estos permisos.
+grant select on public.shop_products to anon,authenticated;
+grant select on public.shop_product_variants to anon,authenticated;
+grant select on public.shop_inventory to anon,authenticated;
+grant select on public.profiles to authenticated;
+grant insert,update,delete on public.shop_products to authenticated;
+grant insert,update,delete on public.shop_product_variants to authenticated;
+grant insert,update,delete on public.shop_inventory to authenticated;
+grant select,insert on public.shop_inventory_movements to authenticated;
+grant update on public.profiles to authenticated;
+grant usage,select on all sequences in schema public to authenticated;
+
 drop policy if exists profiles_read_own_or_admin on public.profiles;
 create policy profiles_read_own_or_admin on public.profiles
 for select to authenticated
@@ -199,4 +212,3 @@ drop policy if exists product_images_admin_delete on storage.objects;
 create policy product_images_admin_delete on storage.objects
 for delete to authenticated
 using (bucket_id='productos' and (select public.is_admin()));
-
