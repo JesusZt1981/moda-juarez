@@ -8,6 +8,8 @@
 <!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<link rel="stylesheet" href="marketing-studio.css">
 
 <style>
 :root{
@@ -457,6 +459,74 @@ body.admin-mode .admin-panel-shell{display:block}
     </div>
   </div>
 </section>
+
+<section class="marketing-studio" id="marketingStudio">
+  <div class="marketing-head">
+    <div>
+      <span class="marketing-kicker">PILOTO LOCAL · SIN GASTO PUBLICITARIO</span>
+      <h2>🎬 Estudio de marketing</h2>
+      <p>Genera imágenes, carruseles, videos verticales y pop-ups usando los productos reales del catálogo.</p>
+    </div>
+    <span class="marketing-safe">Aprobación manual activada</span>
+  </div>
+
+  <div class="marketing-grid">
+    <div class="marketing-card">
+      <h3>1. Seleccionar productos</h3>
+      <label>Origen
+        <select id="marketingScope">
+          <option value="sku">Códigos SKU escritos abajo</option>
+          <option value="filtered">Productos visibles/filtrados</option>
+          <option value="all">Todo el catálogo</option>
+        </select>
+      </label>
+      <label>SKU separados por coma
+        <textarea id="marketingSkus" placeholder="Ejemplo: VES-001, VES-014, ACC-003"></textarea>
+      </label>
+      <div class="marketing-selection" id="marketingSelection">Sin selección.</div>
+      <button class="secondary-btn" type="button" id="marketingCheckSelection">Revisar selección</button>
+    </div>
+
+    <div class="marketing-card">
+      <h3>2. Mensaje de campaña</h3>
+      <label>Título
+        <input id="marketingTitle" value="Nuevos estilos en Moda Juárez">
+      </label>
+      <label>Promoción
+        <input id="marketingOffer" value="Entrega local en Ciudad Juárez">
+      </label>
+      <label>Llamada a la acción
+        <input id="marketingCta" value="Compra ahora">
+      </label>
+      <label>Color principal
+        <input id="marketingColor" type="color" value="#7f1d3f">
+      </label>
+    </div>
+
+    <div class="marketing-card marketing-actions-card">
+      <h3>3. Crear contenido</h3>
+      <button class="primary-btn" type="button" id="generatePromoImage">Descargar imagen PNG</button>
+      <button class="primary-btn" type="button" id="generateCarousel">Descargar carrusel ZIP</button>
+      <button class="primary-btn" type="button" id="generatePromoVideo">Descargar Reel/Historia WEBM</button>
+      <button class="secondary-btn" type="button" id="previewMarketingPopup">Previsualizar pop-up</button>
+      <button class="secondary-btn" type="button" id="saveMarketingPopup">Activar pop-up en la tienda</button>
+      <p class="marketing-note">Los archivos se descargan en la laptop y pueden reutilizarse. Ningún botón publica ni gasta dinero.</p>
+    </div>
+  </div>
+
+  <div class="marketing-output">
+    <canvas id="marketingPreview" width="540" height="675" aria-label="Vista previa de la promoción"></canvas>
+    <div>
+      <h3>Vista previa</h3>
+      <p id="marketingStatus">Carga el catálogo y selecciona uno o varios productos.</p>
+      <div class="marketing-specs">
+        <span>Imagen 1080×1350</span>
+        <span>Video vertical 720×1280</span>
+        <span>Carrusel: hasta 10 productos</span>
+      </div>
+    </div>
+  </div>
+</section>
 </div>
 
 <div id="publicCatalogStatus" class="public-status">Cargando catálogo…</div>
@@ -750,6 +820,14 @@ body.admin-mode .admin-panel-shell{display:block}
 
 <div class="overlay hidden" id="overlay"></div>
 
+<aside class="campaign-popup hidden" id="campaignPopup" role="dialog" aria-modal="true" aria-labelledby="campaignPopupTitle">
+  <button class="campaign-popup-close" id="campaignPopupClose" aria-label="Cerrar promoción">×</button>
+  <span>MODA JUÁREZ</span>
+  <h2 id="campaignPopupTitle"></h2>
+  <p id="campaignPopupText"></p>
+  <button class="campaign-popup-cta" id="campaignPopupCta"></button>
+</aside>
+
 <script>
 
 const PUBLIC_SUPABASE_URL = "https://bcabfavdxxzauahpbmsa.supabase.co";
@@ -758,6 +836,8 @@ const PUBLIC_SUPABASE_KEY = "sb_publishable_F89WekECwWG6d4Nzpk4wag_9gN_ELBG";
 const STORE_CONFIG = {
   whatsapp: "5216567770986",
   storeName: "MODA JUÁREZ",
+  // The bot runs as a separate Render Web Service; secrets remain server-side.
+  botApiUrl: "https://bot-moda-juarez.onrender.com",
   shipping: {
     freeFrom: 999,
     local: 79,
@@ -765,6 +845,47 @@ const STORE_CONFIG = {
     localPostalPrefix: "32"
   }
 };
+
+const ATTRIBUTION_KEYS = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","fbclid","ttclid"];
+
+function currentAttribution(){
+  const params = new URLSearchParams(location.search);
+  const incoming = Object.fromEntries(ATTRIBUTION_KEYS.map(key=>[key,params.get(key)]).filter(([,value])=>value));
+  if(Object.keys(incoming).length){
+    incoming.landing_page = location.href;
+    incoming.captured_at = new Date().toISOString();
+    localStorage.setItem("moda_juarez_attribution",JSON.stringify(incoming));
+    return incoming;
+  }
+  try{return JSON.parse(localStorage.getItem("moda_juarez_attribution")||"{}");}
+  catch{return {};}
+}
+
+function botEndpoint(path){
+  const base=String(STORE_CONFIG.botApiUrl||"").replace(/\/$/,"");
+  return base ? `${base}${path}` : "";
+}
+
+function newEventId(){
+  return globalThis.crypto?.randomUUID?.() || `mj-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function submitBot(path,payload){
+  const url=botEndpoint(path);
+  if(!url) return Promise.resolve({skipped:true});
+  return fetch(url,{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload),keepalive:true
+  }).catch(error=>({accepted:false,error:error.message}));
+}
+
+function trackMarketingEvent(eventName,details={}){
+  return submitBot("/api/events",{
+    event_id:newEventId(),event_name:eventName,source_url:location.href,
+    product_sku:String(details.product_sku||""),value:details.value ?? null,
+    currency:"MXN",attribution:currentAttribution(),custom_data:details.custom_data||{}
+  });
+}
 
 function applyStoreIdentity(){
   const brand=document.querySelector(".brand");
@@ -1335,6 +1456,13 @@ function sendWhatsApp(){
   ]
     .filter(Boolean)
     .join("\n");
+
+  const attribution=currentAttribution();
+  trackMarketingEvent("InitiateCheckout",{value:total,custom_data:{items:state.cart.length,channel:"whatsapp"}});
+  submitBot("/api/leads",{
+    source:"storefront_whatsapp",message:`Carrito con ${state.cart.length} producto(s); total ${money(total)}`,
+    attribution
+  });
 
   window.open(
     `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(message)}`,
@@ -2600,6 +2728,7 @@ $("whatsappBtn").onclick = sendWhatsApp;
 
 
 (async function bootModaJuarez(){
+  trackMarketingEvent("PageView");
   applyStoreIdentity();
   try{
     initSupabaseClient();
@@ -2636,6 +2765,8 @@ $("whatsappBtn").onclick = sendWhatsApp;
 })();
 
 </script>
+
+<script src="marketing-studio.js"></script>
 
 </body>
 </html>
