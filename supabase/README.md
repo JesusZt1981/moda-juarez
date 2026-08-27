@@ -16,22 +16,26 @@ Estos archivos preparan un proyecto nuevo sin modificar el Supabase de
 5. Ejecutar `migrations/002_bot_private_tables.sql`.
 6. Ejecutar `migrations/003_verify_setup.sql`; debe listar 11 tablas y el bucket
    público `productos`.
-7. Configurar Google en **Authentication > Providers** y agregar como URL de
+7. Ejecutar `migrations/004_campaign_media_library.sql` para crear la biblioteca
+   privada de campañas, reels, imágenes y carruseles.
+8. Ejecutar `migrations/005_verify_campaign_library.sql`; debe devolver las tres
+   comprobaciones en `true` y seis políticas.
+9. Configurar Google en **Authentication > Providers** y agregar como URL de
    redirección `https://moda-juarez.onrender.com`.
-8. Antes de cambiar la configuración, entrar como ADMIN en la tienda actual y
+10. Antes de cambiar la configuración, entrar como ADMIN en la tienda actual y
    pulsar **Descargar respaldo JSON**. Conservar ese archivo hasta terminar la
    migración.
-9. Sustituir en `index.html` únicamente `PUBLIC_SUPABASE_URL` y
+11. Sustituir en `index.html` únicamente `PUBLIC_SUPABASE_URL` y
    `PUBLIC_SUPABASE_KEY` por los valores públicos del proyecto nuevo.
-10. Publicar la tienda, iniciar sesión una vez con Google y ejecutar una copia de
+12. Publicar la tienda, iniciar sesión una vez con Google y ejecutar una copia de
    `PROMOTE_ADMIN_TEMPLATE.sql` con el correo real escrito solo dentro del SQL
    Editor de Supabase.
-11. Con la sesión ADMIN activa, pulsar **Restaurar respaldo JSON**, seleccionar
+13. Con la sesión ADMIN activa, pulsar **Restaurar respaldo JSON**, seleccionar
     el archivo descargado en el paso 8 y después pulsar **Guardar catálogo en
     Supabase**. Comprobar que se guardan los 150 productos.
-12. Actualizar en el servicio Render del bot `SUPABASE_URL` y
+14. Actualizar en el servicio Render del bot `SUPABASE_URL` y
     `SUPABASE_PUBLISHABLE_KEY` con los valores públicos del proyecto nuevo.
-13. La conexión PostgreSQL permanente del bot se habilitará en una fase
+15. La conexión PostgreSQL permanente del bot se habilitará en una fase
     posterior con `DATABASE_URL`, guardada exclusivamente como Secret en Render.
 
 ## Separación y seguridad

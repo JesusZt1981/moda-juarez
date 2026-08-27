@@ -6,6 +6,7 @@
   const ctx = preview.getContext('2d');
   let selectedProducts = [];
   let lastPreviewProduct = null;
+  const MEDIA_BUCKET = 'campaign-media';
 
   const slug = value => String(value || 'promo')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -24,6 +25,109 @@
       cta: byId('marketingCta').value.trim() || 'Compra ahora',
       color: byId('marketingColor').value || '#7f1d3f'
     };
+  }
+
+  function validLandingUrl() {
+    const raw = byId('marketingLandingUrl').value.trim();
+    try {
+      const url = new URL(raw);
+      if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+      return url;
+    } catch (_) {
+      throw new Error('Escribe un enlace válido que comience con https://');
+    }
+  }
+
+  function trackedLandingUrl(campaignId = 'preview') {
+    const url = validLandingUrl();
+    url.searchParams.set('utm_source', 'woman656');
+    url.searchParams.set('utm_medium', 'reel');
+    url.searchParams.set('utm_campaign', campaignId);
+    return url.toString();
+  }
+
+  async function qrCanvas(text) {
+    if (typeof window.qrcode !== 'function') return null;
+    const code = window.qrcode(0, 'M');
+    code.addData(text); code.make();
+    const modules = code.getModuleCount(), margin = 2, cell = 4;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = (modules + margin * 2) * cell;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = '#111';
+    for (let row = 0; row < modules; row++) {
+      for (let col = 0; col < modules; col++) {
+        if (code.isDark(row, col)) context.fillRect((col + margin) * cell, (row + margin) * cell, cell, cell);
+      }
+    }
+    return canvas;
+  }
+
+  async function adminSession() {
+    if (!window.shopSupabase && typeof shopSupabase === 'undefined') return null;
+    const client = window.shopSupabase || shopSupabase;
+    if (!client || typeof state === 'undefined' || !state.admin) return null;
+    const {data: {session}} = await client.auth.getSession();
+    return session || null;
+  }
+
+  async function createCampaign(products, assetType) {
+    const session = await adminSession();
+    if (!session) return null;
+    const copy = campaignCopy();
+    const baseUrl = validLandingUrl().toString();
+    const name = `${copy.title} · ${new Date().toLocaleDateString('es-MX')}`;
+    const {data, error} = await shopSupabase.from('marketing_campaigns').insert({
+      name,
+      title: copy.title,
+      offer: copy.offer,
+      cta: copy.cta,
+      landing_url: baseUrl,
+      platform: 'manual',
+      status: 'draft',
+      product_skus: products.map(product => String(product.sku || '')).filter(Boolean)
+    }).select('id').single();
+    if (error) {
+      setStatus(`El contenido se descargará localmente. Biblioteca pendiente: ${error.message}`, 'error');
+      return null;
+    }
+    return {id: data.id, assetType};
+  }
+
+  function datedStoragePath(campaignId, filename) {
+    const now = new Date();
+    return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${campaignId}/${filename}`;
+  }
+
+  async function persistAsset(campaign, blob, details) {
+    if (!campaign) return {saved: false, reason: 'Inicia sesión como ADMIN para guardar en la biblioteca.'};
+    const filename = details.filename;
+    const path = datedStoragePath(campaign.id, filename);
+    const {error: uploadError} = await shopSupabase.storage.from(MEDIA_BUCKET).upload(path, blob, {
+      contentType: details.mimeType || blob.type,
+      upsert: false,
+      cacheControl: '3600'
+    });
+    if (uploadError) throw new Error(`El archivo se descargó, pero no pudo guardarse en Supabase: ${uploadError.message}. Ejecuta la migración 004.`);
+    const {error: rowError} = await shopSupabase.from('marketing_assets').insert({
+      campaign_id: campaign.id,
+      asset_type: details.assetType,
+      generator_mode: 'template',
+      storage_path: path,
+      filename,
+      mime_type: details.mimeType || blob.type || 'application/octet-stream',
+      size_bytes: blob.size,
+      width: details.width || null,
+      height: details.height || null,
+      duration_seconds: details.duration || null,
+      settings: details.settings || {}
+    });
+    if (rowError) {
+      await shopSupabase.storage.from(MEDIA_BUCKET).remove([path]);
+      throw new Error(`El archivo se descargó, pero no se registró en la biblioteca: ${rowError.message}`);
+    }
+    return {saved: true, path};
   }
 
   function selectProducts() {
@@ -108,12 +212,22 @@
     context.font = `800 ${Math.round(w * .055)}px system-ui`; context.fillText(money(product.price), w * .06, h * .79);
     context.font = `500 ${Math.round(w * .027)}px system-ui`; context.fillText(copy.offer, w * .06, h * .85);
 
-    roundedRect(context, w * .06, h * .89, w * .42, h * .07, h * .035);
+    roundedRect(context, w * .06, h * .885, w * .42, h * .065, h * .035);
     context.fillStyle = '#fff'; context.fill(); context.fillStyle = copy.color;
     context.font = `800 ${Math.round(w * .027)}px system-ui`; context.textAlign = 'center';
-    context.fillText(copy.cta.toUpperCase(), w * .27, h * .935);
-    context.textAlign = 'right'; context.fillStyle = '#fff'; context.font = `600 ${Math.round(w * .021)}px system-ui`;
-    context.fillText('@MODAJUAREZ', w * .94, h * .94);
+    context.fillText(copy.cta.toUpperCase(), w * .27, h * .927);
+
+    const displayUrl = options.displayUrl || validLandingUrl().hostname.replace(/^www\./, '');
+    context.textAlign = 'left'; context.fillStyle = '#fff'; context.font = `700 ${Math.round(w * .018)}px system-ui`;
+    context.fillText(displayUrl, w * .06, h * .98);
+    if (options.qrCanvas) {
+      const qrSize = Math.round(w * .14);
+      context.fillStyle = '#fff'; context.fillRect(w * .80, h * .845, qrSize, qrSize);
+      context.drawImage(options.qrCanvas, w * .80, h * .845, qrSize, qrSize);
+    } else {
+      context.textAlign = 'right'; context.font = `600 ${Math.round(w * .018)}px system-ui`;
+      context.fillText('@WOMAN656', w * .94, h * .94);
+    }
   }
 
   async function updatePreview(product = selectedProducts[0]) {
@@ -125,7 +239,8 @@
     }
     lastPreviewProduct = product;
     const image = await loadImage(imageUrl(product));
-    renderPromo(preview, product, image);
+    const landing = trackedLandingUrl();
+    renderPromo(preview, product, image, {qrCanvas: await qrCanvas(landing), displayUrl: new URL(landing).hostname});
   }
 
   function canvasBlob(canvas, type = 'image/png', quality = .94) {
@@ -142,36 +257,52 @@
   async function generateImage() {
     const products = selectProducts();
     if (!products.length) throw new Error('Selecciona al menos un producto.');
+    const campaign = await createCampaign(products.slice(0, 1), 'image');
+    const landing = trackedLandingUrl(campaign?.id || 'image');
+    const qr = await qrCanvas(landing);
     const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1350;
     const image = await loadImage(imageUrl(products[0]));
-    renderPromo(canvas, products[0], image);
-    downloadBlob(await canvasBlob(canvas), `moda-juarez-${slug(products[0].sku)}.png`);
+    renderPromo(canvas, products[0], image, {qrCanvas: qr, displayUrl: new URL(landing).hostname});
+    const blob = await canvasBlob(canvas);
+    const filename = `woman656-${slug(products[0].sku)}-${Date.now()}.png`;
+    downloadBlob(blob, filename);
+    const saved = await persistAsset(campaign, blob, {filename, assetType: 'image', mimeType: 'image/png', width: 1080, height: 1350, settings: {landingUrl: landing}});
     await updatePreview(products[0]);
-    setStatus('Imagen PNG generada y descargada en la laptop.', 'ok');
+    setStatus(`Imagen PNG descargada${saved.saved ? ' y guardada en la biblioteca privada' : ''}.`, 'ok');
+    if (saved.saved) await loadMediaLibrary();
   }
 
   async function generateCarousel() {
     const products = selectProducts().slice(0, 10);
     if (!products.length) throw new Error('Selecciona productos para el carrusel.');
     if (!window.JSZip) throw new Error('No se cargó el componente ZIP. Revisa la conexión a internet.');
+    const campaign = await createCampaign(products, 'carousel');
+    const landing = trackedLandingUrl(campaign?.id || 'carousel');
+    const qr = await qrCanvas(landing);
     const zip = new JSZip();
     const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1350;
     for (let i = 0; i < products.length; i++) {
       setStatus(`Generando lámina ${i + 1} de ${products.length}…`);
       const image = await loadImage(imageUrl(products[i]));
-      renderPromo(canvas, products[i], image);
+      renderPromo(canvas, products[i], image, {qrCanvas: qr, displayUrl: new URL(landing).hostname});
       zip.file(`${String(i + 1).padStart(2, '0')}-${slug(products[i].sku)}.png`, await canvasBlob(canvas));
     }
     const blob = await zip.generateAsync({type: 'blob'});
-    downloadBlob(blob, `moda-juarez-carrusel-${Date.now()}.zip`);
+    const filename = `woman656-carrusel-${Date.now()}.zip`;
+    downloadBlob(blob, filename);
+    const saved = await persistAsset(campaign, blob, {filename, assetType: 'carousel', mimeType: 'application/zip', width: 1080, height: 1350, settings: {landingUrl: landing, slides: products.length}});
     await updatePreview(products[0]);
-    setStatus(`Carrusel de ${products.length} productos descargado como ZIP.`, 'ok');
+    setStatus(`Carrusel de ${products.length} productos descargado${saved.saved ? ' y guardado en la biblioteca' : ''}.`, 'ok');
+    if (saved.saved) await loadMediaLibrary();
   }
 
   async function generateVideo() {
     const products = selectProducts().slice(0, 6);
     if (!products.length) throw new Error('Selecciona productos para el video.');
     if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) throw new Error('Este navegador no permite generar video. Usa Chrome o Edge actualizado.');
+    const campaign = await createCampaign(products, 'reel');
+    const landing = trackedLandingUrl(campaign?.id || 'reel');
+    const qr = await qrCanvas(landing);
     setStatus('Preparando imágenes para el video…');
     const images = [];
     for (const product of products) images.push(await loadImage(imageUrl(product)));
@@ -183,7 +314,8 @@
     const chunks = [];
     recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
     const finished = new Promise(resolve => recorder.onstop = resolve);
-    const secondsPerProduct = 2.6, totalMs = products.length * secondsPerProduct * 1000;
+    const requestedDuration = Number(byId('marketingDuration').value || 9);
+    const secondsPerProduct = requestedDuration / products.length, totalMs = requestedDuration * 1000;
     recorder.start(500);
     const started = performance.now();
 
@@ -192,7 +324,7 @@
         const elapsed = now - started;
         const index = Math.min(products.length - 1, Math.floor(elapsed / (secondsPerProduct * 1000)));
         const local = (elapsed % (secondsPerProduct * 1000)) / (secondsPerProduct * 1000);
-        renderPromo(canvas, products[index], images[index], {zoom: 1 + local * .08});
+        renderPromo(canvas, products[index], images[index], {zoom: 1 + local * .08, qrCanvas: qr, displayUrl: new URL(landing).hostname});
         setStatus(`Grabando video: ${Math.min(100, Math.round(elapsed / totalMs * 100))}%`);
         if (elapsed < totalMs) requestAnimationFrame(frame); else resolve();
       };
@@ -200,9 +332,111 @@
     });
     recorder.stop(); await finished;
     stream.getTracks().forEach(track => track.stop());
-    downloadBlob(new Blob(chunks, {type: mime || 'video/webm'}), `moda-juarez-reel-${Date.now()}.webm`);
+    const blob = new Blob(chunks, {type: mime || 'video/webm'});
+    const filename = `woman656-reel-${Date.now()}.webm`;
+    downloadBlob(blob, filename);
+    const saved = await persistAsset(campaign, blob, {filename, assetType: 'reel', mimeType: 'video/webm', width: 720, height: 1280, duration: requestedDuration, settings: {landingUrl: landing, recordedMimeType: mime || 'video/webm', fps: 20, productCount: products.length}});
     await updatePreview(products[0]);
-    setStatus(`Video vertical de ${products.length} producto(s) descargado. Puedes guardarlo y reutilizarlo.`, 'ok');
+    setStatus(`Reel de ${requestedDuration} s descargado${saved.saved ? ' y guardado en la biblioteca privada' : ''}.`, 'ok');
+    if (saved.saved) await loadMediaLibrary();
+  }
+
+  const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+
+  async function signedAssetUrl(path, expiresIn = 900) {
+    const {data, error} = await shopSupabase.storage.from(MEDIA_BUCKET).createSignedUrl(path, expiresIn);
+    if (error) throw error;
+    return data.signedUrl;
+  }
+
+  async function downloadStoredAsset(assetId) {
+    const {data: asset, error} = await shopSupabase.from('marketing_assets').select('storage_path,filename').eq('id', assetId).single();
+    if (error) throw error;
+    const response = await fetch(await signedAssetUrl(asset.storage_path));
+    if (!response.ok) throw new Error('No se pudo descargar el archivo guardado.');
+    downloadBlob(await response.blob(), asset.filename);
+  }
+
+  async function deleteStoredAsset(assetId) {
+    if (!confirm('¿Eliminar este archivo de la biblioteca? Esta acción no afecta el catálogo.')) return;
+    const {data: asset, error} = await shopSupabase.from('marketing_assets').select('storage_path').eq('id', assetId).single();
+    if (error) throw error;
+    const {error: storageError} = await shopSupabase.storage.from(MEDIA_BUCKET).remove([asset.storage_path]);
+    if (storageError) throw storageError;
+    const {error: rowError} = await shopSupabase.from('marketing_assets').delete().eq('id', assetId);
+    if (rowError) throw rowError;
+    await loadMediaLibrary();
+  }
+
+  function reuseCampaign(campaign) {
+    byId('marketingTitle').value = campaign?.title || '';
+    byId('marketingOffer').value = campaign?.offer || '';
+    byId('marketingCta').value = campaign?.cta || '';
+    byId('marketingLandingUrl').value = campaign?.landing_url || location.origin;
+    byId('marketingScope').value = 'sku';
+    byId('marketingSkus').value = (campaign?.product_skus || []).join(', ');
+    selectProducts();
+    updatePreview();
+    byId('marketingStudio').scrollIntoView({behavior: 'smooth'});
+    setStatus('Campaña copiada al editor. Ajusta el mensaje y crea una nueva versión.', 'ok');
+  }
+
+  async function loadMediaLibrary() {
+    const grid = byId('mediaLibraryGrid');
+    const status = byId('mediaLibraryStatus');
+    if (!grid || !status) return;
+    if (!(await adminSession())) {
+      grid.innerHTML = '<div class="media-library-empty">La biblioteca es privada. Inicia sesión como ADMIN.</div>';
+      status.textContent = 'Sin sesión administrativa.';
+      return;
+    }
+    status.textContent = 'Cargando biblioteca privada…';
+    const {data: assets, error} = await shopSupabase.from('marketing_assets')
+      .select('id,asset_type,storage_path,filename,mime_type,size_bytes,width,height,duration_seconds,version,created_at,settings,campaign:marketing_campaigns(id,name,title,offer,cta,landing_url,product_skus,status)')
+      .order('created_at', {ascending: false}).limit(48);
+    if (error) {
+      grid.innerHTML = '<div class="media-library-empty">Ejecuta las migraciones 004 y 005 en Supabase para activar la biblioteca.</div>';
+      status.textContent = `Biblioteca pendiente: ${error.message}`;
+      return;
+    }
+    if (!assets.length) {
+      grid.innerHTML = '<div class="media-library-empty">Aún no hay archivos. Crea tu primer reel, imagen o carrusel.</div>';
+      status.textContent = 'Biblioteca lista: 0 archivos.';
+      return;
+    }
+    const items = await Promise.all(assets.map(async asset => {
+      let previewUrl = '';
+      if (asset.mime_type.startsWith('image/') || asset.mime_type.startsWith('video/')) {
+        try { previewUrl = await signedAssetUrl(asset.storage_path, 1800); } catch (_) {}
+      }
+      const previewMarkup = asset.mime_type.startsWith('image/') && previewUrl
+        ? `<img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.filename)}">`
+        : asset.mime_type.startsWith('video/') && previewUrl
+          ? `<video src="${escapeHtml(previewUrl)}" muted controls preload="metadata"></video>`
+          : `<strong>${asset.asset_type === 'carousel' ? '▦' : '▶'}</strong>`;
+      const date = new Date(asset.created_at).toLocaleDateString('es-MX');
+      const sizeMb = (Number(asset.size_bytes || 0) / 1048576).toFixed(1);
+      return `<article class="media-item">
+        <div class="media-item-preview">${previewMarkup}</div>
+        <div class="media-item-body">
+          <h4>${escapeHtml(asset.campaign?.name || asset.filename)}</h4>
+          <div class="media-item-meta"><span>${escapeHtml(asset.asset_type)}</span><span>${date}</span><span>${sizeMb} MB</span>${asset.duration_seconds ? `<span>${asset.duration_seconds} s</span>` : ''}</div>
+          <div class="media-item-actions">
+            <button class="primary-btn" data-media-download="${asset.id}">Descargar</button>
+            <button class="secondary-btn" data-media-reuse="${asset.id}">Reutilizar</button>
+            <button class="danger-btn" data-media-delete="${asset.id}">Eliminar</button>
+          </div>
+        </div>
+      </article>`;
+    }));
+    grid.innerHTML = items.join('');
+    status.textContent = `Biblioteca lista: ${assets.length} archivo(s) reciente(s).`;
+    grid.querySelectorAll('[data-media-download]').forEach(button => button.onclick = () => downloadStoredAsset(button.dataset.mediaDownload).catch(error => setStatus(error.message, 'error')));
+    grid.querySelectorAll('[data-media-delete]').forEach(button => button.onclick = () => deleteStoredAsset(button.dataset.mediaDelete).catch(error => setStatus(error.message, 'error')));
+    grid.querySelectorAll('[data-media-reuse]').forEach(button => {
+      const asset = assets.find(item => item.id === button.dataset.mediaReuse);
+      button.onclick = () => reuseCampaign(asset?.campaign);
+    });
   }
 
   function popupConfig() {
@@ -231,13 +465,14 @@
     setStatus('Pop-up activado en este piloto. Se mostrará como máximo una vez cada 24 horas.', 'ok');
     showPopup(config, true);
   };
+  byId('refreshMediaLibrary').onclick = () => loadMediaLibrary().catch(error => setStatus(error.message, 'error'));
   byId('campaignPopupClose').onclick = () => byId('campaignPopup').classList.add('hidden');
   byId('campaignPopupCta').onclick = () => {
     byId('campaignPopup').classList.add('hidden');
     document.querySelector('.catalog-section')?.scrollIntoView({behavior: 'smooth'});
   };
 
-  ['marketingTitle','marketingOffer','marketingCta','marketingColor'].forEach(id => byId(id).addEventListener('input', () => {
+  ['marketingTitle','marketingOffer','marketingCta','marketingColor','marketingLandingUrl'].forEach(id => byId(id).addEventListener('input', () => {
     if (lastPreviewProduct) updatePreview(lastPreviewProduct);
   }));
 
@@ -245,4 +480,5 @@
   const seen = Number(localStorage.getItem('moda_campaign_popup_seen') || 0);
   if (saved?.active && Date.now() - seen > 24 * 60 * 60 * 1000) setTimeout(() => showPopup(saved), 1800);
   updatePreview();
+  setTimeout(() => loadMediaLibrary().catch(() => {}), 800);
 })();

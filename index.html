@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <link rel="stylesheet" href="marketing-studio.css">
 
 <style>
@@ -595,16 +596,26 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
       <label>Color principal
         <input id="marketingColor" type="color" value="#7f1d3f">
       </label>
+      <label>Enlace de destino
+        <input id="marketingLandingUrl" type="url" value="https://moda-juarez.onrender.com" placeholder="https://moda-juarez.onrender.com">
+      </label>
+      <label>Duración del reel
+        <select id="marketingDuration">
+          <option value="6">6 segundos</option>
+          <option value="9" selected>9 segundos</option>
+          <option value="15">15 segundos</option>
+        </select>
+      </label>
     </div>
 
     <div class="marketing-card marketing-actions-card">
       <h3>3. Crear contenido</h3>
       <button class="primary-btn" type="button" id="generatePromoImage">Descargar imagen PNG</button>
       <button class="primary-btn" type="button" id="generateCarousel">Descargar carrusel ZIP</button>
-      <button class="primary-btn" type="button" id="generatePromoVideo">Descargar Reel/Historia WEBM</button>
+      <button class="primary-btn" type="button" id="generatePromoVideo">Crear y guardar Reel WEBM</button>
       <button class="secondary-btn" type="button" id="previewMarketingPopup">Previsualizar pop-up</button>
       <button class="secondary-btn" type="button" id="saveMarketingPopup">Activar pop-up en la tienda</button>
-      <p class="marketing-note">Los archivos se descargan en la laptop y pueden reutilizarse. Ningún botón publica ni gasta dinero.</p>
+      <p class="marketing-note">Cada archivo se descarga y, con sesión ADMIN, se guarda en la biblioteca privada de Supabase. Ningún botón publica ni gasta dinero.</p>
     </div>
   </div>
 
@@ -617,9 +628,23 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
         <span>Imagen 1080×1350</span>
         <span>Video vertical 720×1280</span>
         <span>Carrusel: hasta 10 productos</span>
+        <span>URL + QR atribuido</span>
       </div>
     </div>
   </div>
+
+  <section class="media-library" aria-labelledby="mediaLibraryTitle">
+    <div class="media-library-head">
+      <div>
+        <span class="marketing-kicker">CONTENIDO REUTILIZABLE</span>
+        <h3 id="mediaLibraryTitle">Biblioteca de campañas</h3>
+        <p>Reels, imágenes y carruseles privados, organizados por campaña y producto.</p>
+      </div>
+      <button class="secondary-btn" type="button" id="refreshMediaLibrary">Actualizar biblioteca</button>
+    </div>
+    <div id="mediaLibraryStatus" class="media-library-status">Inicia sesión como ADMIN para consultar los archivos guardados.</div>
+    <div id="mediaLibraryGrid" class="media-library-grid"></div>
+  </section>
 </section>
 </div>
 
