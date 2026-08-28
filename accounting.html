@@ -12,8 +12,8 @@
     <label class="wide">PDF privado (máx. 20 MB)<input name="pdf" type="file" accept="application/pdf" required></label>
     <button class="primary" type="submit">Guardar factura privada</button><span id="invoiceStatus"></span>
   </form></section>
-  <section class="card"><div class="row"><div><h2>Partidas y tabulador</h2><p>IVA y margen se pueden ajustar por producto. El precio solo llega a la tienda al pulsar “Aplicar”.</p></div><button id="addItemBtn">＋ Partida manual</button></div>
-    <div class="tableWrap"><table><thead><tr><th>Producto / SKU</th><th>Clase / talla</th><th>Cant.</th><th>Costo</th><th>IVA</th><th>Gastos/u.</th><th>Margen</th><th>Costo real</th><th>Precio</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+  <section class="card"><div class="row"><div><h2>Partidas y tabulador</h2><p>El costo real suma producto, importación, otros impuestos, otros gastos e IVA cuando no venga incluido. El margen se aplica sobre ese costo real. El precio solo llega a la tienda al pulsar “Aplicar”.</p></div><button id="addItemBtn">＋ Partida manual</button></div>
+    <div class="tableWrap"><table><thead><tr><th>Producto</th><th>SKU</th><th>Categoría</th><th>Talla</th><th>Cant.</th><th>Costo producto</th><th>IVA %</th><th>Importación/u.</th><th>Impuestos/u.</th><th>Otros/u.</th><th>Margen</th><th>Costo real</th><th>Precio</th><th>Acciones</th></tr></thead><tbody id="itemsBody"></tbody></table></div>
   </section>
   <section class="card"><h2>Facturas guardadas</h2><div id="invoiceList"></div></section>
 </div></main><script src="accounting.js"></script></body></html>

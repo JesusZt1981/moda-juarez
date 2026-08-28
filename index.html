@@ -431,7 +431,7 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
 .eyebrow{font-size:10px;font-weight:900;letter-spacing:.17em;color:var(--blue-dark)}
 .newsletter-section form{display:grid;grid-template-columns:1fr auto}.newsletter-section input{min-width:0;border:0;border-radius:999px 0 0 999px;padding:15px 18px}.newsletter-section button{border:0;border-radius:0 999px 999px 0;background:var(--blue);padding:0 20px;font-weight:900}.newsletter-section small{grid-column:1/-1;margin-top:8px;color:#f4c8d9}
 .site-footer{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;padding:28px max(28px,calc((100vw - 1444px)/2));background:#080708;color:#fff}.site-footer img{width:90px;height:68px;object-fit:contain}.site-footer div{display:flex;flex-direction:column;gap:4px}.site-footer span{font-size:11px;color:#ceb9c1}.site-footer nav{display:flex;gap:18px}.site-footer a{color:#fff;text-decoration:none;font-size:12px}
-.quick-view{position:fixed;inset:0;z-index:240;display:grid;place-items:center;padding:20px;background:rgba(8,5,7,.72);backdrop-filter:blur(7px)}.quick-view-card{position:relative;width:min(920px,96vw);max-height:92vh;overflow:auto;display:grid;grid-template-columns:1.05fr .95fr;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.38)}.quick-view-gallery{min-height:570px;background:var(--surface-soft)}.quick-view-gallery img{width:100%;height:100%;max-height:680px;object-fit:cover}.quick-view-info{padding:54px 38px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}.quick-view-info h2{margin:0;font-size:34px}.quick-view-price{font-size:26px}.quick-view-info p{color:var(--muted);line-height:1.65}.quick-view-stock{padding:12px 14px;background:var(--surface-soft);border-radius:10px}.quick-view-cta{width:100%;border:0;border-radius:999px;padding:15px;background:#080708;color:#fff;font-weight:900}.quick-view-close{position:absolute;right:14px;top:14px;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:var(--surface);color:var(--text);font-size:25px}
+.quick-view{position:fixed;inset:0;z-index:240;display:grid;place-items:center;padding:20px;background:rgba(8,5,7,.72);backdrop-filter:blur(7px)}.quick-view-card{position:relative;width:min(920px,96vw);max-height:92vh;overflow:auto;display:grid;grid-template-columns:1.05fr .95fr;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.38)}.quick-view-gallery{min-height:570px;background:var(--surface-soft);display:flex;flex-direction:column}.quick-view-media-stage{flex:1;min-height:500px}.quick-view-media-stage img,.quick-view-media-stage video{display:block;width:100%;height:100%;max-height:620px;min-height:500px;object-fit:cover}.quick-view-thumbs{display:flex;gap:8px;padding:10px;overflow-x:auto;background:var(--surface)}.quick-view-thumb{flex:0 0 62px;width:62px;height:76px;padding:0;border:2px solid transparent;border-radius:8px;overflow:hidden;background:var(--surface-soft);cursor:pointer}.quick-view-thumb.active{border-color:var(--rose-dark)}.quick-view-thumb img,.quick-view-thumb video{width:100%;height:100%;object-fit:cover}.quick-view-info{padding:54px 38px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}.quick-view-info h2{margin:0;font-size:34px}.quick-view-price{font-size:26px}.quick-view-info p{color:var(--muted);line-height:1.65}.quick-view-stock{padding:12px 14px;background:var(--surface-soft);border-radius:10px}.quick-view-cta{width:100%;border:0;border-radius:999px;padding:15px;background:#080708;color:#fff;font-weight:900}.quick-view-close{position:absolute;right:14px;top:14px;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:var(--surface);color:var(--text);font-size:25px}
 .cookie-banner{position:fixed;z-index:260;left:20px;right:20px;bottom:18px;max-width:980px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 20px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:0 18px 50px rgba(0,0,0,.24)}.cookie-banner p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}.cookie-banner button{border:0;border-radius:999px;padding:11px 18px;background:#090709;color:#fff;font-weight:900;white-space:nowrap}
 [data-theme="dark"] .import-panel,[data-theme="dark"] .supabase-box,
 [data-theme="dark"] .sidebar-note,[data-theme="dark"] .stock-editor,
@@ -762,7 +762,10 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
 <div class="quick-view hidden" id="quickView" role="dialog" aria-modal="true" aria-labelledby="quickViewTitle">
   <div class="quick-view-card">
     <button class="quick-view-close" id="quickViewClose" aria-label="Cerrar">×</button>
-    <div class="quick-view-gallery"><img id="quickViewImage" alt=""></div>
+    <div class="quick-view-gallery">
+      <div class="quick-view-media-stage" id="quickViewMediaStage"></div>
+      <div class="quick-view-thumbs" id="quickViewThumbs" aria-label="Galería del producto"></div>
+    </div>
     <div class="quick-view-info">
       <span id="quickViewSku" class="eyebrow"></span>
       <h2 id="quickViewTitle"></h2>
@@ -920,6 +923,43 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
             </div>
           </div>
         </div>
+
+        <div class="admin-field full">
+          <label>Imagen 4</label>
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview4" alt="Vista previa imagen 4">
+            <div class="image-controls">
+              <input id="adminImage4" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile4" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row"><button type="button" class="upload-image-btn" data-upload-slot="4">Subir desde PC</button><button type="button" class="clear-image-btn" data-clear-slot="4">Quitar imagen</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-field full">
+          <label>Imagen 5</label>
+          <div class="image-admin-box">
+            <img class="image-preview" id="adminImagePreview5" alt="Vista previa imagen 5">
+            <div class="image-controls">
+              <input id="adminImage5" type="text" placeholder="URL de imagen">
+              <input id="adminImageFile5" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="image-button-row"><button type="button" class="upload-image-btn" data-upload-slot="5">Subir desde PC</button><button type="button" class="clear-image-btn" data-clear-slot="5">Quitar imagen</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-field full">
+          <label>Video del producto (máximo 3 segundos)</label>
+          <div class="image-admin-box">
+            <video class="image-preview" id="adminVideoPreview" muted playsinline controls></video>
+            <div class="image-controls">
+              <input id="adminVideoUrl" type="text" placeholder="URL del video MP4 o WEBM">
+              <input id="adminVideoFile" type="file" accept="video/mp4,video/webm" hidden>
+              <div class="image-button-row"><button type="button" class="upload-image-btn" id="uploadVideoBtn">Subir video</button><button type="button" class="clear-image-btn" id="clearVideoBtn">Quitar video</button></div>
+              <small>El archivo debe durar como máximo 3 segundos y pesar menos de 20 MB.</small>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="stock-editor" id="existingStockEditor">
@@ -933,29 +973,11 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
 
       <div class="variant-builder hidden" id="newVariantBuilder">
         <h3>Tallas y stock inicial</h3>
-        <div class="variant-add-row">
-          <div>
-            <label>Talla</label>
-            <select id="newVariantSize">
-              <option>CH</option>
-              <option>M</option>
-              <option>G</option>
-              <option>EG</option>
-              <option>UNITALLA</option>
-            </select>
-          </div>
-          <div>
-            <label>Stock</label>
-            <input id="newVariantQty" type="number" min="0" step="1" value="0">
-          </div>
-          <button class="secondary-btn" type="button" id="addNewVariantBtn">Agregar talla</button>
-        </div>
-
         <div id="newVariantRows"></div>
 
         <div class="new-product-note">
-          Puedes agregar CH, M, G, EG o UNITALLA. El stock inicial quedará guardado
-          en Supabase al crear el producto.
+          Captura la cantidad disponible para XS, S, M, G y XG. Las tallas con cero
+          existencias no se mostrarán en la tienda.
         </div>
       </div>
 
@@ -1313,6 +1335,7 @@ function applyFilters(){
         .toLowerCase();
 
     return (
+      Number(product.totalStock || 0) > 0 &&
       (!search || text.includes(search)) &&
       (category === "Todos" || product.category === category) &&
       (!size || product.sizes.includes(size)) &&
@@ -1380,9 +1403,10 @@ function renderProducts(){
 
     const favorite = state.favorites.includes(product.sku);
 
-    const sizeOptions = product.sizes.map(size=>{
+    const availableSizes = product.sizes.filter(size=>Number(product.stock?.[size] || 0) > 0);
+    const sizeOptions = availableSizes.map(size=>{
       const stock = Number(product.stock?.[size] || 0);
-      return `<option value="${escapeHtml(size)}" ${stock <= 0 ? "disabled" : ""}>${escapeHtml(size)} · ${stock > 0 ? stock + " disponibles" : "Agotado"}</option>`;
+      return `<option value="${escapeHtml(size)}">${escapeHtml(size)} · ${stock} disponibles</option>`;
     }).join("");
 
     const promotion = product.promotion && product.promotion !== "Ninguna"
@@ -1446,13 +1470,43 @@ function toggleFavorite(sku){
 
 let quickViewProduct = null;
 
+function selectQuickViewMedia(media,index){
+  const stage = $("quickViewMediaStage");
+  if(media.type === "video"){
+    stage.innerHTML = `<video src="${escapeHtml(media.url)}" controls muted playsinline preload="metadata" aria-label="Video del producto"></video>`;
+  }else{
+    stage.innerHTML = `<img src="${escapeHtml(media.url)}" alt="${escapeHtml(quickViewProduct?.name || "Producto WOMAN 656")}">`;
+  }
+  document.querySelectorAll(".quick-view-thumb").forEach((button,buttonIndex)=>button.classList.toggle("active",buttonIndex===index));
+}
+
+function renderQuickViewMedia(product){
+  const placeholder = `https://placehold.co/800x1067/f2f0eb/4a5355?text=${encodeURIComponent(product.sku || "WOMAN+656")}`;
+  const media = (product.images || []).filter(Boolean).map(url=>({type:"image",url}));
+  if(product.videoUrl) media.push({type:"video",url:product.videoUrl});
+  if(!media.length) media.push({type:"image",url:placeholder});
+
+  const thumbs = $("quickViewThumbs");
+  thumbs.innerHTML = "";
+  media.forEach((item,index)=>{
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `quick-view-thumb${index===0 ? " active" : ""}`;
+    button.setAttribute("aria-label",item.type === "video" ? "Ver video" : `Ver imagen ${index+1}`);
+    button.innerHTML = item.type === "video"
+      ? `<video src="${escapeHtml(item.url)}" muted playsinline preload="metadata"></video>`
+      : `<img src="${escapeHtml(item.url)}" alt="Miniatura ${index+1}">`;
+    button.onclick = ()=>selectQuickViewMedia(item,index);
+    thumbs.appendChild(button);
+  });
+  thumbs.classList.toggle("hidden",media.length <= 1);
+  selectQuickViewMedia(media[0],0);
+}
+
 function openQuickView(product){
   if(!product) return;
   quickViewProduct = product;
-  const image = product.images?.[0] ||
-    `https://placehold.co/800x1067/f2f0eb/4a5355?text=${encodeURIComponent(product.sku || "WOMAN+656")}`;
-  $("quickViewImage").src = image;
-  $("quickViewImage").alt = product.name || "Producto WOMAN 656";
+  renderQuickViewMedia(product);
   $("quickViewSku").textContent = product.sku || "WOMAN 656";
   $("quickViewTitle").textContent = product.name || "Producto";
   $("quickViewPrice").textContent = money(product.price);
@@ -1922,6 +1976,9 @@ function toDbProduct(product){
     image_1: product.images?.[0] || null,
     image_2: product.images?.[1] || null,
     image_3: product.images?.[2] || null,
+    image_4: product.images?.[3] || null,
+    image_5: product.images?.[4] || null,
+    video_url: product.videoUrl || null,
     badge: product.badge || null,
     active: product.active !== false
   };
@@ -2151,7 +2208,7 @@ async function loadCatalogFromSupabase(){
           ? null
           : Number(row.compare_at_price),
       badge: row.badge || "",
-      sizes: sizes.length ? sizes : ["UNITALLA"],
+      sizes: sizes.filter(size=>Number(stock[size] || 0) > 0),
       colors: [],
       stock,
       variants: vs.map(v=>({
@@ -2161,7 +2218,8 @@ async function loadCatalogFromSupabase(){
         quantity:inventoryByVariant[v.id] || 0
       })),
       totalStock:Object.values(stock).reduce((a,b)=>a+Number(b||0),0),
-      images:[row.image_1,row.image_2,row.image_3].filter(Boolean),
+      images:[row.image_1,row.image_2,row.image_3,row.image_4,row.image_5].filter(Boolean),
+      videoUrl:row.video_url || "",
       description:row.description || "",
       fabricType:row.fabric_type || "",
       careInstructions:row.care_instructions || "",
@@ -2332,6 +2390,7 @@ document.querySelectorAll(
    ========================================================= */
 
 const PRODUCT_IMAGE_BUCKET = "productos";
+const STANDARD_PRODUCT_SIZES = ["XS","S","M","G","XG"];
 let newProductVariants = [];
 
 function setAdminEditorStatus(message,type="info"){
@@ -2376,7 +2435,56 @@ function refreshImagePreview(slot){
 }
 
 function refreshAllImagePreviews(){
-  [1,2,3].forEach(refreshImagePreview);
+  [1,2,3,4,5].forEach(refreshImagePreview);
+}
+
+function refreshVideoPreview(){
+  const preview = $("adminVideoPreview");
+  const url = $("adminVideoUrl").value.trim();
+  preview.src = url;
+  preview.classList.toggle("hidden",!url);
+}
+
+function readVideoDuration(file){
+  return new Promise((resolve,reject)=>{
+    const video = document.createElement("video");
+    const url = URL.createObjectURL(file);
+    video.preload = "metadata";
+    video.onloadedmetadata = ()=>{ const duration=video.duration; URL.revokeObjectURL(url); resolve(duration); };
+    video.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error("No se pudo leer la duración del video.")); };
+    video.src = url;
+  });
+}
+
+async function uploadProductVideo(file){
+  await requireShopAdmin();
+  if(!file) return;
+  if(!["video/mp4","video/webm"].includes(file.type)) throw new Error("El video debe ser MP4 o WEBM.");
+  if(file.size > 20*1024*1024) throw new Error("El video supera el límite de 20 MB.");
+  const duration = await readVideoDuration(file);
+  if(!Number.isFinite(duration) || duration > 3.2) throw new Error("El video debe durar como máximo 3 segundos.");
+  const sku = $("adminSku").value.trim();
+  if(!sku) throw new Error("Primero escribe el SKU del producto.");
+  const ext = file.type === "video/webm" ? "webm" : "mp4";
+  const path = `${safeFilePart(sku)}/${Date.now()}-video-3s.${ext}`;
+  setAdminEditorStatus("Subiendo video…");
+  const {error} = await shopSupabase.storage.from(PRODUCT_IMAGE_BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+  if(error) throw error;
+  const {data} = shopSupabase.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
+  if(!data?.publicUrl) throw new Error("Supabase no devolvió la URL pública del video.");
+  $("adminVideoUrl").value = data.publicUrl;
+  refreshVideoPreview();
+  setAdminEditorStatus("✅ Video de producto subido.","ok");
+}
+
+async function clearProductVideo(){
+  await requireShopAdmin();
+  const url = $("adminVideoUrl").value.trim();
+  const path = storagePathFromPublicUrl(url);
+  if(path){ const {error}=await shopSupabase.storage.from(PRODUCT_IMAGE_BUCKET).remove([path]); if(error) throw error; }
+  $("adminVideoUrl").value = "";
+  refreshVideoPreview();
+  setAdminEditorStatus("Video quitado. Guarda el producto para confirmar.","ok");
 }
 
 async function uploadProductImage(slot,file){
@@ -2486,29 +2594,16 @@ function renderNewVariantRows(){
   const wrap = $("newVariantRows");
   wrap.innerHTML = "";
 
-  if(!newProductVariants.length){
-    wrap.innerHTML =
-      `<div class="admin-status">Aún no agregas tallas.</div>`;
-    return;
-  }
-
   newProductVariants.forEach((variant,index)=>{
     const row = document.createElement("div");
     row.className = "variant-list-row";
 
     row.innerHTML = `
       <strong>${escapeHtml(variant.size)}</strong>
-      <span>Stock: ${variant.quantity}</span>
-      <span class="variant-color">Color: —</span>
-      <button type="button" class="variant-remove" data-remove-variant="${index}">
-        Quitar
-      </button>
+      <input class="new-variant-qty" type="number" min="0" step="1" value="${variant.quantity}" aria-label="Cantidad talla ${escapeHtml(variant.size)}">
+      <span class="variant-color">unidades disponibles</span>
     `;
-
-    row.querySelector("[data-remove-variant]").onclick = ()=>{
-      newProductVariants.splice(index,1);
-      renderNewVariantRows();
-    };
+    row.querySelector(".new-variant-qty").oninput = event=>{ variant.quantity=Math.max(0,Math.floor(Number(event.target.value||0))); };
 
     wrap.appendChild(row);
   });
@@ -2546,13 +2641,17 @@ function resetAdminForm(){
   $("adminImage1").value = "";
   $("adminImage2").value = "";
   $("adminImage3").value = "";
+  $("adminImage4").value = "";
+  $("adminImage5").value = "";
+  $("adminVideoUrl").value = "";
   $("adminStockRows").innerHTML = "";
 
-  [1,2,3].forEach(slot=>{
+  [1,2,3,4,5].forEach(slot=>{
     $(`adminImageFile${slot}`).value = "";
   });
 
   refreshAllImagePreviews();
+  refreshVideoPreview();
   setAdminEditorStatus("");
 }
 
@@ -2563,6 +2662,8 @@ function openNewProductEditor(){
   }
 
   resetAdminForm();
+  newProductVariants = STANDARD_PRODUCT_SIZES.map(size=>({size,quantity:0}));
+  renderNewVariantRows();
 
   $("adminEditorMode").value = "new";
   $("adminModalTitle").textContent = "Agregar producto";
@@ -2573,9 +2674,6 @@ function openNewProductEditor(){
   $("newVariantBuilder").classList.remove("hidden");
 
   $("adminSku").readOnly = false;
-
-  newProductVariants = [];
-  renderNewVariantRows();
 
   $("adminModal").classList.remove("hidden");
 }
@@ -2616,20 +2714,22 @@ function openAdminEditor(product){
   $("adminImage1").value = product.images?.[0] || "";
   $("adminImage2").value = product.images?.[1] || "";
   $("adminImage3").value = product.images?.[2] || "";
+  $("adminImage4").value = product.images?.[3] || "";
+  $("adminImage5").value = product.images?.[4] || "";
+  $("adminVideoUrl").value = product.videoUrl || "";
 
   refreshAllImagePreviews();
+  refreshVideoPreview();
 
   const rows = $("adminStockRows");
   rows.innerHTML = "";
 
-  const variants =
-    Array.isArray(product.variants) && product.variants.length
-      ? product.variants
-      : (product.sizes || []).map(size=>({
-          id:null,
-          size,
-          quantity:Number(product.stock?.[size] || 0)
-        }));
+  const existingVariants = Array.isArray(product.variants) ? product.variants : [];
+  const sizeNames = [...new Set([...STANDARD_PRODUCT_SIZES,...existingVariants.map(v=>v.size).filter(Boolean)])];
+  const variants = sizeNames.map(size=>{
+    const existing = existingVariants.find(v=>v.size===size);
+    return existing || {id:null,size,quantity:Number(product.stock?.[size] || 0)};
+  });
 
   variants.forEach(v=>{
     const row = document.createElement("div");
@@ -2691,6 +2791,9 @@ function collectAdminProductValues(){
     image_1:$("adminImage1").value.trim() || null,
     image_2:$("adminImage2").value.trim() || null,
     image_3:$("adminImage3").value.trim() || null,
+    image_4:$("adminImage4").value.trim() || null,
+    image_5:$("adminImage5").value.trim() || null,
+    video_url:$("adminVideoUrl").value.trim() || null,
     badge:$("adminBadge").value.trim() || null,
     active:$("adminActive").value === "true"
   };
@@ -2701,9 +2804,8 @@ async function createAdminProduct(){
 
   const productValues = collectAdminProductValues();
 
-  if(!newProductVariants.length){
-    throw new Error("Agrega por lo menos una talla con su stock.");
-  }
+  const variantsWithStock = newProductVariants.filter(v=>Number(v.quantity)>0);
+  if(!variantsWithStock.length) throw new Error("Captura existencias en por lo menos una talla.");
 
   setAdminEditorStatus("Creando producto…");
 
@@ -2720,7 +2822,7 @@ async function createAdminProduct(){
     throw productError;
   }
 
-  const variants = newProductVariants.map(v=>({
+  const variants = variantsWithStock.map(v=>({
     product_id:product.id,
     variant_sku:`${productValues.sku}-${v.size}`,
     size:v.size,
@@ -2738,7 +2840,7 @@ async function createAdminProduct(){
   }
 
   const qtyBySize =
-    Object.fromEntries(newProductVariants.map(v=>[v.size,v.quantity]));
+    Object.fromEntries(variantsWithStock.map(v=>[v.size,v.quantity]));
 
   const inventoryRows = variantRows.map(v=>({
     variant_id:v.id,
@@ -2836,15 +2938,27 @@ async function saveAdminProductChanges(){
 
   for(const row of stockRows){
     const variantId = Number(row.dataset.variantId);
-    if(!variantId) continue;
-
     const previous = Number(row.dataset.previous || 0);
     const next = Math.max(
       0,
       Math.floor(Number(row.querySelector(".admin-stock-input").value || 0))
     );
 
-    if(next === previous) continue;
+    if(!variantId && next > 0){
+      const size = row.dataset.size || "UNITALLA";
+      const {data:newVariant,error:variantError} = await shopSupabase
+        .from("shop_product_variants")
+        .insert({product_id:dbId,variant_sku:`${sku}-${size}`,size,color:null,active:true})
+        .select("id").single();
+      if(variantError) throw variantError;
+      const {error:inventoryInsertError} = await shopSupabase.from("shop_inventory").insert({variant_id:newVariant.id,quantity:next});
+      if(inventoryInsertError) throw inventoryInsertError;
+      const {error:movementInsertError} = await shopSupabase.from("shop_inventory_movements").insert({variant_id:newVariant.id,movement_type:"manual_adjustment",quantity:next,previous_stock:0,new_stock:next,reason:"Alta de talla desde panel ADMIN",reference:sku});
+      if(movementInsertError) throw movementInsertError;
+      continue;
+    }
+
+    if(!variantId || next === previous) continue;
 
     const {error:inventoryError} = await shopSupabase
       .from("shop_inventory")
@@ -2898,7 +3012,6 @@ async function hideAdminProduct(){
 $("closeAdminModal").onclick = closeAdminEditor;
 $("cancelAdminProduct").onclick = closeAdminEditor;
 $("newProductBtn").onclick = openNewProductEditor;
-$("addNewVariantBtn").onclick = addNewProductVariant;
 
 $("adminModal").addEventListener("click",event=>{
   if(event.target === $("adminModal")){
@@ -2906,7 +3019,7 @@ $("adminModal").addEventListener("click",event=>{
   }
 });
 
-[1,2,3].forEach(slot=>{
+[1,2,3,4,5].forEach(slot=>{
   imageInput(slot).addEventListener("input",()=>refreshImagePreview(slot));
 
   document
@@ -2943,6 +3056,18 @@ $("adminModal").addEventListener("click",event=>{
       }
     });
 });
+
+$("adminVideoUrl").addEventListener("input",refreshVideoPreview);
+$("uploadVideoBtn").onclick = ()=>$("adminVideoFile").click();
+$("adminVideoFile").addEventListener("change",async event=>{
+  try{ await uploadProductVideo(event.target.files?.[0]); }
+  catch(error){ console.error(error); setAdminEditorStatus(`❌ ${error.message}`,"error"); }
+  finally{ event.target.value=""; }
+});
+$("clearVideoBtn").onclick = async ()=>{
+  try{ await clearProductVideo(); }
+  catch(error){ console.error(error); setAdminEditorStatus(`❌ ${error.message}`,"error"); }
+};
 
 $("saveAdminProduct").onclick = async ()=>{
   try{
