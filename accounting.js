@@ -1,11 +1,14 @@
 const SUPABASE_URL="https://snkuvxpddxcmbfhgabbx.supabase.co";
 const SUPABASE_KEY="sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK";
+if(localStorage.getItem("woman656-auth-token-v1")===null && localStorage.getItem("moda-juarez-auth-token-v2")!==null){
+  localStorage.setItem("woman656-auth-token-v1",localStorage.getItem("moda-juarez-auth-token-v2"));
+}
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
   auth:{
     persistSession:true,
     autoRefreshToken:true,
     detectSessionInUrl:true,
-    storageKey:"moda-juarez-auth-token-v2"
+    storageKey:"woman656-auth-token-v1"
   }
 });
 const $=id=>document.getElementById(id); const money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).format(Number(n)||0);

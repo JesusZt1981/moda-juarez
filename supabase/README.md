@@ -1,18 +1,18 @@
-# Supabase independiente para Moda Juárez
+# Supabase independiente para WOMAN 656
 
 Estos archivos preparan un proyecto nuevo sin modificar el Supabase de
 `inversor-facil`.
 
 ## Orden seguro
 
-1. Crear un proyecto Supabase llamado `moda-juarez` en la misma organización.
+1. Crear un proyecto Supabase llamado `WOMAN 656` en la misma organización.
    Mantener **Enable Data API** activado y desactivar **Automatically expose new
    tables**; el script concede únicamente los privilegios necesarios para la
    tienda.
 2. Guardar la contraseña de base de datos en un gestor de contraseñas. No ponerla
    en Git, capturas ni mensajes.
 3. Abrir **SQL Editor** en el proyecto nuevo.
-4. Ejecutar `migrations/001_moda_juarez_core.sql`.
+4. Ejecutar `migrations/001_moda_juarez_core.sql` (el nombre del archivo se conserva como historial técnico).
 5. Ejecutar `migrations/002_bot_private_tables.sql`.
 6. Ejecutar `migrations/003_verify_setup.sql`; debe listar 11 tablas y el bucket
    público `productos`.
@@ -25,7 +25,8 @@ Estos archivos preparan un proyecto nuevo sin modificar el Supabase de
 10. Ejecutar `migrations/007_verify_accounting.sql`; debe devolver las cuatro
    comprobaciones en `true`, tres políticas de tablas y cuatro de Storage.
 11. Configurar Google en **Authentication > Providers** y agregar como URL de
-   redirección `https://moda-juarez.onrender.com`.
+   redirección del dominio activo de WOMAN 656. Mientras se completa la migración,
+   permanece `https://moda-juarez.onrender.com`.
 12. Antes de cambiar la configuración, entrar como ADMIN en la tienda actual y
    pulsar **Descargar respaldo JSON**. Conservar ese archivo hasta terminar la
    migración.

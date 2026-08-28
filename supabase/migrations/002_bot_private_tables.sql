@@ -1,4 +1,4 @@
--- Moda Juárez Bot: tablas privadas y permanentes.
+-- WOMAN 656 Studio: tablas privadas y permanentes.
 -- Sin políticas públicas: no quedan expuestas mediante la publishable key.
 
 create table if not exists public.bot_products (
@@ -78,4 +78,3 @@ alter table public.bot_leads enable row level security;
 alter table public.bot_sales enable row level security;
 alter table public.bot_settings enable row level security;
 alter table public.bot_marketing_events enable row level security;
-

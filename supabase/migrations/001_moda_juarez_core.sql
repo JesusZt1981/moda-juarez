@@ -1,5 +1,5 @@
--- Moda Juárez: autenticación, catálogo, inventario y Storage.
--- Ejecutar únicamente en el proyecto NUEVO de Supabase para Moda Juárez.
+-- WOMAN 656: autenticación, catálogo, inventario y Storage.
+-- Ejecutar únicamente en el proyecto Supabase de WOMAN 656.
 -- Es idempotente: puede ejecutarse nuevamente sin borrar el catálogo.
 
 create extension if not exists pgcrypto;

@@ -452,7 +452,7 @@
     byId('campaignPopupCta').textContent = config.cta;
     popup.style.background = `linear-gradient(145deg,#24131b,${config.color})`;
     popup.classList.remove('hidden');
-    if (!previewMode) localStorage.setItem('moda_campaign_popup_seen', String(Date.now()));
+    if (!previewMode) localStorage.setItem('woman656_campaign_popup_seen', String(Date.now()));
   }
 
   byId('marketingCheckSelection').onclick = async () => { selectProducts(); await updatePreview(); };
@@ -461,7 +461,7 @@
   byId('generatePromoVideo').onclick = () => generateVideo().catch(e => setStatus(e.message, 'error'));
   byId('previewMarketingPopup').onclick = () => showPopup(popupConfig(), true);
   byId('saveMarketingPopup').onclick = () => {
-    const config = popupConfig(); localStorage.setItem('moda_campaign_popup', JSON.stringify(config));
+    const config = popupConfig(); localStorage.setItem('woman656_campaign_popup', JSON.stringify(config));
     setStatus('Pop-up activado en este piloto. Se mostrará como máximo una vez cada 24 horas.', 'ok');
     showPopup(config, true);
   };
@@ -476,8 +476,8 @@
     if (lastPreviewProduct) updatePreview(lastPreviewProduct);
   }));
 
-  const saved = JSON.parse(localStorage.getItem('moda_campaign_popup') || 'null');
-  const seen = Number(localStorage.getItem('moda_campaign_popup_seen') || 0);
+  const saved = JSON.parse(localStorage.getItem('woman656_campaign_popup') || 'null');
+  const seen = Number(localStorage.getItem('woman656_campaign_popup_seen') || 0);
   if (saved?.active && Date.now() - seen > 24 * 60 * 60 * 1000) setTimeout(() => showPopup(saved), 1800);
   updatePreview();
   setTimeout(() => loadMediaLibrary().catch(() => {}), 800);

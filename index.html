@@ -510,7 +510,7 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
     <div class="import-head">
       <div>
         <h2>📥 Importar catálogo desde Excel</h2>
-        <p>Selecciona el archivo <b>catalogo_100_productos_moda_juarez.xlsx</b>. Se leerá la hoja <b>Productos</b>.</p>
+        <p>Selecciona el archivo <b>catalogo_productos_woman_656.xlsx</b>. Se leerá la hoja <b>Productos</b>.</p>
       </div>
 
       <div class="import-actions">
@@ -999,6 +999,22 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
 const PUBLIC_SUPABASE_URL = "https://snkuvxpddxcmbfhgabbx.supabase.co";
 const PUBLIC_SUPABASE_KEY = "sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK";
 
+// Migración de identidad: conserva sesiones, catálogo, carrito y campañas
+// creadas antes del cambio de nombre a WOMAN 656.
+const WOMAN656_STORAGE_MIGRATIONS = [
+  ["moda_catalog","woman656_catalog"],
+  ["moda_cart","woman656_cart"],
+  ["moda_juarez_attribution","woman656_attribution"],
+  ["moda_campaign_popup","woman656_campaign_popup"],
+  ["moda_campaign_popup_seen","woman656_campaign_popup_seen"],
+  ["moda-juarez-auth-token-v2","woman656-auth-token-v1"]
+];
+for(const [legacyKey,currentKey] of WOMAN656_STORAGE_MIGRATIONS){
+  if(localStorage.getItem(currentKey)===null && localStorage.getItem(legacyKey)!==null){
+    localStorage.setItem(currentKey,localStorage.getItem(legacyKey));
+  }
+}
+
 const STORE_CONFIG = {
   whatsapp: "5216567770986",
   storeName: "WOMAN 656",
@@ -1020,10 +1036,10 @@ function currentAttribution(){
   if(Object.keys(incoming).length){
     incoming.landing_page = location.href;
     incoming.captured_at = new Date().toISOString();
-    localStorage.setItem("moda_juarez_attribution",JSON.stringify(incoming));
+    localStorage.setItem("woman656_attribution",JSON.stringify(incoming));
     return incoming;
   }
-  try{return JSON.parse(localStorage.getItem("moda_juarez_attribution")||"{}");}
+  try{return JSON.parse(localStorage.getItem("woman656_attribution")||"{}");}
   catch{return {};}
 }
 
@@ -1073,9 +1089,9 @@ const ACCESSORY_CATEGORIES = [
 ];
 
 const state = {
-  products: JSON.parse(localStorage.getItem("moda_catalog") || "[]"),
+  products: JSON.parse(localStorage.getItem("woman656_catalog") || "[]"),
   filtered: [],
-  cart: JSON.parse(localStorage.getItem("moda_cart") || "[]"),
+  cart: JSON.parse(localStorage.getItem("woman656_cart") || "[]"),
   favorites: JSON.parse(localStorage.getItem("woman656_favorites") || "[]"),
   favoritesOnly: false,
   admin: false,
@@ -1185,7 +1201,7 @@ async function importExcel(file){
     state.products = products;
 
     localStorage.setItem(
-      "moda_catalog",
+      "woman656_catalog",
       JSON.stringify(products)
     );
 
@@ -1488,7 +1504,7 @@ function addToCart(product,size){
 
 function saveCart(){
   localStorage.setItem(
-    "moda_cart",
+    "woman656_cart",
     JSON.stringify(state.cart)
   );
 
@@ -1731,7 +1747,7 @@ function initSupabaseClient(){
         persistSession:true,
         autoRefreshToken:true,
         detectSessionInUrl:true,
-        storageKey:"moda-juarez-auth-token-v2"
+        storageKey:"woman656-auth-token-v1"
       }
     }
   );
@@ -1998,7 +2014,7 @@ async function loadCatalogFromSupabase(){
 
   const localFallback = state.products.length
     ? [...state.products]
-    : JSON.parse(localStorage.getItem("moda_catalog") || "[]");
+    : JSON.parse(localStorage.getItem("woman656_catalog") || "[]");
 
   const {data:products,error:productsError} = await shopSupabase
     .from("shop_products")
@@ -2117,7 +2133,7 @@ async function loadCatalogFromSupabase(){
     };
   });
 
-  localStorage.setItem("moda_catalog",JSON.stringify(state.products));
+  localStorage.setItem("woman656_catalog",JSON.stringify(state.products));
 
   fillCategoryFilter();
   syncPriceFilterToCatalog();
@@ -2160,7 +2176,7 @@ $("excelFile").addEventListener("change",event=>{
 
 $("saveCatalogBtn").onclick = ()=>{
   localStorage.setItem(
-    "moda_catalog",
+    "woman656_catalog",
     JSON.stringify(state.products)
   );
 
@@ -2176,7 +2192,7 @@ $("clearCatalogBtn").onclick = ()=>{
   state.products = [];
   state.filtered = [];
 
-  localStorage.removeItem("moda_catalog");
+  localStorage.removeItem("woman656_catalog");
 
   fillCategoryFilter();
   applyFilters();
@@ -3022,7 +3038,7 @@ $("downloadCatalogBackupBtn").onclick = ()=>{
     return;
   }
   const payload = {
-    format:"moda-juarez-catalog-backup",
+    format:"woman-656-catalog-backup",
     version:1,
     exportedAt:new Date().toISOString(),
     products:state.products
@@ -3031,7 +3047,7 @@ $("downloadCatalogBackupBtn").onclick = ()=>{
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `moda-juarez-catalogo-${new Date().toISOString().slice(0,10)}.json`;
+  link.download = `woman-656-catalogo-${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -3046,11 +3062,12 @@ $("catalogBackupFile").addEventListener("change",async event=>{
     const file = event.target.files?.[0];
     if(!file) return;
     const payload = JSON.parse(await file.text());
-    if(payload?.format !== "moda-juarez-catalog-backup" || !Array.isArray(payload.products)){
+    const validFormats = new Set(["woman-656-catalog-backup","moda-juarez-catalog-backup"]);
+    if(!validFormats.has(payload?.format) || !Array.isArray(payload.products)){
       throw new Error("El archivo no es un respaldo válido de WOMAN 656.");
     }
     state.products = payload.products;
-    localStorage.setItem("moda_catalog",JSON.stringify(state.products));
+    localStorage.setItem("woman656_catalog",JSON.stringify(state.products));
     fillCategoryFilter();
     syncPriceFilterToCatalog();
     applyFilters();
@@ -3094,7 +3111,7 @@ $("postalCode").addEventListener("input",renderCart);
 $("whatsappBtn").onclick = sendWhatsApp;
 
 
-(async function bootModaJuarez(){
+(async function bootWoman656(){
   applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "normal");
   updateFavoritesCount();
   const savedNewsletterEmail = localStorage.getItem("woman656_newsletter_email");
