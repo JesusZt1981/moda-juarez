@@ -768,6 +768,7 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
       <h2 id="quickViewTitle"></h2>
       <strong id="quickViewPrice" class="quick-view-price"></strong>
       <p id="quickViewDescription"></p>
+      <div id="quickViewProductDetails" class="quick-view-stock"></div>
       <div id="quickViewStock" class="quick-view-stock"></div>
       <button id="quickViewWhatsApp" class="quick-view-cta">Consultar por WhatsApp</button>
     </div>
@@ -800,26 +801,36 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
 
         <div class="admin-field">
           <label>Categoría</label>
-          <input id="adminCategory" list="categorySuggestions">
-          <datalist id="categorySuggestions">
+          <select id="adminCategory">
+            <option value="">Selecciona una categoría</option>
+            <option>Novedades</option>
             <option>Vestidos</option>
+            <option>Conjuntos</option>
             <option>Blusas</option>
             <option>Tops</option>
+            <option>Camisas</option>
+            <option>Playeras</option>
             <option>Pantalones</option>
+            <option>Jeans</option>
+            <option>Leggings</option>
             <option>Shorts</option>
             <option>Faldas</option>
+            <option>Enterizos</option>
+            <option>Suéteres y cárdigans</option>
+            <option>Chamarras y abrigos</option>
+            <option>Blazers y sacos</option>
+            <option>Ropa deportiva</option>
             <option>Ropa interior</option>
-            <option>Conjuntos</option>
+            <option>Pijamas y ropa para dormir</option>
             <option>Trajes de baño</option>
-            <option>Suéteres y cardigans</option>
-            <option>Chamarras y blazers</option>
             <option>Accesorios</option>
-          </datalist>
+            <option>Calzado</option>
+          </select>
         </div>
 
         <div class="admin-field full">
-          <label>Nombre</label>
-          <input id="adminName">
+          <label>Nombre del producto (opcional)</label>
+          <input id="adminName" placeholder="Si lo dejas vacío se genera con categoría y SKU">
         </div>
 
         <div class="admin-field">
@@ -848,6 +859,21 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
         <div class="admin-field full">
           <label>Descripción</label>
           <textarea id="adminDescription"></textarea>
+        </div>
+
+        <div class="admin-field">
+          <label>Tipo de tejido</label>
+          <input id="adminFabricType" placeholder="Ej. 97% poliéster; 3% elastano">
+        </div>
+
+        <div class="admin-field">
+          <label>Instrucciones de cuidado</label>
+          <input id="adminCareInstructions" placeholder="Ej. Lavar a máquina">
+        </div>
+
+        <div class="admin-field full">
+          <label>País de origen</label>
+          <input id="adminCountryOfOrigin" placeholder="Ej. China">
         </div>
 
         <div class="admin-field full">
@@ -1431,6 +1457,13 @@ function openQuickView(product){
   $("quickViewTitle").textContent = product.name || "Producto";
   $("quickViewPrice").textContent = money(product.price);
   $("quickViewDescription").textContent = product.description || "Consulta disponibilidad, tallas y entrega por WhatsApp.";
+  const details = [
+    product.fabricType ? `<strong>Tipo de tejido:</strong> ${escapeHtml(product.fabricType)}` : "",
+    product.careInstructions ? `<strong>Cuidados:</strong> ${escapeHtml(product.careInstructions)}` : "",
+    product.countryOfOrigin ? `<strong>País de origen:</strong> ${escapeHtml(product.countryOfOrigin)}` : ""
+  ].filter(Boolean);
+  $("quickViewProductDetails").innerHTML = details.join("<br>");
+  $("quickViewProductDetails").classList.toggle("hidden",!details.length);
   $("quickViewStock").textContent = `Disponibilidad total: ${Number(product.totalStock || 0)} unidades`;
   $("quickView").classList.remove("hidden");
   document.body.style.overflow = "hidden";
@@ -1877,6 +1910,9 @@ function toDbProduct(product){
     name: product.name,
     category: product.category || "Sin categoría",
     description: product.description || null,
+    fabric_type: product.fabricType || null,
+    care_instructions: product.careInstructions || null,
+    country_of_origin: product.countryOfOrigin || null,
     price: Number(product.price) || 0,
     compare_at_price:
       Number.isFinite(Number(product.compareAtPrice))
@@ -2127,6 +2163,9 @@ async function loadCatalogFromSupabase(){
       totalStock:Object.values(stock).reduce((a,b)=>a+Number(b||0),0),
       images:[row.image_1,row.image_2,row.image_3].filter(Boolean),
       description:row.description || "",
+      fabricType:row.fabric_type || "",
+      careInstructions:row.care_instructions || "",
+      countryOfOrigin:row.country_of_origin || "",
       active:row.active !== false,
       promotion:"Ninguna",
       discountPct:0
@@ -2501,6 +2540,9 @@ function resetAdminForm(){
   $("adminBadge").value = "";
   $("adminActive").value = "true";
   $("adminDescription").value = "";
+  $("adminFabricType").value = "";
+  $("adminCareInstructions").value = "";
+  $("adminCountryOfOrigin").value = "";
   $("adminImage1").value = "";
   $("adminImage2").value = "";
   $("adminImage3").value = "";
@@ -2556,7 +2598,10 @@ function openAdminEditor(product){
 
   $("adminProductDbId").value = product.dbId || "";
   $("adminSku").value = product.sku || "";
-  $("adminSku").readOnly = true;
+  $("adminSku").readOnly = false;
+  if(product.category && ![...$("adminCategory").options].some(option=>option.value===product.category)){
+    $("adminCategory").add(new Option(product.category,product.category));
+  }
   $("adminCategory").value = product.category || "";
   $("adminName").value = product.name || "";
   $("adminPrice").value = Number(product.price || 0);
@@ -2565,6 +2610,9 @@ function openAdminEditor(product){
   $("adminBadge").value = product.badge || "";
   $("adminActive").value = product.active === false ? "false" : "true";
   $("adminDescription").value = product.description || "";
+  $("adminFabricType").value = product.fabricType || "";
+  $("adminCareInstructions").value = product.careInstructions || "";
+  $("adminCountryOfOrigin").value = product.countryOfOrigin || "";
   $("adminImage1").value = product.images?.[0] || "";
   $("adminImage2").value = product.images?.[1] || "";
   $("adminImage3").value = product.images?.[2] || "";
@@ -2609,15 +2657,11 @@ function closeAdminEditor(){
 
 function collectAdminProductValues(){
   const sku = $("adminSku").value.trim();
-  const name = $("adminName").value.trim();
   const category = $("adminCategory").value.trim();
+  const name = $("adminName").value.trim() || `${category} · ${sku}`;
 
   if(!sku){
     throw new Error("Falta el SKU.");
-  }
-
-  if(!name){
-    throw new Error("Falta el nombre del producto.");
   }
 
   if(!category){
@@ -2635,6 +2679,9 @@ function collectAdminProductValues(){
     name,
     category,
     description:$("adminDescription").value.trim() || null,
+    fabric_type:$("adminFabricType").value.trim() || null,
+    care_instructions:$("adminCareInstructions").value.trim() || null,
+    country_of_origin:$("adminCountryOfOrigin").value.trim() || null,
     price,
     compare_at_price:
       $("adminComparePrice").value === ""
@@ -2744,18 +2791,46 @@ async function saveAdminProductChanges(){
 
   const productValues = collectAdminProductValues();
   const sku = productValues.sku;
+  const currentProduct = state.products.find(product=>Number(product.dbId)===dbId);
+  const previousSku = currentProduct?.sku || "";
 
   setAdminEditorStatus("Guardando producto…");
 
-  // SKU no se modifica en productos existentes desde este editor.
-  delete productValues.sku;
+  const {data:skuMatches,error:skuCheckError} = await shopSupabase
+    .from("shop_products")
+    .select("id")
+    .eq("sku",sku)
+    .neq("id",dbId)
+    .limit(1);
+
+  if(skuCheckError) throw skuCheckError;
+  if(skuMatches?.length){
+    throw new Error("Ese SKU ya existe. Escribe uno diferente.");
+  }
 
   const {error:productError} = await shopSupabase
     .from("shop_products")
     .update(productValues)
     .eq("id",dbId);
 
-  if(productError) throw productError;
+  if(productError){
+    if(productError.code === "23505" || String(productError.message).toLowerCase().includes("duplicate")){
+      throw new Error("Ese SKU ya existe. Escribe uno diferente.");
+    }
+    throw productError;
+  }
+
+  if(previousSku && previousSku !== sku){
+    const variants = currentProduct?.variants || [];
+    for(const variant of variants){
+      if(!variant.id) continue;
+      const {error:variantSkuError} = await shopSupabase
+        .from("shop_product_variants")
+        .update({variant_sku:`${sku}-${variant.size || "UNITALLA"}`})
+        .eq("id",variant.id);
+      if(variantSkuError) throw variantSkuError;
+    }
+  }
 
   const stockRows = [...document.querySelectorAll("#adminStockRows .stock-row")];
 
