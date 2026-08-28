@@ -1,6 +1,13 @@
 const SUPABASE_URL="https://snkuvxpddxcmbfhgabbx.supabase.co";
 const SUPABASE_KEY="sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK";
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{
+    persistSession:true,
+    autoRefreshToken:true,
+    detectSessionInUrl:true,
+    storageKey:"moda-juarez-auth-token-v2"
+  }
+});
 const $=id=>document.getElementById(id); const money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).format(Number(n)||0);
 const categories=["NOVEDADES","VESTIDOS","FALDAS","SHORTS","BLUSAS","TOPS","ROPA INTERIOR","ACCESORIOS"];
 let invoices=[],items=[];
