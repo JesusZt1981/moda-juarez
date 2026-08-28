@@ -4,7 +4,26 @@
 <body><header><a href="index.html?admin=1">← Tienda</a><div><strong>WOMAN 656</strong><span>Control interno de compras y precios</span></div><button id="logoutBtn">Cerrar sesión</button></header>
 <main id="app"><section id="restricted" class="card centered"><h1>🔒 Área restringida</h1><p>Inicia sesión como administradora desde la tienda.</p><a class="button" href="index.html?admin=1">Ir al acceso ADMIN</a></section>
 <div id="workspace" hidden>
-  <section class="hero"><div><h1>Contabilidad y precios</h1><p>Control operativo. No sustituye CFDI, declaraciones ni asesoría contable.</p></div><div id="summary" class="summary"></div></section>
+  <section class="hero"><div><h1>Contabilidad y precios</h1><p>Control operativo configurable. No emite CFDI ni sustituye declaraciones o asesoría contable.</p></div><div id="summary" class="summary"></div></section>
+  <nav class="tabs"><button data-tab="purchases" class="active">Compras y precios</button><button data-tab="operations">Ventas y devoluciones</button><button data-tab="ledger">Libro y cuentas T</button><button data-tab="reports">Estados financieros</button><button data-tab="settings">Configuración fiscal</button></nav>
+  <section id="settings" class="card tabPanel" hidden><h2>Configuración fiscal modificable</h2><p>Los cambios solo aplican a operaciones nuevas; las operaciones históricas conservan la tasa con la que fueron registradas.</p><form id="settingsForm" class="grid">
+    <label>Régimen / tratamiento<input name="fiscal_regime" list="fiscalRegimes" placeholder="Escribe o selecciona el régimen"></label><datalist id="fiscalRegimes"><option value="PLATAFORMAS_TECNOLOGICAS"><option value="ACTIVIDAD_EMPRESARIAL"><option value="RESICO"><option value="OTRO_POR_CONFIRMAR"></datalist>
+    <label>IVA de ventas %<input name="sales_tax_rate" type="number" min="0" max="100" step=".001" value="16"></label>
+    <label>ISR estimado %<input name="income_tax_rate" type="number" min="0" max="100" step=".001" value="0"></label>
+    <label>Retención ISR plataforma %<input name="platform_isr_withholding_rate" type="number" min="0" max="100" step=".001" value="0"></label>
+    <label>Retención IVA plataforma %<input name="platform_vat_withholding_rate" type="number" min="0" max="100" step=".001" value="0"></label>
+    <label class="checkline"><input name="border_stimulus_enabled" type="checkbox"> Estímulo fronterizo autorizado (no marcar sin acuse SAT)</label><button class="primary" type="submit">Guardar configuración</button><span id="settingsStatus"></span>
+  </form></section>
+  <section id="operations" class="card tabPanel" hidden><h2>Registrar venta, devolución, compra o gasto</h2><form id="operationForm" class="grid">
+    <label>Fecha<input name="operation_date" type="date" required></label><label>Tipo<select name="operation_type"><option value="sale">Venta</option><option value="return">Devolución</option><option value="purchase">Compra</option><option value="expense">Gasto</option></select></label><label>Canal<select name="channel"><option value="direct">Tienda directa</option><option value="platform">Plataforma</option></select></label>
+    <label>Referencia<input name="reference" placeholder="Pedido, folio o nota"></label><label>Cliente / proveedor<input name="customer_or_supplier"></label><label>Subtotal antes de IVA<input name="subtotal" type="number" min="0" step=".01" required></label>
+    <label>IVA %<input name="tax_rate" type="number" min="0" max="100" step=".001"></label><label>Costo de mercancía<input name="cost_amount" type="number" min="0" step=".01" value="0"></label><label>Comisión plataforma<input name="platform_fee" type="number" min="0" step=".01" value="0"></label>
+    <label>ISR retenido<input name="isr_withheld" type="number" min="0" step=".01" value="0"></label><label>IVA retenido<input name="vat_withheld" type="number" min="0" step=".01" value="0"></label><label class="wide">Notas<input name="notes"></label>
+    <button class="primary" type="submit">Registrar y generar póliza</button><span id="operationStatus"></span>
+  </form><h3>Operaciones registradas</h3><div id="operationList" class="tableWrap"></div></section>
+  <section id="ledger" class="card tabPanel" hidden><div class="row"><div><h2>Libro diario, mayor y cuentas T</h2><p>Solo incluye pólizas contabilizadas.</p></div><button data-export="journal">Exportar CSV</button></div><div id="journal"></div><h3>Cuentas T / mayor</h3><div id="tAccounts" class="tAccounts"></div></section>
+  <section id="reports" class="card tabPanel" hidden><div class="row"><div><h2>Reportes</h2><p>Balanza, IVA, estado de resultados y balance general.</p></div><div><button data-export="operations">Exportar operaciones CSV</button> <button data-export="trial">Exportar balanza CSV</button></div></div><div class="period"><label>Desde<input id="reportFrom" type="date"></label><label>Hasta<input id="reportTo" type="date"></label><button id="applyPeriod">Aplicar periodo</button></div><div id="taxReport"></div><h3>Balanza de comprobación</h3><div id="trialBalance" class="tableWrap"></div><div class="reportGrid"><article><h3>Estado de resultados</h3><div id="incomeStatement"></div></article><article><h3>Balance general</h3><div id="balanceSheet"></div></article></div></section>
+  <div id="purchases" class="tabPanel">
   <section class="card"><h2>Nueva factura de compra</h2><form id="invoiceForm" class="grid">
     <label>Proveedor<input name="supplier" required value="Amazon"></label><label>Número de factura<input name="invoice_number"></label>
     <label>Fecha<input name="invoice_date" type="date"></label><label>Moneda<select name="currency"><option>MXN</option><option>USD</option></select></label>
@@ -16,4 +35,5 @@
     <div class="tableWrap"><table><thead><tr><th>Producto</th><th>SKU</th><th>Categoría</th><th>Talla</th><th>Cant.</th><th>Costo producto</th><th>IVA %</th><th>Importación/u.</th><th>Impuestos/u.</th><th>Otros/u.</th><th>Margen</th><th>Costo real</th><th>Precio</th><th>Acciones</th></tr></thead><tbody id="itemsBody"></tbody></table></div>
   </section>
   <section class="card"><h2>Facturas guardadas</h2><div id="invoiceList"></div></section>
+  </div>
 </div></main><script src="accounting.js"></script></body></html>
