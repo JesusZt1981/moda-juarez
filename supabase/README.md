@@ -20,22 +20,26 @@ Estos archivos preparan un proyecto nuevo sin modificar el Supabase de
    privada de campañas, reels, imágenes y carruseles.
 8. Ejecutar `migrations/005_verify_campaign_library.sql`; debe devolver las tres
    comprobaciones en `true` y seis políticas.
-9. Configurar Google en **Authentication > Providers** y agregar como URL de
+9. Ejecutar `migrations/006_accounting_and_pricing.sql` para crear compras,
+   partidas, tabulador de precios y el bucket privado de facturas.
+10. Ejecutar `migrations/007_verify_accounting.sql`; debe devolver las cuatro
+   comprobaciones en `true`, tres políticas de tablas y cuatro de Storage.
+11. Configurar Google en **Authentication > Providers** y agregar como URL de
    redirección `https://moda-juarez.onrender.com`.
-10. Antes de cambiar la configuración, entrar como ADMIN en la tienda actual y
+12. Antes de cambiar la configuración, entrar como ADMIN en la tienda actual y
    pulsar **Descargar respaldo JSON**. Conservar ese archivo hasta terminar la
    migración.
-11. Sustituir en `index.html` únicamente `PUBLIC_SUPABASE_URL` y
+13. Sustituir en `index.html` únicamente `PUBLIC_SUPABASE_URL` y
    `PUBLIC_SUPABASE_KEY` por los valores públicos del proyecto nuevo.
-12. Publicar la tienda, iniciar sesión una vez con Google y ejecutar una copia de
+14. Publicar la tienda, iniciar sesión una vez con Google y ejecutar una copia de
    `PROMOTE_ADMIN_TEMPLATE.sql` con el correo real escrito solo dentro del SQL
    Editor de Supabase.
-13. Con la sesión ADMIN activa, pulsar **Restaurar respaldo JSON**, seleccionar
+15. Con la sesión ADMIN activa, pulsar **Restaurar respaldo JSON**, seleccionar
     el archivo descargado en el paso 8 y después pulsar **Guardar catálogo en
     Supabase**. Comprobar que se guardan los 150 productos.
-14. Actualizar en el servicio Render del bot `SUPABASE_URL` y
+16. Actualizar en el servicio Render del bot `SUPABASE_URL` y
     `SUPABASE_PUBLISHABLE_KEY` con los valores públicos del proyecto nuevo.
-15. La conexión PostgreSQL permanente del bot se habilitará en una fase
+17. La conexión PostgreSQL permanente del bot se habilitará en una fase
     posterior con `DATABASE_URL`, guardada exclusivamente como Secret en Render.
 
 ## Separación y seguridad

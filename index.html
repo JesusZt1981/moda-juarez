@@ -546,6 +546,7 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
       <div class="admin-top-actions hidden" id="adminTopActions">
         <button class="primary-btn" id="newProductBtn">＋ Agregar producto</button>
         <button class="secondary-btn" id="openBotAdminBtn">🤖 Abrir panel del bot</button>
+        <button class="secondary-btn" id="openAccountingBtn">🧾 Contabilidad y precios</button>
       </div>
 
       <div class="supabase-status" id="supabaseStatus">
@@ -3071,6 +3072,15 @@ $("openBotAdminBtn").onclick = async ()=>{
     }
     const botUrl = String(STORE_CONFIG.botApiUrl||"").replace(/\/$/,"");
     window.open(`${botUrl}/#access_token=${encodeURIComponent(session.access_token)}`,"_blank","noopener,noreferrer");
+  }catch(error){
+    setSupabaseStatus(`❌ ${error.message}`,"error");
+  }
+};
+
+$("openAccountingBtn").onclick = async ()=>{
+  try{
+    await requireShopAdmin();
+    window.location.href = "accounting.html";
   }catch(error){
     setSupabaseStatus(`❌ ${error.message}`,"error");
   }
