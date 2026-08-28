@@ -13,7 +13,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
 });
 const $=id=>document.getElementById(id); const money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).format(Number(n)||0);
 const categories=["NOVEDADES","CONJUNTOS","VESTIDOS","FALDAS","SHORTS","PANTALONES","JEANS","LEGGINGS","BLUSAS","TOPS","PLAYERAS","SUDADERAS","CHAQUETAS","ROPA INTERIOR","TRAJES DE BAÑO","ACCESORIOS","CALZADO","OTROS"];
-let invoices=[],items=[],settings={},transactions=[],entries=[],entryLines=[],accounts=[],trial=[];
+let invoices=[],items=[],settings={},transactions=[],entries=[],entryLines=[],accounts=[],trial=[],shopProducts=[];
 const esc=s=>String(s??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function calc(i){
   const paid=Number(i.unit_cost)||0,rate=(Number(i.tax_rate)||0)/100;
@@ -36,13 +36,23 @@ function render(){
 async function guard(){const {data:{session}}=await db.auth.getSession();if(!session)return false;const {data}=await db.from("profiles").select("role").eq("id",session.user.id).maybeSingle();return data?.role==="admin"}
 async function query(table,options={}){let q=db.from(table).select(options.select||"*");if(options.order)q=q.order(options.order,{ascending:options.ascending??false});const r=await q;if(r.error)throw r.error;return r.data||[]}
 async function load(){
-  const [a,b,s,t,e,l,ac,tr]=await Promise.all([
+  const [a,b,s,t,e,l,ac,tr,p]=await Promise.all([
     query("purchase_invoices",{order:"created_at"}),query("purchase_items",{order:"created_at",ascending:true}),
     db.from("pricing_settings").select("*").eq("id",1).single(),query("accounting_transactions",{order:"operation_date"}),
     query("accounting_entries",{order:"entry_date"}),query("accounting_entry_lines",{order:"id",ascending:true}),
-    query("accounting_accounts",{order:"code",ascending:true}),query("accounting_trial_balance",{order:"code",ascending:true})
+    query("accounting_accounts",{order:"code",ascending:true}),query("accounting_trial_balance",{order:"code",ascending:true}),
+    query("shop_products",{order:"sku",ascending:true})
   ]);
-  if(s.error)throw s.error; invoices=a;items=b;settings=s.data||{};transactions=t;entries=e;entryLines=l;accounts=ac;trial=tr;render();
+  if(s.error)throw s.error;
+  shopProducts=p;
+  const productById=new Map(shopProducts.map(product=>[Number(product.id),product]));
+  invoices=a;
+  items=b.map(item=>{
+    const linked=productById.get(Number(item.shop_product_id));
+    if(!linked)return item;
+    return {...item,purchase_source_sku:item.sku,sku:linked.sku||item.sku,description:linked.name||item.description,category:linked.category||item.category};
+  });
+  settings=s.data||{};transactions=t;entries=e;entryLines=l;accounts=ac;trial=tr;render();
 }
 async function boot(){try{if(!await guard())return;$("restricted").hidden=true;$("workspace").hidden=false;const today=new Date().toISOString().slice(0,10);$("operationForm").operation_date.value=today;$("reportFrom").value=`${today.slice(0,4)}-01-01`;$("reportTo").value=today;await load()}catch(e){$("restricted").innerHTML=`<h1>Configuración pendiente</h1><p class="error">${esc(e.message)}</p><p>Ejecuta las migraciones 006, 010 y 011 en Supabase.</p>`}}
 $("invoiceForm").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),file=f.get("pdf");if(file.size>20971520)return $("invoiceStatus").textContent="PDF mayor a 20 MB";const id=crypto.randomUUID(),safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_"),path=`invoices/${new Date().getFullYear()}/${id}-${safe}`;$("invoiceStatus").textContent="Guardando…";const up=await db.storage.from("accounting-documents").upload(path,file,{contentType:"application/pdf"});if(up.error)return $("invoiceStatus").textContent=up.error.message;const row={supplier:f.get("supplier"),invoice_number:f.get("invoice_number")||null,invoice_date:f.get("invoice_date")||null,currency:f.get("currency"),exchange_rate:Number(f.get("exchange_rate")),grand_total:Number(f.get("grand_total")),pdf_path:path,original_filename:file.name};const q=await db.from("purchase_invoices").insert(row);if(q.error){await db.storage.from("accounting-documents").remove([path]);return $("invoiceStatus").textContent=q.error.message}$("invoiceStatus").textContent="✅ Factura guardada en privado";e.target.reset();await load()};
@@ -128,19 +138,17 @@ async function applyAccountingPrice(item,row){
   const sku=String(item.sku||"").trim();
   const price=Number(item.final_price)||calc(item).suggested;
 
-  const {data:matches,error:findError}=await db.from("shop_products")
-    .select("id,sku,price,category")
-    .eq("sku",sku)
-    .limit(2);
+  let lookup=db.from("shop_products").select("id,sku,price,category");
+  lookup=item.shop_product_id ? lookup.eq("id",item.shop_product_id) : lookup.eq("sku",sku);
+  const {data:matches,error:findError}=await lookup.limit(2);
   if(findError) throw findError;
-  if(!matches?.length) throw new Error(`No se encontró el SKU ${sku} en el catálogo de la tienda.`);
+  if(!matches?.length) throw new Error(`No se encontró el producto vinculado al SKU ${sku} en el catálogo de la tienda.`);
   if(matches.length>1) throw new Error(`Hay más de un producto con el SKU ${sku}; no se aplicó el precio para evitar modificar el producto equivocado.`);
 
   const product=matches[0];
   const {data:updated,error:updateError}=await db.from("shop_products")
     .update({price,category:item.category})
     .eq("id",product.id)
-    .eq("sku",sku)
     .select("id,sku,price,category")
     .single();
   if(updateError) throw updateError;
@@ -155,11 +163,11 @@ async function applyAccountingPrice(item,row){
   }
 
   const {error:linkError}=await db.from("purchase_items")
-    .update({shop_product_id:product.id,final_price:price})
+    .update({shop_product_id:product.id,sku:updated.sku,description:item.description,category:item.category,final_price:price})
     .eq("id",item.id);
   if(linkError) throw linkError;
 
-  Object.assign(item,{shop_product_id:product.id,final_price:price});
+  Object.assign(item,{shop_product_id:product.id,sku:updated.sku,final_price:price});
   return {sku:updated.sku,price:Number(verified.price),category:verified.category};
 }
 

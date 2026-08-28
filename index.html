@@ -1316,11 +1316,13 @@ function updateCatalogDiagnostic(){
   if(!el) return;
 
   const total = state.products.length;
+  const inactive = state.products.filter(product=>product.active === false).length;
+  const outOfStock = state.products.filter(product=>Number(product.totalStock || 0) <= 0).length;
   const shown = state.filtered.length;
   const max = Number($("filterPrice")?.value || 0);
 
-  el.textContent =
-    `Base: ${total} productos · Mostrando: ${shown} · Precio máximo aplicado: ${money(max)}`;
+  el.textContent = `Base: ${total} productos · Mostrando: ${shown} · Precio máximo aplicado: ${money(max)}` +
+    (state.admin ? ` · Ocultos al público: ${inactive} · Sin existencias: ${outOfStock}` : "");
 }
 
 function applyFilters(){
@@ -1335,6 +1337,7 @@ function applyFilters(){
         .toLowerCase();
 
     return (
+      (state.admin || product.active !== false) &&
       Number(product.totalStock || 0) > 0 &&
       (!search || text.includes(search)) &&
       (category === "Todos" || product.category === category) &&
@@ -1398,8 +1401,8 @@ function renderProducts(){
     const oldPrice = product.compareAtPrice && product.compareAtPrice > product.price
       ? `<span class="old-price">${money(product.compareAtPrice)}</span>` : "";
 
-    const badge = product.badge
-      ? `<span class="badge">${escapeHtml(product.badge)}</span>` : "";
+    const badgeText = state.admin && product.active === false ? "OCULTO AL PÚBLICO" : product.badge;
+    const badge = badgeText ? `<span class="badge">${escapeHtml(badgeText)}</span>` : "";
 
     const favorite = state.favorites.includes(product.sku);
 
@@ -1423,6 +1426,7 @@ function renderProducts(){
         <h2 class="product-name">${escapeHtml(product.name)}</h2>
         <div class="price-row"><strong class="product-price">${money(product.price)}</strong>${oldPrice}</div>
         <div class="stock-line">Stock total: ${product.totalStock}</div>
+        ${state.admin ? `<div class="stock-line"><b>${product.active === false ? "⚠️ No visible para clientes" : "✅ Visible para clientes"}</b></div>` : ""}
         ${promotion}
         <select class="size-select"><option value="">Selecciona talla</option>${sizeOptions}</select>
         <button class="add-btn">Agregar al carrito</button>
@@ -2922,6 +2926,15 @@ async function saveAdminProductChanges(){
     throw productError;
   }
 
+  const {error:accountingSyncError} = await shopSupabase
+    .from("purchase_items")
+    .update({sku,description:productValues.name,category:productValues.category})
+    .eq("shop_product_id",dbId);
+
+  if(accountingSyncError){
+    throw new Error(`El producto se guardó, pero no fue posible sincronizar su SKU en Contabilidad: ${accountingSyncError.message}`);
+  }
+
   if(previousSku && previousSku !== sku){
     const variants = currentProduct?.variants || [];
     for(const variant of variants){
@@ -2982,7 +2995,9 @@ async function saveAdminProductChanges(){
     if(movementError) throw movementError;
   }
 
-  setAdminEditorStatus("✅ Producto y stock guardados.","ok");
+  setAdminEditorStatus(productValues.active
+    ? "✅ Producto, SKU y stock guardados. Visible para clientes."
+    : "⚠️ Producto guardado, pero permanece OCULTO para clientes.",productValues.active ? "ok" : "error");
 
   await loadCatalogFromSupabase();
   closeAdminEditor();
