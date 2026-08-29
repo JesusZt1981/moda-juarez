@@ -3399,11 +3399,15 @@ $("openBotAdminBtn").onclick = async ()=>{
     initSupabaseClient();
     const auth = await getAdminState();
     const {data:{session}} = await shopSupabase.auth.getSession();
-    if(!auth.admin || !session?.access_token){
+    if(!auth.admin || !session?.access_token || !session?.refresh_token){
       throw new Error("Primero inicia sesión con una cuenta que tenga role=admin.");
     }
     const botUrl = String(STORE_CONFIG.botApiUrl||"").replace(/\/$/,"");
-    window.open(`${botUrl}/#access_token=${encodeURIComponent(session.access_token)}`,"_blank","noopener,noreferrer");
+    const botSession = new URLSearchParams({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    });
+    window.open(`${botUrl}/#${botSession.toString()}`,"_blank","noopener,noreferrer");
   }catch(error){
     setSupabaseStatus(`❌ ${error.message}`,"error");
   }
