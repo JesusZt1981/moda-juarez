@@ -444,6 +444,55 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
 }
 @media(max-width:480px){.brand{width:88px;height:62px}.theme-control select{width:68px;font-size:10px}.theme-control{display:none}.trust-strip{grid-template-columns:1fr}.newsletter-section form{grid-template-columns:1fr}.newsletter-section input,.newsletter-section button{border-radius:999px}.newsletter-section button{padding:13px;margin-top:8px}.cookie-banner{align-items:stretch;flex-direction:column}.quick-view-gallery,.quick-view-media-stage,.quick-view-media-stage img,.quick-view-media-stage video{min-height:280px}}
 
+/* Catálogo WOMAN 656: ficha horizontal consistente y controles solo administrativos. */
+body:not(.admin-mode) .public-status,
+body:not(.admin-mode) .catalog-diagnostic,
+body:not(.admin-mode) #resultCount{display:none!important}
+.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.product-card{display:grid;grid-template-columns:minmax(170px,42%) minmax(0,58%);min-height:285px}
+.product-card .image-wrap{height:100%;aspect-ratio:auto;min-height:285px}
+.product-card .product-info{display:flex;min-width:0;flex-direction:column;justify-content:center}
+.product-card .product-name{min-height:0}
+.catalog-view-controls{display:none;align-items:center;gap:6px}
+.catalog-view-controls button{width:34px;height:34px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-weight:900;cursor:pointer}
+.catalog-view-controls button.active{background:var(--blue);border-color:var(--rose-dark)}
+.mobile-admin-entry{display:none!important}
+.desktop-admin-entry{margin-left:8px!important;border-left:1px solid var(--border)!important;border-radius:0 20px 20px 0!important;color:var(--rose-dark)!important;font-weight:900!important}
+#publicAdminBtn{display:none!important}
+.media-fallback{display:grid!important;place-items:center;width:100%;height:100%;min-height:100px;padding:12px;background:#f3eef0;color:var(--muted);font-size:11px;text-align:center}
+#marketingStudio{display:none!important}
+.admin-mode .import-panel button,.admin-mode .supabase-box button{padding:7px 10px;font-size:10px}
+
+@media(max-width:760px){
+  #publicAdminBtn{display:none}
+  .catalog-view-controls{display:flex}
+  .mobile-admin-entry{display:block!important;margin-top:8px;border-top:1px solid var(--border)!important;padding-top:14px!important;color:var(--rose-dark)!important;font-weight:900!important}
+  .trust-strip{display:flex;margin:8px 10px 0;padding:0;gap:1px;overflow-x:auto;border-radius:10px}
+  .trust-strip div{flex:0 0 132px;padding:8px 10px}.trust-strip strong{font-size:10px}.trust-strip span{font-size:9px}
+  .catalog-toolbar{align-items:flex-start}.catalog-toolbar>select{max-width:145px}
+  .product-grid{grid-template-columns:1fr;gap:12px}
+  .product-card{grid-template-columns:minmax(115px,42%) minmax(0,58%);min-height:230px}
+  .product-card .image-wrap{min-height:230px}.product-card .product-info{padding:11px}.product-card .product-name{font-size:13px}.product-card .product-price{font-size:17px}
+  .product-grid.mobile-two-columns{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  .product-grid.mobile-two-columns .product-card{grid-template-columns:minmax(62px,42%) minmax(0,58%);min-height:178px;border-radius:10px}
+  .product-grid.mobile-two-columns .image-wrap{min-height:178px}
+  .product-grid.mobile-two-columns .product-info{padding:6px;justify-content:flex-start}
+  .product-grid.mobile-two-columns .product-name{font-size:9px;line-height:1.25;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .product-grid.mobile-two-columns .sku,.product-grid.mobile-two-columns .stock-line{font-size:7px;margin:3px 0}
+  .product-grid.mobile-two-columns .product-price{font-size:12px}.product-grid.mobile-two-columns .price-row{margin-bottom:3px}
+  .product-grid.mobile-two-columns .size-select{font-size:8px;padding:5px;margin-bottom:4px}.product-grid.mobile-two-columns .add-btn{font-size:8px;padding:6px}
+  .product-grid.mobile-two-columns .badge{font-size:7px;padding:3px 5px;left:4px;top:4px}.product-grid.mobile-two-columns .favorite-btn{transform:scale(.72);transform-origin:top right}
+
+  .quick-view{padding:6px;place-items:center}.quick-view-card{width:calc(100vw - 12px);height:calc(100dvh - 12px);max-height:none;overflow:hidden;grid-template-columns:minmax(0,48%) minmax(0,52%);border-radius:16px}
+  .quick-view-gallery{min-height:0;height:100%;overflow:hidden}.quick-view-media-stage{min-height:0;height:calc(100% - 66px)}
+  .quick-view-media-stage img,.quick-view-media-stage video{min-height:0;height:100%;max-height:none;object-fit:contain}
+  .quick-view-thumbs{height:66px;padding:5px;gap:4px}.quick-view-thumb{flex-basis:44px;width:44px;height:54px}
+  .quick-view-info{min-width:0;height:100%;overflow:hidden;padding:45px 10px 10px;gap:7px;justify-content:center}
+  .quick-view-info h2{font-size:clamp(13px,3.4vw,20px);line-height:1.15;max-height:3.45em;overflow:hidden}.quick-view-price{font-size:18px}
+  .quick-view-info p{margin:0;font-size:9px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+  .quick-view-stock{width:100%;padding:6px 7px;font-size:8px;line-height:1.25}.quick-view-cta{padding:9px 5px;font-size:9px}.quick-view-close{width:32px;height:32px;font-size:21px;right:8px;top:8px}
+}
+
 </style>
 </head>
 
@@ -466,6 +515,7 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
     <button data-category="Tops">TOPS</button>
     <button data-category="Ropa interior">ROPA INTERIOR</button>
     <button data-category="Accesorios">ACCESORIOS</button>
+    <button type="button" class="desktop-admin-entry" id="desktopAdminMenuBtn">ADMIN</button>
   </nav>
 
   <a class="brand" href="#" aria-label="WOMAN 656 · Inicio">
@@ -501,6 +551,7 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
   <button data-category="Tops">TOPS</button>
   <button data-category="Ropa interior">ROPA INTERIOR</button>
   <button data-category="Accesorios">ACCESORIOS</button>
+  <button type="button" class="mobile-admin-entry" id="mobileAdminBtn">ADMINISTRAR TIENDA</button>
 </nav>
 
 
@@ -713,13 +764,19 @@ body{background:var(--bg);transition:background-color .25s,color .25s}
           <div id="catalogDiagnostic" class="catalog-diagnostic">Sin catálogo cargado.</div>
       </div>
 
-      <select id="sortSelect">
-        <option value="featured">Destacados</option>
-        <option value="priceAsc">Precio: menor a mayor</option>
-        <option value="priceDesc">Precio: mayor a menor</option>
-        <option value="nameAsc">Nombre: A → Z</option>
-        <option value="nameDesc">Nombre: Z → A</option>
-      </select>
+      <div>
+        <select id="sortSelect">
+          <option value="featured">Destacados</option>
+          <option value="priceAsc">Precio: menor a mayor</option>
+          <option value="priceDesc">Precio: mayor a menor</option>
+          <option value="nameAsc">Nombre: A → Z</option>
+          <option value="nameDesc">Nombre: Z → A</option>
+        </select>
+        <div class="catalog-view-controls" aria-label="Vista del catálogo">
+          <button type="button" class="active" id="catalogOneColumn" aria-label="Una columna" title="Una columna">▤</button>
+          <button type="button" id="catalogTwoColumns" aria-label="Dos columnas" title="Dos columnas">▦</button>
+        </div>
+      </div>
     </div>
 
     <div class="product-grid" id="productGrid">
@@ -1374,6 +1431,7 @@ function applyFilters(){
 function renderProducts(){
   const grid = $("productGrid");
   grid.innerHTML = "";
+  grid.classList.toggle("mobile-two-columns",localStorage.getItem("woman656_mobile_catalog_columns") === "2");
 
   const total = state.filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -1436,6 +1494,7 @@ function renderProducts(){
     const select = card.querySelector(".size-select");
     card.querySelector(".favorite-btn").addEventListener("click",()=>toggleFavorite(product.sku));
     card.querySelector(".product-image").addEventListener("click",()=>openQuickView(product));
+    card.querySelector(".product-image").addEventListener("error",event=>showMediaFallback(event.currentTarget,product.sku));
     card.querySelector(".product-name").addEventListener("click",()=>openQuickView(product));
     card.querySelector(".add-btn").addEventListener("click",()=>{
       if(!select.value){ alert("Selecciona una talla."); return; }
@@ -1473,6 +1532,16 @@ function toggleFavorite(sku){
 }
 
 let quickViewProduct = null;
+let quickViewHistoryActive = false;
+
+function showMediaFallback(media,label="Producto"){
+  if(!media || media.dataset.fallbackApplied === "1") return;
+  media.dataset.fallbackApplied = "1";
+  const fallback = document.createElement("div");
+  fallback.className = "media-fallback";
+  fallback.textContent = `Imagen no disponible · ${label || "WOMAN 656"}`;
+  media.replaceWith(fallback);
+}
 
 function selectQuickViewMedia(media,index){
   const stage = $("quickViewMediaStage");
@@ -1480,6 +1549,7 @@ function selectQuickViewMedia(media,index){
     stage.innerHTML = `<video src="${escapeHtml(media.url)}" controls muted playsinline preload="metadata" aria-label="Video del producto"></video>`;
   }else{
     stage.innerHTML = `<img src="${escapeHtml(media.url)}" alt="${escapeHtml(quickViewProduct?.name || "Producto WOMAN 656")}">`;
+    stage.querySelector("img")?.addEventListener("error",event=>showMediaFallback(event.currentTarget,quickViewProduct?.sku));
   }
   document.querySelectorAll(".quick-view-thumb").forEach((button,buttonIndex)=>button.classList.toggle("active",buttonIndex===index));
 }
@@ -1500,6 +1570,7 @@ function renderQuickViewMedia(product){
     button.innerHTML = item.type === "video"
       ? `<video src="${escapeHtml(item.url)}" muted playsinline preload="metadata"></video>`
       : `<img src="${escapeHtml(item.url)}" alt="Miniatura ${index+1}">`;
+    button.querySelector("img")?.addEventListener("error",event=>showMediaFallback(event.currentTarget,`Imagen ${index+1}`));
     button.onclick = ()=>selectQuickViewMedia(item,index);
     thumbs.appendChild(button);
   });
@@ -1507,7 +1578,7 @@ function renderQuickViewMedia(product){
   selectQuickViewMedia(media[0],0);
 }
 
-function openQuickView(product){
+function openQuickView(product,{fromHistory=false}={}){
   if(!product) return;
   quickViewProduct = product;
   renderQuickViewMedia(product);
@@ -1525,12 +1596,19 @@ function openQuickView(product){
   $("quickViewStock").textContent = `Disponibilidad total: ${Number(product.totalStock || 0)} unidades`;
   $("quickView").classList.remove("hidden");
   document.body.style.overflow = "hidden";
+  if(!fromHistory && !quickViewHistoryActive){
+    history.pushState({woman656QuickView:true},"",location.href);
+    quickViewHistoryActive = true;
+  }
 }
 
-function closeQuickView(){
+function closeQuickView({navigateBack=false}={}){
   $("quickView").classList.add("hidden");
   document.body.style.overflow = "";
   quickViewProduct = null;
+  const hadHistory = quickViewHistoryActive;
+  quickViewHistoryActive = false;
+  if(navigateBack && hadHistory) history.back();
 }
 
 function updatePagination(total,totalPages){
@@ -3186,13 +3264,14 @@ $("mobileNav").querySelectorAll("button[data-category]").forEach(button=>{
   });
 });
 
-$("publicAdminBtn").onclick = async ()=>{
+async function openAdminAccess(){
   try{
     initSupabaseClient();
     const auth = await getAdminState();
 
     if(auth.admin){
       document.body.classList.toggle("admin-mode");
+      $("mobileNav")?.classList.remove("open");
       return;
     }
 
@@ -3200,7 +3279,24 @@ $("publicAdminBtn").onclick = async ()=>{
   }catch(error){
     setPublicCatalogStatus(`❌ ${error.message}`,"error");
   }
-};
+}
+
+$("publicAdminBtn").onclick = openAdminAccess;
+$("mobileAdminBtn").onclick = openAdminAccess;
+$("desktopAdminMenuBtn").onclick = openAdminAccess;
+
+function setCatalogColumns(columns){
+  const twoColumns = Number(columns) === 2;
+  localStorage.setItem("woman656_mobile_catalog_columns",twoColumns ? "2" : "1");
+  $("productGrid").classList.toggle("mobile-two-columns",twoColumns);
+  $("catalogOneColumn").classList.toggle("active",!twoColumns);
+  $("catalogTwoColumns").classList.toggle("active",twoColumns);
+  $("catalogOneColumn").setAttribute("aria-pressed",String(!twoColumns));
+  $("catalogTwoColumns").setAttribute("aria-pressed",String(twoColumns));
+}
+
+$("catalogOneColumn").onclick = ()=>setCatalogColumns(1);
+$("catalogTwoColumns").onclick = ()=>setCatalogColumns(2);
 
 $("favoritesBtn").onclick = ()=>{
   state.favoritesOnly = !state.favoritesOnly;
@@ -3209,9 +3305,9 @@ $("favoritesBtn").onclick = ()=>{
   document.querySelector(".catalog-section")?.scrollIntoView({behavior:"smooth",block:"start"});
 };
 
-$("quickViewClose").onclick = closeQuickView;
+$("quickViewClose").onclick = ()=>closeQuickView({navigateBack:true});
 $("quickView").addEventListener("click",event=>{
-  if(event.target === $("quickView")) closeQuickView();
+  if(event.target === $("quickView")) closeQuickView({navigateBack:true});
 });
 $("quickViewWhatsApp").onclick = ()=>{
   if(!quickViewProduct) return;
@@ -3221,7 +3317,11 @@ $("quickViewWhatsApp").onclick = ()=>{
 };
 
 document.addEventListener("keydown",event=>{
-  if(event.key === "Escape" && !$("quickView").classList.contains("hidden")) closeQuickView();
+  if(event.key === "Escape" && !$("quickView").classList.contains("hidden")) closeQuickView({navigateBack:true});
+});
+
+window.addEventListener("popstate",()=>{
+  if(!$("quickView").classList.contains("hidden")) closeQuickView({navigateBack:false});
 });
 
 $("newsletterForm").addEventListener("submit",event=>{
@@ -3328,6 +3428,7 @@ $("whatsappBtn").onclick = sendWhatsApp;
 
 (async function bootWoman656(){
   applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || "normal");
+  setCatalogColumns(localStorage.getItem("woman656_mobile_catalog_columns") === "2" ? 2 : 1);
   updateFavoritesCount();
   const savedNewsletterEmail = localStorage.getItem("woman656_newsletter_email");
   if(savedNewsletterEmail) $("newsletterEmail").value = savedNewsletterEmail;
