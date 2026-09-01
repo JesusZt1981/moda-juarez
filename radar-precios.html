@@ -128,7 +128,7 @@ tbody tr.selected{background:#eef4ef}
   </header>
 
   <div id="systemStatus" class="status-banner ok">
-    V15 · Google Lens es la fuente de verdad. Más barato y más cercano solo pueden salir de publicaciones encontradas por Lens. El precio se obtiene de esa misma publicación o del mismo ID del mismo comercio en México.
+    V16 · Google Lens es la fuente de verdad. Los enlaces se validan antes de mostrarse: si Lens entrega una URL genérica, se intenta resolver por la misma imagen; si no se confirma una ficha de producto, no se abre.
   </div>
 
   <section class="kpis">
@@ -199,7 +199,7 @@ tbody tr.selected{background:#eef4ef}
       <div id="emptyState" class="empty hidden">No hay productos que coincidan con los filtros.</div>
     </div>
     <div class="footer-note">
-      <b>Google Lens define los comparables.</b> La imagen mostrada siempre es la coincidencia Lens. El radar no puede sustituirla por otro producto para obtener un precio. Si esa misma publicación —o el mismo ID del mismo comercio en México— tiene precio y se puede comprar desde México, participa en <b>Más barato</b> y <b>Más cercano</b>. Monedas extranjeras se convierten a MXN.
+      <b>Google Lens define los comparables.</b> La imagen mostrada siempre es la coincidencia Lens. Antes de mostrar un enlace, el radar verifica que sea una ficha de producto; las URLs genéricas, captcha o home no se presentan como publicación. El precio solo puede pertenecer a esa ficha o al mismo ID del mismo comercio en México.
     </div>
   </section>
 </div>
@@ -528,23 +528,43 @@ function moneyOriginal(item){
 function resultPhoto(item){
   if(!item?.image_url) return '<span class="muted">Sin imagen</span>';
 
+  const safeUrl =
+    item.purchase_url ||
+    (
+      item.publication_resolved === true
+        ? item.publication_url
+        : null
+    );
+
+  const img = `
+    <img
+      class="competitor-photo"
+      src="${esc(item.image_url)}"
+      alt="${esc(item.title || item.site || 'Resultado Lens')}"
+      loading="lazy"
+    >
+  `;
+
   return `
     <div class="competitor-photo-wrap">
-      <a href="${esc(item.purchase_url || item.url || item.image_url)}" target="_blank" rel="noopener">
-        <img
-          class="competitor-photo"
-          src="${esc(item.image_url)}"
-          alt="${esc(item.title || item.site || 'Resultado')}"
-          loading="lazy"
-        >
-      </a>
+      ${safeUrl
+        ? `<a href="${esc(safeUrl)}" target="_blank" rel="noopener">${img}</a>`
+        : img
+      }
       ${item.lens_rank ? `<div class="pill good" style="margin-top:5px">Lens #${Number(item.lens_rank)}</div>` : ''}
     </div>
   `;
 }
-
 function resultBlock(item, myPrice, kind='price'){
   if(!item) return '<span class="muted">Sin coincidencia confiable</span>';
+
+  const safePublicationUrl =
+    item.purchase_url ||
+    (
+      item.publication_resolved === true
+        ? item.publication_url
+        : null
+    );
 
   const priceMxn = Number(item.price_mxn ?? item.price);
   const hasPrice = Number.isFinite(priceMxn) && priceMxn > 0;
@@ -620,10 +640,17 @@ function resultBlock(item, myPrice, kind='price'){
           ${lensInfo}
           ${matchInfo}
           ${item.source_image_slot ? `<span class="pill">Foto WOMAN ${Number(item.source_image_slot)}</span>` : ''}
+          ${item.publication_resolved === true
+            ? '<span class="pill valid">Enlace validado</span>'
+            : '<span class="pill close">Enlace no resuelto</span>'
+          }
         </div>
         ${item.image_url ? resultPhoto(item) : ''}
         <div class="fabric-result"><b>Tela:</b> ${esc(fabric)}</div>
-        ${(item.purchase_url || item.url) ? `<a href="${esc(item.purchase_url || item.url)}" target="_blank" rel="noopener">${linkText}</a>` : ''}
+        ${safePublicationUrl
+        ? `<a href="${esc(safePublicationUrl)}" target="_blank" rel="noopener">${linkText}</a>`
+        : '<div class="muted" style="margin-top:5px">Publicación no resoluble</div>'
+      }
       </div>
     `;
   }
@@ -644,7 +671,10 @@ function resultBlock(item, myPrice, kind='price'){
       </div>
       <div class="fabric-result"><b>Tela:</b> ${esc(fabric)}</div>
       ${diffHtml}
-      ${(item.purchase_url || item.url) ? `<a href="${esc(item.purchase_url || item.url)}" target="_blank" rel="noopener">${linkText}</a>` : '<span class="muted">Sin enlace</span>'}
+      ${safePublicationUrl
+        ? `<a href="${esc(safePublicationUrl)}" target="_blank" rel="noopener">${linkText}</a>`
+        : '<span class="muted">Publicación no resoluble</span>'
+      }
     </div>
   `;
 }
