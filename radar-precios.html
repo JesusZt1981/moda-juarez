@@ -128,7 +128,7 @@ tbody tr.selected{background:#eef4ef}
   </header>
 
   <div id="systemStatus" class="status-banner ok">
-    Google Lens define qué productos son comparables. Más barato y más cercano solo usan coincidencias Lens comprables desde México; precios extranjeros se convierten a MXN y la tela se muestra cuando la publicación la informa.
+    V15 · Google Lens es la fuente de verdad. Más barato y más cercano solo pueden salir de publicaciones encontradas por Lens. El precio se obtiene de esa misma publicación o del mismo ID del mismo comercio en México.
   </div>
 
   <section class="kpis">
@@ -199,7 +199,7 @@ tbody tr.selected{background:#eef4ef}
       <div id="emptyState" class="empty hidden">No hay productos que coincidan con los filtros.</div>
     </div>
     <div class="footer-note">
-      <b>Google Lens define los comparables.</b> Más barato y más cercano solo pueden salir de coincidencias Lens con venta verificable desde México. Si el precio está en otra moneda se convierte a MXN con el tipo de cambio diario. La tela/composición se muestra solo cuando la publicación la informa; de lo contrario aparece <b>No informado</b>.
+      <b>Google Lens define los comparables.</b> La imagen mostrada siempre es la coincidencia Lens. El radar no puede sustituirla por otro producto para obtener un precio. Si esa misma publicación —o el mismo ID del mismo comercio en México— tiene precio y se puede comprar desde México, participa en <b>Más barato</b> y <b>Más cercano</b>. Monedas extranjeras se convierten a MXN.
     </div>
   </section>
 </div>
@@ -530,7 +530,7 @@ function resultPhoto(item){
 
   return `
     <div class="competitor-photo-wrap">
-      <a href="${esc(item.url || item.image_url)}" target="_blank" rel="noopener">
+      <a href="${esc(item.purchase_url || item.url || item.image_url)}" target="_blank" rel="noopener">
         <img
           class="competitor-photo"
           src="${esc(item.image_url)}"
@@ -623,7 +623,7 @@ function resultBlock(item, myPrice, kind='price'){
         </div>
         ${item.image_url ? resultPhoto(item) : ''}
         <div class="fabric-result"><b>Tela:</b> ${esc(fabric)}</div>
-        ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${linkText}</a>` : ''}
+        ${(item.purchase_url || item.url) ? `<a href="${esc(item.purchase_url || item.url)}" target="_blank" rel="noopener">${linkText}</a>` : ''}
       </div>
     `;
   }
@@ -644,7 +644,7 @@ function resultBlock(item, myPrice, kind='price'){
       </div>
       <div class="fabric-result"><b>Tela:</b> ${esc(fabric)}</div>
       ${diffHtml}
-      ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${linkText}</a>` : '<span class="muted">Sin enlace</span>'}
+      ${(item.purchase_url || item.url) ? `<a href="${esc(item.purchase_url || item.url)}" target="_blank" rel="noopener">${linkText}</a>` : '<span class="muted">Sin enlace</span>'}
     </div>
   `;
 }
