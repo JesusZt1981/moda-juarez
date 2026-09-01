@@ -122,8 +122,8 @@ tbody tr.selected{background:#eef4ef}
     </div>
   </header>
 
-  <div id="systemStatus" class="status-banner warn">
-    Radar visual listo. El motor externo de comparación real se conectará en la siguiente etapa; por ahora esta página ya toma automáticamente tus productos de Supabase, detecta nuevos SKU y prepara las selecciones para validación.
+  <div id="systemStatus" class="status-banner ok">
+    Motor real conectado a Google Shopping México mediante Serper. Selecciona uno o varios productos y usa “Actualizar seleccionados”. La comparación visual se conectará en la siguiente etapa.
   </div>
 
   <section class="kpis">
@@ -214,7 +214,7 @@ const db = window.supabase.createClient(
 );
 
 const STATE_KEY = 'woman656-price-radar-state-v1';
-const API_KEY = 'woman656-price-radar-api-base';
+const RADAR_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/price-radar-search`;
 
 let products = [];
 let visibleProducts = [];
@@ -509,15 +509,33 @@ function resultBlock(item, myPrice){
   if(diff < 0){ diffClass='diff-neg'; diffText=`${money(Math.abs(diff))} más barato`; }
   else if(diff > 0){ diffClass='diff-pos'; diffText=`Tú eres ${money(diff)} más barato`; }
 
+  const relevance = item.similarity !== undefined
+    ? `<span class="pill">${Math.round(Number(item.similarity)||0)}% similitud</span>`
+    : item.text_relevance !== undefined
+      ? `<span class="pill">${Math.round(Number(item.text_relevance)||0)}% texto</span>`
+      : '';
+
+  const linkType = item.url_type === 'merchant'
+    ? '<span class="pill good">Enlace directo</span>'
+    : item.url_type === 'google-shopping'
+      ? '<span class="pill close">Google Shopping</span>'
+      : '';
+
+  const linkText = item.url_type === 'google-shopping'
+    ? 'Abrir resultado Google ↗'
+    : 'Abrir publicación ↗';
+
   return `
     <div class="competitor">
       <strong>${esc(item.site || 'Competidor')} · ${money(price)}</strong>
+      ${item.title ? `<div class="desc" title="${esc(item.title)}">${esc(item.title)}</div>` : ''}
       <div class="meta">
         ${shippingLabel(item.shipping)}
-        ${item.similarity !== undefined ? `<span class="pill">${Math.round(Number(item.similarity)||0)}% similitud</span>` : ''}
+        ${relevance}
+        ${linkType}
       </div>
       <div class="${diffClass}">${esc(diffText)}</div>
-      ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">Abrir publicación ↗</a>` : '<span class="muted">Sin enlace</span>'}
+      ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${linkText}</a>` : '<span class="muted">Sin enlace</span>'}
     </div>
   `;
 }
@@ -596,59 +614,100 @@ function clearSelection(){
 }
 
 async function validateSkus(skus, source){
-  const unique = [...new Set(skus)].filter(Boolean);
+  const activeSkus = new Set(products.map(p=>p.sku));
+  const unique = [...new Set(skus)]
+    .filter(Boolean)
+    .filter(sku=>activeSkus.has(sku));
+
   if(!unique.length){
-    setBanner('No hay productos para validar.','warn');
+    setBanner('No hay productos activos con stock para validar.','warn');
     return;
   }
 
-  const apiBase = String(localStorage.getItem(API_KEY) || '').replace(/\/+$/,'');
-  if(!apiBase){
-    selectedSkus = new Set(unique);
-    render();
-    setBanner(
-      `${unique.length} producto(s) preparados para ${source}. La interfaz del radar ya está lista; falta conectar el motor externo de búsqueda/validación real para ejecutar estas consultas.`,
-      'warn'
-    );
-    return;
-  }
-
-  setBanner(`Validando ${unique.length} producto(s)…`,'warn');
+  setBanner(`Preparando ${unique.length} producto(s) para ${source}…`,'warn');
   $('validateSelectedBtn').disabled = true;
   $('validateNewBtn').disabled = true;
 
   try{
-    const {data:{session}} = await db.auth.getSession();
+    const {data:{session}, error:sessionError} = await db.auth.getSession();
+    if(sessionError) throw sessionError;
     const token = session?.access_token || '';
 
-    const response = await fetch(`${apiBase}/api/price-radar/validate`,{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        ...(token ? {'Authorization':`Bearer ${token}`} : {})
-      },
-      body:JSON.stringify({skus:unique})
-    });
+    if(!token){
+      throw new Error('No hay una sesión ADMIN activa.');
+    }
 
-    const text = await response.text();
-    let payload;
-    try{ payload = JSON.parse(text); }catch{ payload = {message:text}; }
+    // La Edge Function admite máximo 50 SKU por petición.
+    // Si el catálogo crece, el radar los procesa automáticamente por bloques.
+    const chunks = [];
+    for(let i=0;i<unique.length;i+=50){
+      chunks.push(unique.slice(i,i+50));
+    }
 
-    if(!response.ok) throw new Error(payload?.detail || payload?.message || `HTTP ${response.status}`);
+    let allResults = [];
+    let processed = 0;
 
-    const results = Array.isArray(payload?.items) ? payload.items : [];
-    for(const item of results){
+    for(const chunk of chunks){
+      setBanner(
+        `Buscando precios reales en Google Shopping México… ${processed}/${unique.length} procesados.`,
+        'warn'
+      );
+
+      const response = await fetch(RADAR_FUNCTION_URL,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${token}`
+        },
+        body:JSON.stringify({skus:chunk})
+      });
+
+      const text = await response.text();
+      let payload;
+      try{ payload = JSON.parse(text); }catch{ payload = {message:text}; }
+
+      if(!response.ok){
+        throw new Error(
+          payload?.error ||
+          payload?.detail ||
+          payload?.message ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      const batchResults = Array.isArray(payload?.results) ? payload.results : [];
+      allResults = allResults.concat(batchResults);
+      processed += chunk.length;
+    }
+
+    for(const item of allResults){
       if(!item?.sku) continue;
+
       state.results[item.sku] = {
         ...(state.results[item.sku] || {}),
         ...item,
         checked_at:item.checked_at || new Date().toISOString()
       };
+
       state.pendingNewSkus = state.pendingNewSkus.filter(s=>s!==item.sku);
     }
+
     saveState();
-    setBanner(`Validación terminada: ${results.length} producto(s) actualizado(s).`,'ok');
+
+    const withCompetitor = allResults.filter(
+      item=>item?.cheapest || item?.closest
+    ).length;
+
+    const withoutCompetitor = allResults.length - withCompetitor;
+
+    setBanner(
+      `Validación terminada: ${allResults.length} producto(s) consultado(s). ` +
+      `${withCompetitor} con competidores válidos` +
+      (withoutCompetitor ? ` y ${withoutCompetitor} sin coincidencia suficiente.` : '.'),
+      'ok'
+    );
   }catch(e){
+    console.error('Radar WOMAN 656:', e);
     setBanner(`La validación no pudo completarse: ${e.message}`,'error');
   }finally{
     applyFilters();
