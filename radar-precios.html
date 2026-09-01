@@ -123,7 +123,7 @@ tbody tr.selected{background:#eef4ef}
   </header>
 
   <div id="systemStatus" class="status-banner ok">
-    Motor real conectado a Google Shopping México mediante Serper. Selecciona uno o varios productos y usa “Actualizar seleccionados”. La comparación visual se conectará en la siguiente etapa.
+    Google Shopping + Google Lens conectados. El radar busca precio y coincidencia visual usando varias fotos del producto, priorizando la misma familia de prenda.
   </div>
 
   <section class="kpis">
@@ -192,7 +192,7 @@ tbody tr.selected{background:#eef4ef}
       <div id="emptyState" class="empty hidden">No hay productos que coincidan con los filtros.</div>
     </div>
     <div class="footer-note">
-      El envío se mostrará únicamente como <b>Gratis</b>, <b>Cobra envío</b> o <b>No informado</b>. No se calculará el costo del envío. Los enlaces de competidores se conservarán para comprobación manual.
+      Google Shopping se usa para precio y Google Lens para similitud visual. Lens muestra su posición real como <b>Top Lens #1, #2…</b>; no se inventa un porcentaje visual. Si una coincidencia visual no es de México, su precio se muestra solo como referencia.
     </div>
   </section>
 </div>
@@ -501,13 +501,25 @@ function shippingLabel(v){
   return '<span class="pill pending">Envío no informado</span>';
 }
 
-function resultBlock(item, myPrice){
+function resultBlock(item, myPrice, kind='price'){
   if(!item) return '<span class="muted">Sin resultado</span>';
-  const price = Number(item.price || 0);
-  const diff = price - Number(myPrice || 0);
-  let diffClass='diff-neutral', diffText='Igual';
-  if(diff < 0){ diffClass='diff-neg'; diffText=`${money(Math.abs(diff))} más barato`; }
-  else if(diff > 0){ diffClass='diff-pos'; diffText=`Tú eres ${money(diff)} más barato`; }
+
+  const hasPrice = item.price !== null && item.price !== undefined && Number(item.price) > 0;
+  const price = hasPrice ? Number(item.price) : null;
+
+  let diffHtml = '';
+  if(hasPrice){
+    const diff = price - Number(myPrice || 0);
+    let diffClass='diff-neutral', diffText='Igual';
+    if(diff < 0){
+      diffClass='diff-neg';
+      diffText=`${money(Math.abs(diff))} más barato`;
+    }else if(diff > 0){
+      diffClass='diff-pos';
+      diffText=`Tú eres ${money(diff)} más barato`;
+    }
+    diffHtml = `<div class="${diffClass}">${esc(diffText)}</div>`;
+  }
 
   const relevance = item.similarity !== undefined
     ? `<span class="pill">${Math.round(Number(item.similarity)||0)}% similitud</span>`
@@ -525,21 +537,36 @@ function resultBlock(item, myPrice){
     ? 'Abrir resultado Google ↗'
     : 'Abrir publicación ↗';
 
+  const visualInfo = kind === 'visual'
+    ? `
+      ${item.visual_label ? `<span class="pill good">${esc(item.visual_label)}</span>` : ''}
+      ${item.source_image_slot ? `<span class="pill">Foto ${Number(item.source_image_slot)}</span>` : ''}
+      ${item.mexico_signal === false ? '<span class="pill close">Fuera de MX</span>' : ''}
+    `
+    : '';
+
+  const visualNote = kind === 'visual' && item.mexico_signal === false
+    ? '<div class="muted" style="margin-top:4px">Precio solo como referencia visual.</div>'
+    : '';
+
   return `
     <div class="competitor">
-      <strong>${esc(item.site || 'Competidor')} · ${money(price)}</strong>
+      <strong>
+        ${esc(item.site || 'Competidor')}
+        ${hasPrice ? ` · ${money(price)}` : ''}
+      </strong>
       ${item.title ? `<div class="desc" title="${esc(item.title)}">${esc(item.title)}</div>` : ''}
       <div class="meta">
-        ${shippingLabel(item.shipping)}
+        ${kind === 'visual' ? visualInfo : shippingLabel(item.shipping)}
         ${relevance}
         ${linkType}
       </div>
-      <div class="${diffClass}">${esc(diffText)}</div>
+      ${kind === 'visual' && item.mexico_signal === false ? '' : diffHtml}
+      ${visualNote}
       ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${linkText}</a>` : '<span class="muted">Sin enlace</span>'}
     </div>
   `;
 }
-
 function productStatusPill(p){
   if(isNewSku(p.sku)) return '<span class="pill new">Nuevo/agregado</span>';
   if(isValidated(p.sku)) return '<span class="pill valid">Validado</span>';
@@ -565,9 +592,9 @@ function render(){
         </td>
         <td><span class="price">${money(p.price)}</span></td>
         <td>${productStatusPill(p)}</td>
-        <td>${resultBlock(r?.cheapest, p.price)}</td>
-        <td>${resultBlock(r?.closest, p.price)}</td>
-        <td>${resultBlock(r?.visual, p.price)}</td>
+        <td>${resultBlock(r?.cheapest, p.price, 'price')}</td>
+        <td>${resultBlock(r?.closest, p.price, 'price')}</td>
+        <td>${resultBlock(r?.visual, p.price, 'visual')}</td>
         <td>${r?.checked_at ? shortDate(r.checked_at) : '—'}</td>
       </tr>
     `;
