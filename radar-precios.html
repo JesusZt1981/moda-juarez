@@ -127,7 +127,7 @@ tbody tr.selected{background:#eef4ef}
   </div>
 
   <section class="kpis">
-    <div class="kpi"><span>Productos activos</span><strong id="kpiActive">0</strong></div>
+    <div class="kpi"><span>Activos con stock</span><strong id="kpiActive">0</strong></div>
     <div class="kpi"><span>Nuevos/agregados</span><strong id="kpiNew">0</strong></div>
     <div class="kpi"><span>Seleccionados</span><strong id="kpiSelected">0</strong></div>
     <div class="kpi"><span>Con validación</span><strong id="kpiValidated">0</strong></div>
@@ -332,20 +332,102 @@ async function checkAdmin(){
 }
 
 async function loadProducts(){
-  setBanner('Leyendo inventario activo desde Supabase…','warn');
+  setBanner('Leyendo productos activos con inventario mayor a 0 desde Supabase…','warn');
 
-  const {data,error} = await db
+  // 1) Productos activos.
+  const {data:productRows,error:productError} = await db
     .from('shop_products')
     .select('id,sku,category,description,price,image_1,fabric_type,active,updated_at')
     .eq('active',true)
     .order('updated_at',{ascending:false});
 
-  if(error){
-    setBanner(`No fue posible leer shop_products: ${error.message}`,'error');
+  if(productError){
+    setBanner(`No fue posible leer shop_products: ${productError.message}`,'error');
     return;
   }
 
-  products = (data || []).filter(p => p.sku);
+  const activeProducts = (productRows || []).filter(p => p.id && p.sku);
+  const productIds = activeProducts.map(p => p.id);
+
+  if(!productIds.length){
+    products = [];
+    fillCategories();
+    applyFilters();
+    setBanner('No hay productos activos en Supabase.','warn');
+    return;
+  }
+
+  // Supabase/PostgREST admite .in(); se consulta por bloques para que el radar
+  // siga funcionando aunque el catálogo crezca mucho.
+  async function fetchInChunks(table, columns, field, ids, extraFilter){
+    const out = [];
+    const chunkSize = 200;
+
+    for(let i=0;i<ids.length;i+=chunkSize){
+      const chunk = ids.slice(i,i+chunkSize);
+      let query = db.from(table).select(columns).in(field,chunk);
+      if(typeof extraFilter === 'function') query = extraFilter(query);
+
+      const {data,error} = await query;
+      if(error) throw error;
+      out.push(...(data || []));
+    }
+
+    return out;
+  }
+
+  try{
+    // 2) Variantes activas pertenecientes a esos productos.
+    const variants = await fetchInChunks(
+      'shop_product_variants',
+      'id,product_id,active',
+      'product_id',
+      productIds,
+      q => q.eq('active',true)
+    );
+
+    const variantIds = variants.map(v => v.id).filter(Boolean);
+
+    // 3) Existencias por variante.
+    const inventoryRows = variantIds.length
+      ? await fetchInChunks(
+          'shop_inventory',
+          'variant_id,quantity',
+          'variant_id',
+          variantIds
+        )
+      : [];
+
+    const productByVariant = new Map(
+      variants.map(v => [String(v.id), v.product_id])
+    );
+
+    const stockByProduct = new Map();
+
+    for(const row of inventoryRows){
+      const productId = productByVariant.get(String(row.variant_id));
+      if(!productId) continue;
+
+      const qty = Number(row.quantity || 0);
+      stockByProduct.set(
+        productId,
+        (stockByProduct.get(productId) || 0) + qty
+      );
+    }
+
+    // Regla del radar:
+    // active = true Y suma de inventario de variantes activas > 0.
+    products = activeProducts
+      .map(p => ({
+        ...p,
+        stock_total:Number(stockByProduct.get(p.id) || 0)
+      }))
+      .filter(p => p.stock_total > 0);
+
+  }catch(e){
+    setBanner(`No fue posible validar existencias: ${e.message}`,'error');
+    return;
+  }
 
   const known = new Set(state.knownSkus);
   const pending = new Set(state.pendingNewSkus);
@@ -357,7 +439,8 @@ async function loadProducts(){
     }
   }
 
-  // Elimina de "nuevos" SKU que ya no existen en el catálogo activo.
+  // Si un SKU queda en cero o se desactiva, deja de participar en el radar.
+  // Si después vuelve a tener stock, aparecerá automáticamente al sincronizar.
   const currentSkus = new Set(products.map(p => p.sku));
   state.knownSkus = [...known];
   state.pendingNewSkus = [...pending].filter(sku => currentSkus.has(sku));
@@ -367,7 +450,7 @@ async function loadProducts(){
   fillCategories();
   applyFilters();
   setBanner(
-    `Inventario sincronizado: ${products.length} producto(s) activo(s). ${state.pendingNewSkus.length} pendiente(s) como nuevo/agregado.`,
+    `Inventario sincronizado: ${products.length} producto(s) activo(s) con existencias. ${state.pendingNewSkus.length} pendiente(s) como nuevo/agregado.`,
     'ok'
   );
 }
