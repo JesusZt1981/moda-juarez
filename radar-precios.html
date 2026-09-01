@@ -285,24 +285,38 @@ async function checkAdmin(){
     return;
   }
 
-  const token =
-    sessionStorage.getItem('woman656-admin-token') ||
-    sessionStorage.getItem('moda-juarez-admin-token') ||
-    '';
-
-  if(!token){
-    $('authText').textContent = 'No hay una sesión ADMIN disponible. Cuando integremos el enlace en tu panel, abre el radar desde la sesión ADMIN de WOMAN 656.';
-    return;
-  }
-
   try{
-    const {data,error} = await db.auth.getUser(token);
-    if(error || !data?.user) throw error || new Error('Sesión inválida');
+    // Usa exactamente la misma sesión Supabase que la tienda WOMAN 656.
+    const {data:{session}, error:sessionError} = await db.auth.getSession();
+
+    if(sessionError) throw sessionError;
+
+    if(!session?.user){
+      $('authText').textContent = 'No hay una sesión ADMIN activa. Entra primero a WOMAN 656 como ADMIN y luego vuelve a abrir el Radar de precios.';
+      return;
+    }
+
+    // La tienda valida el permiso ADMIN mediante profiles.role = admin.
+    const {data:profile, error:profileError} = await db
+      .from('profiles')
+      .select('email,role')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if(profileError) throw profileError;
+
+    if(String(profile?.role || '').toLowerCase() !== 'admin'){
+      $('authText').textContent = `La sesión ${profile?.email || session.user.email || ''} está iniciada, pero no tiene permiso ADMIN.`;
+      return;
+    }
+
     $('authBox').classList.add('hidden');
     $('app').classList.remove('hidden');
     await loadProducts();
+
   }catch(e){
-    $('authText').textContent = 'La sesión ADMIN no pudo validarse. Vuelve a abrir el radar desde el panel ADMIN de WOMAN 656.';
+    console.error('Radar ADMIN:', e);
+    $('authText').textContent = 'No fue posible validar la sesión ADMIN. Regresa a WOMAN 656, confirma que el panel ADMIN esté abierto y vuelve a entrar al radar.';
   }
 }
 
@@ -510,10 +524,8 @@ async function validateSkus(skus, source){
   $('validateNewBtn').disabled = true;
 
   try{
-    const token =
-      sessionStorage.getItem('woman656-admin-token') ||
-      sessionStorage.getItem('moda-juarez-admin-token') ||
-      '';
+    const {data:{session}} = await db.auth.getSession();
+    const token = session?.access_token || '';
 
     const response = await fetch(`${apiBase}/api/price-radar/validate`,{
       method:'POST',
