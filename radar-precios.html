@@ -200,7 +200,18 @@ tbody tr.selected{background:#eef4ef}
 <script>
 const SUPABASE_URL = 'https://snkuvxpddxcmbfhgabbx.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storageKey:'woman656-auth-token-v1'
+    }
+  }
+);
 
 const STATE_KEY = 'woman656-price-radar-state-v1';
 const API_KEY = 'woman656-price-radar-api-base';
