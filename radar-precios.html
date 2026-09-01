@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WOMAN 656 · Radar de precios</title>
+<meta name="theme-color" content="#73877a">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#f6f4ef;
+  --surface:#fff;
+  --surface-soft:#eef2ef;
+  --text:#303638;
+  --muted:#6d7474;
+  --border:#d9dfdc;
+  --sage:#a8b9ad;
+  --sage-dark:#73877a;
+  --blue:#aebdca;
+  --blue-dark:#73899b;
+  --sand:#d8c8ae;
+  --danger:#b67f7f;
+  --warn:#bd8d4e;
+  --ok:#5e8068;
+  --shadow:0 8px 24px rgba(44,52,52,.08);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.wrap{max-width:1550px;margin:auto;padding:20px}
+.topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.brand h1{margin:0;font-size:28px;letter-spacing:.02em}
+.brand p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:800}
+.btn.primary{background:var(--sage-dark);color:#fff}
+.btn.secondary{background:var(--blue);color:#26343d}
+.btn.light{background:#fff;border:1px solid var(--border);color:var(--text)}
+.btn.warn{background:#f4eadb;color:#765425}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.status-banner{margin-bottom:16px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#fff;font-size:13px;line-height:1.5}
+.status-banner.warn{background:#fff8ed;border-color:#e5cba7;color:#6d512d}
+.status-banner.ok{background:#edf5ef;border-color:#c8dbc9;color:#375c41}
+.status-banner.error{background:#fff0f0;border-color:#e2bcbc;color:#7a4141}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+.kpi span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.kpi strong{display:block;margin-top:5px;font-size:25px}
+.controls{display:grid;grid-template-columns:minmax(240px,1.5fr) 200px 190px 180px;gap:10px;padding:14px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px}
+.control label{display:block;margin-bottom:5px;font-size:11px;font-weight:800;color:var(--muted)}
+.control input,.control select{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text)}
+.selection-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;margin-bottom:12px;background:#fff;border:1px solid var(--border);border-radius:12px}
+.selection-actions{display:flex;gap:7px;flex-wrap:wrap}
+.selection-bar small{color:var(--muted)}
+.table-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.table-wrap{overflow:auto;max-height:calc(100vh - 315px)}
+table{width:100%;border-collapse:collapse;min-width:1320px}
+thead th{position:sticky;top:0;z-index:4;background:#f3f5f3;border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;font-size:11px;color:#59635e;white-space:nowrap}
+tbody td{border-bottom:1px solid #ecefed;padding:9px 8px;vertical-align:middle;font-size:12px}
+tbody tr:hover{background:#fafbf9}
+tbody tr.selected{background:#eef4ef}
+.check{width:18px;height:18px}
+.product-cell{display:grid;grid-template-columns:58px minmax(180px,1fr);gap:9px;align-items:center;max-width:390px}
+.product-cell img{width:58px;height:76px;object-fit:contain;background:#f6f5f3;border:1px solid var(--border);border-radius:8px}
+.sku{font-weight:900;font-size:12px}
+.desc{margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#4f5655;line-height:1.35}
+.fabric{margin-top:4px;color:var(--muted);font-size:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.price{font-size:16px;font-weight:900;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:5px 8px;border:1px solid var(--border);font-size:10px;font-weight:800;white-space:nowrap}
+.pill.new{background:#fff4df;border-color:#e2c28d;color:#785a24}
+.pill.pending{background:#f1f1f1;color:#606666}
+.pill.valid{background:#eaf4ec;border-color:#c1d9c5;color:#406149}
+.pill.cheaper{background:#fff0f0;border-color:#e3b9b9;color:#7b4141}
+.pill.good{background:#eaf4ec;border-color:#c1d9c5;color:#406149}
+.pill.close{background:#fff7e7;border-color:#e7d0a6;color:#6c542e}
+.competitor{min-width:180px;max-width:235px}
+.competitor strong{display:block;font-size:13px}
+.competitor .meta{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0}
+.competitor a{display:inline-block;margin-top:4px;color:#496b86;font-weight:800;text-decoration:none}
+.competitor a:hover{text-decoration:underline}
+.muted{color:var(--muted)}
+.diff-pos{color:#3e6b49;font-weight:900}
+.diff-neg{color:#9a4d4d;font-weight:900}
+.diff-neutral{color:#7a6b45;font-weight:900}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+.footer-note{padding:10px 12px;color:var(--muted);font-size:11px;background:#fafafa;border-top:1px solid var(--border)}
+.auth{max-width:660px;margin:80px auto;padding:30px;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);text-align:center}
+.auth h2{margin-top:0}
+.auth p{color:var(--muted);line-height:1.5}
+@media(max-width:1000px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .controls{grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+  .wrap{padding:12px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .controls{grid-template-columns:1fr}
+  .top-actions .btn{flex:1}
+}
+</style>
+</head>
+<body>
+
+<div id="authBox" class="auth">
+  <h2>🔒 WOMAN 656 · Radar de precios</h2>
+  <p id="authText">Comprobando sesión ADMIN…</p>
+</div>
+
+<div id="app" class="wrap hidden">
+  <header class="topbar">
+    <div class="brand">
+      <h1>📊 Radar de precios</h1>
+      <p>WOMAN 656 · inventario leído directamente desde Supabase</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn light" id="reloadProductsBtn">↻ Actualizar inventario</button>
+      <button class="btn secondary" id="validateNewBtn">✨ Validar nuevos/agregados</button>
+      <button class="btn primary" id="validateSelectedBtn">🔎 Actualizar seleccionados</button>
+    </div>
+  </header>
+
+  <div id="systemStatus" class="status-banner warn">
+    Radar visual listo. El motor externo de comparación real se conectará en la siguiente etapa; por ahora esta página ya toma automáticamente tus productos de Supabase, detecta nuevos SKU y prepara las selecciones para validación.
+  </div>
+
+  <section class="kpis">
+    <div class="kpi"><span>Productos activos</span><strong id="kpiActive">0</strong></div>
+    <div class="kpi"><span>Nuevos/agregados</span><strong id="kpiNew">0</strong></div>
+    <div class="kpi"><span>Seleccionados</span><strong id="kpiSelected">0</strong></div>
+    <div class="kpi"><span>Con validación</span><strong id="kpiValidated">0</strong></div>
+    <div class="kpi"><span>Última sincronización</span><strong id="kpiSync" style="font-size:16px">—</strong></div>
+  </section>
+
+  <section class="controls">
+    <div class="control">
+      <label>Buscar</label>
+      <input id="searchInput" placeholder="SKU, descripción, categoría o tela…">
+    </div>
+    <div class="control">
+      <label>Categoría</label>
+      <select id="categoryFilter"><option value="">Todas</option></select>
+    </div>
+    <div class="control">
+      <label>Estado</label>
+      <select id="statusFilter">
+        <option value="">Todos</option>
+        <option value="new">Nuevos/agregados</option>
+        <option value="unvalidated">Sin validar</option>
+        <option value="validated">Validados</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Ordenar</label>
+      <select id="sortSelect">
+        <option value="new">Nuevos primero</option>
+        <option value="priceAsc">Precio menor</option>
+        <option value="priceDesc">Precio mayor</option>
+        <option value="sku">SKU</option>
+      </select>
+    </div>
+  </section>
+
+  <div class="selection-bar">
+    <div class="selection-actions">
+      <button class="btn light" id="selectVisibleBtn">Seleccionar visibles</button>
+      <button class="btn light" id="selectUnvalidatedBtn">Seleccionar sin validar</button>
+      <button class="btn light" id="clearSelectionBtn">Limpiar selección</button>
+    </div>
+    <small id="visibleCount">0 productos visibles</small>
+  </div>
+
+  <section class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Producto WOMAN 656</th>
+            <th>Mi precio</th>
+            <th>Estado</th>
+            <th>Más barato encontrado</th>
+            <th>Más cercano a mi precio</th>
+            <th>Mejor coincidencia visual</th>
+            <th>Última validación</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="emptyState" class="empty hidden">No hay productos que coincidan con los filtros.</div>
+    </div>
+    <div class="footer-note">
+      El envío se mostrará únicamente como <b>Gratis</b>, <b>Cobra envío</b> o <b>No informado</b>. No se calculará el costo del envío. Los enlaces de competidores se conservarán para comprobación manual.
+    </div>
+  </section>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://snkuvxpddxcmbfhgabbx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STATE_KEY = 'woman656-price-radar-state-v1';
+const API_KEY = 'woman656-price-radar-api-base';
+
+let products = [];
+let visibleProducts = [];
+let selectedSkus = new Set();
+let state = loadState();
+
+const $ = id => document.getElementById(id);
+
+function loadState(){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+    return {
+      knownSkus: Array.isArray(parsed.knownSkus) ? parsed.knownSkus : [],
+      pendingNewSkus: Array.isArray(parsed.pendingNewSkus) ? parsed.pendingNewSkus : [],
+      results: parsed.results && typeof parsed.results === 'object' ? parsed.results : {},
+      lastInventorySync: parsed.lastInventorySync || ''
+    };
+  }catch{
+    return {knownSkus:[], pendingNewSkus:[], results:{}, lastInventorySync:''};
+  }
+}
+
+function saveState(){
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+function esc(v=''){
+  return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function money(v){
+  const n = Number(v || 0);
+  return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:2}).format(n);
+}
+
+function shortDate(v){
+  if(!v) return '—';
+  const d = new Date(v);
+  if(Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+function normalizeCategory(v){
+  const t = String(v || 'Sin categoría').trim().toLowerCase();
+  return t.replace(/\b\p{L}/gu, c => c.toUpperCase());
+}
+
+function currentResult(sku){
+  return state.results?.[sku] || null;
+}
+
+function isNewSku(sku){
+  return state.pendingNewSkus.includes(sku);
+}
+
+function isValidated(sku){
+  const r = currentResult(sku);
+  return !!(r && r.checked_at);
+}
+
+function statusOf(p){
+  if(isNewSku(p.sku)) return 'new';
+  if(isValidated(p.sku)) return 'validated';
+  return 'unvalidated';
+}
+
+function setBanner(message,type='warn'){
+  const el = $('systemStatus');
+  el.textContent = message;
+  el.className = `status-banner ${type}`;
+}
+
+async function checkAdmin(){
+  if(location.protocol === 'file:'){
+    $('authBox').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    setBanner('Vista local de desarrollo. Se omite la validación ADMIN porque abriste el archivo directamente desde tu PC.','warn');
+    await loadProducts();
+    return;
+  }
+
+  const token =
+    sessionStorage.getItem('woman656-admin-token') ||
+    sessionStorage.getItem('moda-juarez-admin-token') ||
+    '';
+
+  if(!token){
+    $('authText').textContent = 'No hay una sesión ADMIN disponible. Cuando integremos el enlace en tu panel, abre el radar desde la sesión ADMIN de WOMAN 656.';
+    return;
+  }
+
+  try{
+    const {data,error} = await db.auth.getUser(token);
+    if(error || !data?.user) throw error || new Error('Sesión inválida');
+    $('authBox').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    await loadProducts();
+  }catch(e){
+    $('authText').textContent = 'La sesión ADMIN no pudo validarse. Vuelve a abrir el radar desde el panel ADMIN de WOMAN 656.';
+  }
+}
+
+async function loadProducts(){
+  setBanner('Leyendo inventario activo desde Supabase…','warn');
+
+  const {data,error} = await db
+    .from('shop_products')
+    .select('id,sku,category,description,price,image_1,fabric_type,active,updated_at')
+    .eq('active',true)
+    .order('updated_at',{ascending:false});
+
+  if(error){
+    setBanner(`No fue posible leer shop_products: ${error.message}`,'error');
+    return;
+  }
+
+  products = (data || []).filter(p => p.sku);
+
+  const known = new Set(state.knownSkus);
+  const pending = new Set(state.pendingNewSkus);
+
+  for(const p of products){
+    if(!known.has(p.sku)){
+      known.add(p.sku);
+      pending.add(p.sku);
+    }
+  }
+
+  // Elimina de "nuevos" SKU que ya no existen en el catálogo activo.
+  const currentSkus = new Set(products.map(p => p.sku));
+  state.knownSkus = [...known];
+  state.pendingNewSkus = [...pending].filter(sku => currentSkus.has(sku));
+  state.lastInventorySync = new Date().toISOString();
+  saveState();
+
+  fillCategories();
+  applyFilters();
+  setBanner(
+    `Inventario sincronizado: ${products.length} producto(s) activo(s). ${state.pendingNewSkus.length} pendiente(s) como nuevo/agregado.`,
+    'ok'
+  );
+}
+
+function fillCategories(){
+  const current = $('categoryFilter').value;
+  const cats = [...new Set(products.map(p => normalizeCategory(p.category)))].sort((a,b)=>a.localeCompare(b,'es'));
+  $('categoryFilter').innerHTML = '<option value="">Todas</option>' + cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  if(cats.includes(current)) $('categoryFilter').value = current;
+}
+
+function applyFilters(){
+  const q = $('searchInput').value.trim().toLowerCase();
+  const category = $('categoryFilter').value;
+  const st = $('statusFilter').value;
+  const sort = $('sortSelect').value;
+
+  visibleProducts = products.filter(p => {
+    const hay = [
+      p.sku,p.description,p.category,p.fabric_type
+    ].map(x=>String(x||'').toLowerCase()).join(' ');
+    if(q && !hay.includes(q)) return false;
+    if(category && normalizeCategory(p.category) !== category) return false;
+    const s = statusOf(p);
+    if(st === 'new' && s !== 'new') return false;
+    if(st === 'unvalidated' && isValidated(p.sku)) return false;
+    if(st === 'validated' && !isValidated(p.sku)) return false;
+    return true;
+  });
+
+  visibleProducts.sort((a,b)=>{
+    if(sort === 'priceAsc') return Number(a.price||0) - Number(b.price||0);
+    if(sort === 'priceDesc') return Number(b.price||0) - Number(a.price||0);
+    if(sort === 'sku') return String(a.sku).localeCompare(String(b.sku),'es');
+    const an = isNewSku(a.sku) ? 0 : 1;
+    const bn = isNewSku(b.sku) ? 0 : 1;
+    if(an !== bn) return an - bn;
+    return String(a.sku).localeCompare(String(b.sku),'es');
+  });
+
+  render();
+}
+
+function shippingLabel(v){
+  const t = String(v || '').toLowerCase();
+  if(t === 'free' || t === 'gratis') return '<span class="pill good">Envío gratis</span>';
+  if(t === 'paid' || t === 'cobra') return '<span class="pill close">Cobra envío</span>';
+  return '<span class="pill pending">Envío no informado</span>';
+}
+
+function resultBlock(item, myPrice){
+  if(!item) return '<span class="muted">Sin resultado</span>';
+  const price = Number(item.price || 0);
+  const diff = price - Number(myPrice || 0);
+  let diffClass='diff-neutral', diffText='Igual';
+  if(diff < 0){ diffClass='diff-neg'; diffText=`${money(Math.abs(diff))} más barato`; }
+  else if(diff > 0){ diffClass='diff-pos'; diffText=`Tú eres ${money(diff)} más barato`; }
+
+  return `
+    <div class="competitor">
+      <strong>${esc(item.site || 'Competidor')} · ${money(price)}</strong>
+      <div class="meta">
+        ${shippingLabel(item.shipping)}
+        ${item.similarity !== undefined ? `<span class="pill">${Math.round(Number(item.similarity)||0)}% similitud</span>` : ''}
+      </div>
+      <div class="${diffClass}">${esc(diffText)}</div>
+      ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">Abrir publicación ↗</a>` : '<span class="muted">Sin enlace</span>'}
+    </div>
+  `;
+}
+
+function productStatusPill(p){
+  if(isNewSku(p.sku)) return '<span class="pill new">Nuevo/agregado</span>';
+  if(isValidated(p.sku)) return '<span class="pill valid">Validado</span>';
+  return '<span class="pill pending">Sin validar</span>';
+}
+
+function render(){
+  $('rows').innerHTML = visibleProducts.map(p => {
+    const r = currentResult(p.sku);
+    const selected = selectedSkus.has(p.sku);
+    return `
+      <tr class="${selected ? 'selected' : ''}" data-sku="${esc(p.sku)}">
+        <td><input class="check row-check" type="checkbox" data-sku="${esc(p.sku)}" ${selected?'checked':''}></td>
+        <td>
+          <div class="product-cell">
+            ${p.image_1 ? `<img src="${esc(p.image_1)}" alt="${esc(p.sku)}" loading="lazy">` : '<div style="width:58px;height:76px;background:#f3f3f3;border-radius:8px"></div>'}
+            <div>
+              <div class="sku">${esc(p.sku)}</div>
+              <div class="desc">${esc(p.description || `${normalizeCategory(p.category)} · ${p.sku}`)}</div>
+              <div class="fabric">${esc(p.fabric_type || 'Tela/composición no capturada')}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="price">${money(p.price)}</span></td>
+        <td>${productStatusPill(p)}</td>
+        <td>${resultBlock(r?.cheapest, p.price)}</td>
+        <td>${resultBlock(r?.closest, p.price)}</td>
+        <td>${resultBlock(r?.visual, p.price)}</td>
+        <td>${r?.checked_at ? shortDate(r.checked_at) : '—'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  $('emptyState').classList.toggle('hidden', visibleProducts.length > 0);
+  $('visibleCount').textContent = `${visibleProducts.length} producto(s) visible(s)`;
+
+  document.querySelectorAll('.row-check').forEach(chk=>{
+    chk.addEventListener('change',()=>{
+      const sku = chk.dataset.sku;
+      if(chk.checked) selectedSkus.add(sku);
+      else selectedSkus.delete(sku);
+      render();
+    });
+  });
+
+  updateKpis();
+}
+
+function updateKpis(){
+  $('kpiActive').textContent = products.length;
+  $('kpiNew').textContent = state.pendingNewSkus.filter(s=>products.some(p=>p.sku===s)).length;
+  $('kpiSelected').textContent = selectedSkus.size;
+  $('kpiValidated').textContent = products.filter(p=>isValidated(p.sku)).length;
+  $('kpiSync').textContent = state.lastInventorySync ? shortDate(state.lastInventorySync) : '—';
+  $('validateSelectedBtn').disabled = selectedSkus.size === 0;
+  $('validateNewBtn').disabled = state.pendingNewSkus.length === 0;
+}
+
+function selectVisible(){
+  visibleProducts.forEach(p=>selectedSkus.add(p.sku));
+  render();
+}
+
+function selectUnvalidated(){
+  visibleProducts.filter(p=>!isValidated(p.sku)).forEach(p=>selectedSkus.add(p.sku));
+  render();
+}
+
+function clearSelection(){
+  selectedSkus.clear();
+  render();
+}
+
+async function validateSkus(skus, source){
+  const unique = [...new Set(skus)].filter(Boolean);
+  if(!unique.length){
+    setBanner('No hay productos para validar.','warn');
+    return;
+  }
+
+  const apiBase = String(localStorage.getItem(API_KEY) || '').replace(/\/+$/,'');
+  if(!apiBase){
+    selectedSkus = new Set(unique);
+    render();
+    setBanner(
+      `${unique.length} producto(s) preparados para ${source}. La interfaz del radar ya está lista; falta conectar el motor externo de búsqueda/validación real para ejecutar estas consultas.`,
+      'warn'
+    );
+    return;
+  }
+
+  setBanner(`Validando ${unique.length} producto(s)…`,'warn');
+  $('validateSelectedBtn').disabled = true;
+  $('validateNewBtn').disabled = true;
+
+  try{
+    const token =
+      sessionStorage.getItem('woman656-admin-token') ||
+      sessionStorage.getItem('moda-juarez-admin-token') ||
+      '';
+
+    const response = await fetch(`${apiBase}/api/price-radar/validate`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        ...(token ? {'Authorization':`Bearer ${token}`} : {})
+      },
+      body:JSON.stringify({skus:unique})
+    });
+
+    const text = await response.text();
+    let payload;
+    try{ payload = JSON.parse(text); }catch{ payload = {message:text}; }
+
+    if(!response.ok) throw new Error(payload?.detail || payload?.message || `HTTP ${response.status}`);
+
+    const results = Array.isArray(payload?.items) ? payload.items : [];
+    for(const item of results){
+      if(!item?.sku) continue;
+      state.results[item.sku] = {
+        ...(state.results[item.sku] || {}),
+        ...item,
+        checked_at:item.checked_at || new Date().toISOString()
+      };
+      state.pendingNewSkus = state.pendingNewSkus.filter(s=>s!==item.sku);
+    }
+    saveState();
+    setBanner(`Validación terminada: ${results.length} producto(s) actualizado(s).`,'ok');
+  }catch(e){
+    setBanner(`La validación no pudo completarse: ${e.message}`,'error');
+  }finally{
+    applyFilters();
+  }
+}
+
+// Adaptador público para la futura integración:
+// WOMAN656_RADAR.applyResults([{sku:'W656-0001', checked_at:'...', cheapest:{...}, closest:{...}, visual:{...}}])
+window.WOMAN656_RADAR = {
+  applyResults(items=[]){
+    for(const item of items){
+      if(!item?.sku) continue;
+      state.results[item.sku] = {
+        ...(state.results[item.sku] || {}),
+        ...item,
+        checked_at:item.checked_at || new Date().toISOString()
+      };
+      state.pendingNewSkus = state.pendingNewSkus.filter(s=>s!==item.sku);
+    }
+    saveState();
+    applyFilters();
+  },
+  getSelectedSkus(){
+    return [...selectedSkus];
+  },
+  getProducts(){
+    return products.map(p=>({...p}));
+  }
+};
+
+$('reloadProductsBtn').addEventListener('click',loadProducts);
+$('validateSelectedBtn').addEventListener('click',()=>validateSkus([...selectedSkus],'actualización de seleccionados'));
+$('validateNewBtn').addEventListener('click',()=>validateSkus(state.pendingNewSkus,'validación de productos nuevos/agregados'));
+$('selectVisibleBtn').addEventListener('click',selectVisible);
+$('selectUnvalidatedBtn').addEventListener('click',selectUnvalidated);
+$('clearSelectionBtn').addEventListener('click',clearSelection);
+$('searchInput').addEventListener('input',applyFilters);
+$('categoryFilter').addEventListener('change',applyFilters);
+$('statusFilter').addEventListener('change',applyFilters);
+$('sortSelect').addEventListener('change',applyFilters);
+
+checkAdmin();
+</script>
+</body>
+</html>
