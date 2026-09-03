@@ -3,7 +3,11 @@
   const SESSION_KEY = 'woman656_session_id';
   const ACCOUNT_URL = 'cuenta.html';
   const STATS_URL = 'estadisticas.html';
+  const SUPABASE_URL = 'https://snkuvxpddxcmbfhgabbx.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+  const CUSTOMER_STORAGE_KEY = 'woman656-customer-auth-token-v1';
   const uuid = () => globalThis.crypto?.randomUUID?.() || `w656-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  let customerSupabase = null;
 
   function getVisitorId(){
     let id = localStorage.getItem(VISITOR_KEY);
@@ -17,10 +21,15 @@
   }
   function client(){
     try{
-      if(typeof shopSupabase !== 'undefined' && shopSupabase) return shopSupabase;
-      if(typeof initSupabaseClient === 'function') return initSupabaseClient();
-    }catch(_){ }
-    return null;
+      if(customerSupabase) return customerSupabase;
+      if(!window.supabase?.createClient) return null;
+      customerSupabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+        {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:CUSTOMER_STORAGE_KEY}}
+      );
+      return customerSupabase;
+    }catch(_){ return null; }
   }
   async function record(eventName, sku=null, metadata={}){
     const c = client(); if(!c) return;
