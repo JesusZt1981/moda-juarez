@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estadísticas · WOMAN 656</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--good:#527160;--danger:#9b4f4f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(1320px,96vw);margin:28px auto}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.top a{color:var(--main);font-weight:800;text-decoration:none}.controls{display:flex;gap:8px;flex-wrap:wrap}.controls select,.controls button{padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:#fff;font-weight:700}.controls button{background:var(--main);color:#fff;border:0;cursor:pointer}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(44,52,52,.06)}.kpi strong{display:block;font-size:28px;margin-top:6px}.kpi span,.muted{color:var(--muted);font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}.table th{background:var(--soft);position:sticky;top:0}.agebar{display:flex;align-items:center;gap:10px;margin:8px 0}.agebar div{height:12px;background:var(--main);border-radius:20px;min-width:2px}.status{margin:12px 0;color:var(--muted)}.customer-btn{border:0;background:transparent;color:var(--main);font-weight:800;cursor:pointer;padding:0}.modal{position:fixed;inset:0;background:rgba(0,0,0,.38);display:grid;place-items:center;padding:20px}.modal.hidden{display:none}.modal-card{width:min(760px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:20px}.modal-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.modal-head button{border:0;background:var(--soft);border-radius:50%;width:34px;height:34px;cursor:pointer}@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}@media(max-width:520px){.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><a href="/">← Volver a WOMAN 656</a><h1>📊 Estadísticas</h1></div><div class="controls"><select id="days"><option value="1">Hoy</option><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option><option value="365">1 año</option></select><button id="refresh">Actualizar</button></div></div>
+  <div id="status" class="status">Comprobando sesión ADMIN…</div>
+  <section class="kpis">
+    <div class="card kpi"><span>Visitantes únicos</span><strong id="visitors">0</strong></div>
+    <div class="card kpi"><span>Usuarios registrados que visitaron</span><strong id="registered">0</strong></div>
+    <div class="card kpi"><span>Vistas de producto</span><strong id="views">0</strong></div>
+    <div class="card kpi"><span>Agregados al carrito</span><strong id="carts">0</strong></div>
+    <div class="card kpi"><span>Inicios de checkout</span><strong id="checkout">0</strong></div>
+    <div class="card kpi"><span>Nuevos usuarios</span><strong id="newUsers">0</strong></div>
+    <div class="card kpi"><span>Me encanta</span><strong id="likes">0</strong></div>
+    <div class="card kpi"><span>Aceptaron marketing</span><strong id="marketing">0</strong></div>
+  </section>
+
+  <section class="grid2">
+    <div class="card"><h2>Rango de edad</h2><div id="ages"></div></div>
+    <div class="card"><h2>Visitantes por día</h2><div class="table-wrap"><table class="table"><thead><tr><th>Fecha</th><th>Visitantes únicos</th></tr></thead><tbody id="daily"></tbody></table></div></div>
+  </section>
+
+  <section class="card" style="margin-top:14px"><h2>Productos con más interés</h2><div class="table-wrap"><table class="table"><thead><tr><th>SKU</th><th>Producto</th><th>Vistas</th><th>Me encanta</th><th>Carrito</th></tr></thead><tbody id="products"></tbody></table></div></section>
+
+  <section class="card" style="margin-top:14px"><h2>Clientes / usuarios</h2><div class="table-wrap"><table class="table"><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Edad</th><th>Acceso</th><th>Marketing</th><th>Alta</th><th>Última visita</th><th>Visitas</th><th>Vistas</th><th>❤️</th></tr></thead><tbody id="customers"></tbody></table></div></section>
+</div>
+
+<div class="modal hidden" id="modal"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">Actividad</h2><button id="closeModal">×</button></div><div id="modalBody"></div></div></div>
+<script>
+const URL='https://snkuvxpddxcmbfhgabbx.supabase.co';const KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});const $=id=>document.getElementById(id);
+const fmtDate=v=>v?new Date(v).toLocaleString('es-MX'):'—';const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+async function ensureAdmin(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){location.href='/?admin=1';return false}const {data:p}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();if(String(p?.role).toLowerCase()!=='admin'){throw new Error('Esta cuenta no tiene permisos ADMIN.')}return true}
+function renderAges(rows){const max=Math.max(1,...(rows||[]).map(x=>Number(x.users)||0));$('ages').innerHTML=(rows||[]).map(x=>`<div class="agebar"><span style="width:70px">${esc(x.range)}</span><div style="width:${Math.max(2,(Number(x.users)||0)/max*75)}%"></div><strong>${Number(x.users)||0}</strong></div>`).join('')||'<p class="muted">Sin datos de edad todavía.</p>'}
+async function openCustomer(id,name){$('modalTitle').textContent=`Actividad · ${name||'Cliente'}`;$('modalBody').innerHTML='Cargando…';$('modal').classList.remove('hidden');const {data,error}=await sb.rpc('admin_customer_activity',{p_user_id:id});if(error){$('modalBody').textContent=error.message;return}const views=(data?.views||[]).map(x=>`<tr><td>${esc(x.sku)}</td><td>${esc(x.name)}</td><td>${Number(x.days_viewed)||0}</td><td>${fmtDate(x.last_viewed)}</td></tr>`).join('');const likes=(data?.likes||[]).map(x=>`<tr><td>${esc(x.sku)}</td><td>${esc(x.name)}</td><td>${fmtDate(x.liked_at)}</td></tr>`).join('');$('modalBody').innerHTML=`<h3>Productos vistos</h3><table class="table"><tr><th>SKU</th><th>Producto</th><th>Días vistos</th><th>Última vista</th></tr>${views||'<tr><td colspan="4">Sin vistas registradas</td></tr>'}</table><h3>Me encanta</h3><table class="table"><tr><th>SKU</th><th>Producto</th><th>Fecha</th></tr>${likes||'<tr><td colspan="3">Sin favoritos</td></tr>'}</table>`}
+async function load(){try{if(!await ensureAdmin())return;$('status').textContent='Actualizando…';const d=Number($('days').value);const [{data:s,error:se},{data:c,error:ce}]=await Promise.all([sb.rpc('admin_store_stats',{p_days:d}),sb.rpc('admin_customer_list',{p_limit:300,p_offset:0})]);if(se)throw se;if(ce)throw ce;$('visitors').textContent=s.unique_visitors||0;$('registered').textContent=s.registered_visitors||0;$('views').textContent=s.product_views||0;$('carts').textContent=s.add_to_cart||0;$('checkout').textContent=s.begin_checkout||0;$('newUsers').textContent=s.new_users||0;$('likes').textContent=s.likes_total||0;$('marketing').textContent=s.marketing_opt_in||0;renderAges(s.age_ranges);$('daily').innerHTML=(s.daily||[]).map(x=>`<tr><td>${esc(x.date)}</td><td>${Number(x.visitors)||0}</td></tr>`).join('')||'<tr><td colspan="2">Sin datos</td></tr>';$('products').innerHTML=(s.top_products||[]).map(x=>`<tr><td>${esc(x.sku)}</td><td>${esc(x.name)}</td><td>${Number(x.views)||0}</td><td>${Number(x.likes)||0}</td><td>${Number(x.carts)||0}</td></tr>`).join('')||'<tr><td colspan="5">Sin actividad todavía</td></tr>';$('customers').innerHTML=(c||[]).map(x=>{const name=`${x.first_name||''} ${x.last_name||''}`.trim()||'Sin completar';return `<tr><td><button class="customer-btn" data-id="${x.user_id}" data-name="${esc(name)}">${esc(name)}</button></td><td>${esc(x.email||'—')}</td><td>${esc(x.phone||'—')}</td><td>${x.age??'—'}</td><td>${esc(x.auth_provider||'—')}</td><td>${x.marketing_consent?'Sí':'No'}</td><td>${fmtDate(x.created_at)}</td><td>${fmtDate(x.last_seen)}</td><td>${Number(x.visit_days)||0}</td><td>${Number(x.product_views)||0}</td><td>${Number(x.likes_count)||0}</td></tr>`}).join('')||'<tr><td colspan="11">Sin clientes todavía</td></tr>';document.querySelectorAll('.customer-btn').forEach(b=>b.onclick=()=>openCustomer(b.dataset.id,b.dataset.name));$('status').textContent=`Actualizado ${new Date().toLocaleTimeString('es-MX')}`}catch(e){$('status').textContent=`Error: ${e.message}`;$('status').style.color='#9b4f4f'}}
+$('refresh').onclick=load;$('days').onchange=load;$('closeModal').onclick=()=>$('modal').classList.add('hidden');$('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.add('hidden')});load();
+</script>
+</body></html>
