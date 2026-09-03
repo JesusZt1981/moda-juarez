@@ -50,9 +50,9 @@
   </section>
 </div>
 <script>
-const URL='https://snkuvxpddxcmbfhgabbx.supabase.co';
-const KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
-const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});
+const SUPABASE_URL='https://snkuvxpddxcmbfhgabbx.supabase.co';
+const SUPABASE_KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});
 const $=id=>document.getElementById(id);
 function fillAges(){for(const id of ['signupAge','age']){$(id).innerHTML='<option value="">Edad</option>'+Array.from({length:68},(_,i)=>i+13).map(n=>`<option value="${n}">${n} años</option>`).join('');}}
 function status(id,msg,error=false){$(id).textContent=msg;$(id).style.color=error?'#9b4f4f':'#527160'}
