@@ -7,9 +7,39 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(760px,94vw);margin:34px auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.top a{color:var(--main);font-weight:800;text-decoration:none}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08)}h1{margin:0 0 8px}h2{font-size:17px;margin:20px 0 10px}p{color:var(--muted)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field input,.field select{padding:11px;border:1px solid var(--border);border-radius:9px;background:#fff}.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.primary,.secondary,.method-btn,.login-social button{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}.primary{background:var(--main);color:#fff}.secondary,.method-btn,.login-social button{background:var(--soft);color:var(--text)}.status{margin-top:12px;font-size:13px;min-height:18px}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin:16px 0}.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800;cursor:pointer}.tabs button.active{background:var(--main);color:#fff}.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:16px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}.provider-badge{display:inline-flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft);font-weight:800;min-height:42px}.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}.methods{border-top:1px solid var(--border);margin-top:20px;padding-top:2px}.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.method-btn{min-height:58px}.method-btn:disabled{opacity:.45;cursor:not-allowed}.login-social{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
-@media(max-width:700px){.method-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.grid,.login-social{grid-template-columns:1fr}.method-grid{grid-template-columns:1fr 1fr}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{width:min(760px,94vw);margin:34px auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.top a{color:var(--main);font-weight:800;text-decoration:none}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08)}
+h1{margin:0 0 8px}h2{font-size:17px;margin:20px 0 10px}p{color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+.field-title{display:block;min-height:20px}
+.field input,.field select{width:100%;height:42px;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:#fff;font:inherit}
+.field-help{font-size:11px;color:var(--muted);line-height:1.35;min-height:15px}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.primary,.secondary,.method-btn,.login-social button{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}
+.primary{background:var(--main);color:#fff}
+.secondary,.method-btn,.login-social button{background:var(--soft);color:var(--text)}
+.status{margin-top:12px;font-size:13px;min-height:18px}
+.hidden{display:none!important}
+.tabs{display:flex;gap:8px;margin:16px 0}
+.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800;cursor:pointer}
+.tabs button.active{background:var(--main);color:#fff}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:16px 0}
+.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}
+.provider-badge{display:inline-flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft);font-weight:800;min-height:42px}
+.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}
+.methods{border-top:1px solid var(--border);margin-top:20px;padding-top:2px}
+.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.method-btn{min-height:58px}
+.login-social{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+@media(max-width:700px){.method-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.grid,.login-social{grid-template-columns:1fr}.method-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -27,8 +57,8 @@
       <div class="login-social"><button id="loginGoogleBtn">Continuar con Google</button><button id="loginFacebookBtn">Continuar con Facebook</button></div>
       <div class="divider">o con correo y contraseña</div>
       <div class="grid">
-        <label class="field full">Correo<input id="loginEmail" type="email" autocomplete="email"></label>
-        <label class="field full">Contraseña<input id="loginPassword" type="password" autocomplete="current-password"></label>
+        <label class="field full"><span class="field-title">Correo</span><input id="loginEmail" type="email" autocomplete="email"></label>
+        <label class="field full"><span class="field-title">Contraseña</span><input id="loginPassword" type="password" autocomplete="current-password"></label>
       </div>
       <div class="actions"><button class="primary" id="loginBtn">Ingresar</button><button class="secondary" id="forgotBtn">Olvidé mi contraseña</button></div>
     </div>
@@ -36,12 +66,15 @@
     <div id="signupPane" class="hidden">
       <h2>1. Tus datos</h2>
       <div class="grid">
-        <label class="field">Nombre<input id="signupFirst" autocomplete="given-name"></label>
-        <label class="field">Apellido<input id="signupLast" autocomplete="family-name"></label>
-        <label class="field full">WhatsApp / teléfono<input id="signupPhone" type="tel" autocomplete="tel" placeholder="+526561234567"></label>
-        <label class="field">Edad<select id="signupAge"></select></label>
-        <label class="field">Contraseña <span class="note">(solo si usarás correo)</span><input id="signupPassword" type="password" autocomplete="new-password" minlength="8"></label>
-        <label class="field full">Correo <span class="note">(si usas Google, Instagram o Facebook tomaremos el correo autorizado por esa cuenta)</span><input id="signupEmail" type="email" autocomplete="email"></label>
+        <label class="field"><span class="field-title">Nombre</span><input id="signupFirst" autocomplete="given-name"></label>
+        <label class="field"><span class="field-title">Apellido</span><input id="signupLast" autocomplete="family-name"></label>
+
+        <label class="field"><span class="field-title">WhatsApp / teléfono</span><input id="signupPhone" type="tel" autocomplete="tel" placeholder="+526561234567"></label>
+        <label class="field"><span class="field-title">Correo</span><input id="signupEmail" type="email" autocomplete="email" placeholder="nombre@gmail.com"></label>
+
+        <label class="field"><span class="field-title">Edad</span><select id="signupAge"></select><span class="field-help"></span></label>
+        <label class="field"><span class="field-title">Contraseña</span><input id="signupPassword" type="password" autocomplete="new-password" minlength="8"><span class="field-help">Mínimo 8 caracteres.</span></label>
+
         <label class="check full"><input id="signupMarketing" type="checkbox"><span>Quiero recibir promociones y ofertas de WOMAN 656 por correo. Solo se habilita para mayores de 18 años.</span></label>
       </div>
 
@@ -53,7 +86,7 @@
           <button class="method-btn" id="signupInstagramBtn">Registrarme con Instagram</button>
           <button class="method-btn" id="signupFacebookBtn">Registrarme con Facebook</button>
         </div>
-        <div class="note">Nombre, Apellido, Teléfono, Edad y tu preferencia de promociones se conservan independientemente del método elegido.</div>
+        <div class="note">Los datos que llenaste arriba se conservan. Si eliges Google, Instagram o Facebook, la identidad de acceso se autoriza con esa cuenta.</div>
       </section>
     </div>
     <div class="status" id="authStatus"></div>
@@ -62,12 +95,12 @@
   <section class="card hidden" id="profileCard">
     <h1>Mi perfil</h1><p id="profileIntro"></p>
     <div class="grid">
-      <label class="field">Nombre<input id="firstName" autocomplete="given-name"></label>
-      <label class="field">Apellido<input id="lastName" autocomplete="family-name"></label>
-      <label class="field full">Correo de contacto<input id="contactEmail" type="email" autocomplete="email"></label>
-      <label class="field full">WhatsApp / teléfono<input id="phone" type="tel" autocomplete="tel"></label>
-      <label class="field">Edad<select id="age"></select></label>
-      <div class="field"><span>Método de acceso</span><div class="provider-badge" id="providerBadge">—</div></div>
+      <label class="field"><span class="field-title">Nombre</span><input id="firstName" autocomplete="given-name"></label>
+      <label class="field"><span class="field-title">Apellido</span><input id="lastName" autocomplete="family-name"></label>
+      <label class="field"><span class="field-title">WhatsApp / teléfono</span><input id="phone" type="tel" autocomplete="tel"></label>
+      <label class="field"><span class="field-title">Correo de contacto</span><input id="contactEmail" type="email" autocomplete="email"></label>
+      <label class="field"><span class="field-title">Edad</span><select id="age"></select></label>
+      <div class="field"><span class="field-title">Método de acceso</span><div class="provider-badge" id="providerBadge">—</div></div>
       <label class="check full"><input id="marketing" type="checkbox"><span>Acepto recibir promociones y ofertas de WOMAN 656 por correo. Solo disponible para mayores de 18 años.</span></label>
     </div>
     <div class="actions"><button class="primary" id="saveProfileBtn">Guardar perfil</button><button class="secondary" id="logoutBtn">Cerrar sesión</button></div>
@@ -82,35 +115,125 @@ const PENDING_PROFILE_KEY='woman656-pending-social-profile';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:CUSTOMER_STORAGE_KEY}});
 const $=id=>document.getElementById(id);
 
-function fillAges(){for(const id of ['signupAge','age']){$(id).innerHTML='<option value="">Edad</option>'+Array.from({length:68},(_,i)=>i+13).map(n=>`<option value="${n}">${n} años</option>`).join('')}}
+function fillAges(){
+  for(const id of ['signupAge','age']){
+    $(id).innerHTML='<option value="">Edad</option>'+Array.from({length:68},(_,i)=>i+13).map(n=>`<option value="${n}">${n} años</option>`).join('');
+  }
+}
 function status(id,msg,error=false){$(id).textContent=msg;$(id).style.color=error?'#9b4f4f':'#527160'}
 function marketingAgeGuard(ageId,checkId){const age=Number($(ageId).value||0);if(age<18){$(checkId).checked=false;$(checkId).disabled=true}else{$(checkId).disabled=false}}
 function providerLabel(value){const v=String(value||'email').toLowerCase();if(v==='google')return 'Google';if(v==='facebook')return 'Facebook';if(v==='instagram')return 'Instagram';return 'Correo y contraseña'}
-function signupProfileValues(){return{first_name:$('signupFirst').value.trim(),last_name:$('signupLast').value.trim(),phone:$('signupPhone').value.trim(),age:Number($('signupAge').value),marketing_consent:$('signupMarketing').checked}}
-function baseSignupComplete(){const p=signupProfileValues();return !!(p.first_name&&p.last_name&&p.phone&&p.age>=13&&p.age<=80)}
-function updateSignupMethods(){const ready=baseSignupComplete();$('signupMethods').classList.toggle('hidden',!ready);const email=$('signupEmail').value.trim(),password=$('signupPassword').value;$('signupBtn').disabled=!(ready&&email&&password.length>=8)}
-function validateSignupProfile(){const p=signupProfileValues();if(!p.first_name||!p.last_name||!p.phone||!p.age){status('authStatus','Completa Nombre, Apellido, Teléfono y Edad antes de elegir cómo registrarte.',true);return null}if(p.age<13||p.age>80){status('authStatus','Selecciona una edad entre 13 y 80 años.',true);return null}if(p.age<18)p.marketing_consent=false;return p}
+function isValidEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim())}
+
+function signupProfileValues(){
+  return {
+    first_name:$('signupFirst').value.trim(),
+    last_name:$('signupLast').value.trim(),
+    phone:$('signupPhone').value.trim(),
+    email:$('signupEmail').value.trim(),
+    age:Number($('signupAge').value),
+    password:$('signupPassword').value,
+    marketing_consent:$('signupMarketing').checked
+  };
+}
+function baseSignupComplete(){
+  const p=signupProfileValues();
+  return !!(
+    p.first_name &&
+    p.last_name &&
+    p.phone &&
+    isValidEmail(p.email) &&
+    p.age>=13 && p.age<=80 &&
+    p.password.length>=8
+  );
+}
+function updateSignupMethods(){
+  $('signupMethods').classList.toggle('hidden',!baseSignupComplete());
+}
+function validateSignupProfile(){
+  const p=signupProfileValues();
+  if(!p.first_name||!p.last_name||!p.phone||!p.email||!p.age||!p.password){status('authStatus','Completa todos los datos antes de elegir cómo registrarte.',true);return null}
+  if(!isValidEmail(p.email)){status('authStatus','Escribe un correo válido.',true);return null}
+  if(p.password.length<8){status('authStatus','La contraseña debe tener al menos 8 caracteres.',true);return null}
+  if(p.age<13||p.age>80){status('authStatus','Selecciona una edad entre 13 y 80 años.',true);return null}
+  if(p.age<18)p.marketing_consent=false;
+  return p;
+}
 
 async function oauth(provider,{signup=false}={}){
-  if(signup){const pending=validateSignupProfile();if(!pending)return;localStorage.setItem(PENDING_PROFILE_KEY,JSON.stringify({...pending,provider,created_at:Date.now()}))}else{localStorage.removeItem(PENDING_PROFILE_KEY)}
+  if(signup){
+    const pending=validateSignupProfile();
+    if(!pending)return;
+    localStorage.setItem(PENDING_PROFILE_KEY,JSON.stringify({
+      first_name:pending.first_name,
+      last_name:pending.last_name,
+      phone:pending.phone,
+      age:pending.age,
+      marketing_consent:pending.marketing_consent,
+      provider,
+      created_at:Date.now()
+    }));
+  }else{
+    localStorage.removeItem(PENDING_PROFILE_KEY);
+  }
   const redirectTo=location.origin+'/cuenta.html';
   const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo}});
-  if(error)status('authStatus',error.message,true)
+  if(error)status('authStatus',error.message,true);
 }
-async function applyPendingSocialProfile(user){let pending=null;try{pending=JSON.parse(localStorage.getItem(PENDING_PROFILE_KEY)||'null')}catch(_){pending=null}if(!pending)return;if(!pending.created_at||Date.now()-Number(pending.created_at)>30*60*1000){localStorage.removeItem(PENDING_PROFILE_KEY);return}const age=Number(pending.age);const {error}=await sb.rpc('set_my_profile',{p_first_name:String(pending.first_name||'').trim(),p_last_name:String(pending.last_name||'').trim(),p_contact_email:user.email||'',p_phone:String(pending.phone||'').trim(),p_age:age,p_marketing_consent:!!pending.marketing_consent&&age>=18});if(!error)localStorage.removeItem(PENDING_PROFILE_KEY)}
-async function refresh(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){$('authCard').classList.remove('hidden');$('profileCard').classList.add('hidden');return}const u=session.user;await applyPendingSocialProfile(u);const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();$('authCard').classList.add('hidden');$('profileCard').classList.remove('hidden');$('firstName').value=p?.first_name||u.user_metadata?.given_name||u.user_metadata?.first_name||'';$('lastName').value=p?.last_name||u.user_metadata?.family_name||u.user_metadata?.last_name||'';$('contactEmail').value=p?.contact_email||p?.email||u.email||'';$('phone').value=p?.phone||'';$('age').value=p?.age||'';const provider=p?.auth_provider||u.app_metadata?.provider||'email';$('providerBadge').textContent=providerLabel(provider);$('marketing').checked=!!p?.marketing_consent;$('profileIntro').textContent=`Sesión: ${u.email||'cuenta social'}`;marketingAgeGuard('age','marketing')}
+
+async function applyPendingSocialProfile(user){
+  let pending=null;
+  try{pending=JSON.parse(localStorage.getItem(PENDING_PROFILE_KEY)||'null')}catch(_){pending=null}
+  if(!pending)return;
+  if(!pending.created_at||Date.now()-Number(pending.created_at)>30*60*1000){localStorage.removeItem(PENDING_PROFILE_KEY);return}
+  const age=Number(pending.age);
+  const {error}=await sb.rpc('set_my_profile',{
+    p_first_name:String(pending.first_name||'').trim(),
+    p_last_name:String(pending.last_name||'').trim(),
+    p_contact_email:user.email||'',
+    p_phone:String(pending.phone||'').trim(),
+    p_age:age,
+    p_marketing_consent:!!pending.marketing_consent&&age>=18
+  });
+  if(!error)localStorage.removeItem(PENDING_PROFILE_KEY);
+}
+
+async function refresh(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.user){$('authCard').classList.remove('hidden');$('profileCard').classList.add('hidden');return}
+  const u=session.user;
+  await applyPendingSocialProfile(u);
+  const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();
+  $('authCard').classList.add('hidden');$('profileCard').classList.remove('hidden');
+  $('firstName').value=p?.first_name||u.user_metadata?.given_name||u.user_metadata?.first_name||'';
+  $('lastName').value=p?.last_name||u.user_metadata?.family_name||u.user_metadata?.last_name||'';
+  $('contactEmail').value=p?.contact_email||p?.email||u.email||'';
+  $('phone').value=p?.phone||'';
+  $('age').value=p?.age||'';
+  const provider=p?.auth_provider||u.app_metadata?.provider||'email';
+  $('providerBadge').textContent=providerLabel(provider);
+  $('marketing').checked=!!p?.marketing_consent;
+  $('profileIntro').textContent=`Sesión: ${u.email||'cuenta social'}`;
+  marketingAgeGuard('age','marketing');
+}
 
 $('loginTab').onclick=()=>{$('loginTab').classList.add('active');$('signupTab').classList.remove('active');$('loginPane').classList.remove('hidden');$('signupPane').classList.add('hidden')};
 $('signupTab').onclick=()=>{$('signupTab').classList.add('active');$('loginTab').classList.remove('active');$('signupPane').classList.remove('hidden');$('loginPane').classList.add('hidden');updateSignupMethods()};
-$('loginGoogleBtn').onclick=()=>oauth('google');$('loginFacebookBtn').onclick=()=>oauth('facebook');
+$('loginGoogleBtn').onclick=()=>oauth('google');
+$('loginFacebookBtn').onclick=()=>oauth('facebook');
 $('signupGoogleBtn').onclick=()=>oauth('google',{signup:true});
 $('signupFacebookBtn').onclick=()=>oauth('facebook',{signup:true});
-$('signupInstagramBtn').onclick=()=>{const p=validateSignupProfile();if(!p)return;status('authStatus','Instagram ya está contemplado como método de registro, pero todavía falta conectar la autorización de Instagram/Meta. Tus datos aún no se enviaron.',false)};
+$('signupInstagramBtn').onclick=()=>{const p=validateSignupProfile();if(!p)return;status('authStatus','Instagram ya aparece como opción, pero todavía falta conectar la autorización de Instagram/Meta. Tus datos aún no se enviaron.',false)};
 $('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)status('authStatus',error.message,true);else refresh()};
 $('forgotBtn').onclick=async()=>{const email=$('loginEmail').value.trim();if(!email)return status('authStatus','Escribe primero tu correo.',true);const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/cuenta.html'});status('authStatus',error?error.message:'Te enviamos un correo para recuperar tu contraseña.',!!error)};
 ['signupFirst','signupLast','signupPhone','signupEmail','signupPassword'].forEach(id=>$(id).addEventListener('input',updateSignupMethods));
-$('signupAge').onchange=()=>{marketingAgeGuard('signupAge','signupMarketing');updateSignupMethods()};$('age').onchange=()=>marketingAgeGuard('age','marketing');
-$('signupBtn').onclick=async()=>{const p=validateSignupProfile();if(!p)return;const email=$('signupEmail').value.trim(),password=$('signupPassword').value;if(!email||password.length<8)return status('authStatus','Para crear la cuenta con correo escribe un correo válido y una contraseña de al menos 8 caracteres.',true);const {error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/cuenta.html',data:{first_name:p.first_name,last_name:p.last_name,phone:p.phone,age:p.age,marketing_consent:p.marketing_consent&&p.age>=18}}});status('authStatus',error?error.message:'Cuenta creada. Revisa tu correo para confirmar el registro.',!!error)};
+$('signupAge').onchange=()=>{marketingAgeGuard('signupAge','signupMarketing');updateSignupMethods()};
+$('age').onchange=()=>marketingAgeGuard('age','marketing');
+$('signupBtn').onclick=async()=>{
+  const p=validateSignupProfile();if(!p)return;
+  const {error}=await sb.auth.signUp({email:p.email,password:p.password,options:{emailRedirectTo:location.origin+'/cuenta.html',data:{first_name:p.first_name,last_name:p.last_name,phone:p.phone,age:p.age,marketing_consent:p.marketing_consent&&p.age>=18}}});
+  status('authStatus',error?error.message:'Cuenta creada. Revisa tu correo para confirmar el registro.',!!error);
+};
 $('saveProfileBtn').onclick=async()=>{const age=Number($('age').value);const args={p_first_name:$('firstName').value.trim(),p_last_name:$('lastName').value.trim(),p_contact_email:$('contactEmail').value.trim(),p_phone:$('phone').value.trim(),p_age:age,p_marketing_consent:$('marketing').checked&&age>=18};const {error}=await sb.rpc('set_my_profile',args);status('profileStatus',error?error.message:'Perfil guardado correctamente.',!!error);if(!error)refresh()};
 $('logoutBtn').onclick=async()=>{await sb.auth.signOut();localStorage.removeItem(PENDING_PROFILE_KEY);location.href='/'};
 fillAges();updateSignupMethods();refresh();sb.auth.onAuthStateChange(()=>setTimeout(refresh,0));
