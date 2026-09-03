@@ -1,276 +1,56 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mi cuenta · WOMAN 656</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f;--success:#527160}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
-.wrap{width:min(760px,94vw);margin:34px auto}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.top a{color:var(--main);font-weight:800;text-decoration:none}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08)}
-h1{margin:0 0 8px}h2{font-size:17px;margin:20px 0 10px}p{color:var(--muted)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.field.full{grid-column:1/-1}
-.field-title{display:block;min-height:20px}
-.field input,.field select{width:100%;height:42px;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:#fff;font:inherit}
-.field-help{font-size:11px;color:var(--muted);line-height:1.35;min-height:15px}
-.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
-.primary,.secondary,.method-btn,.login-social button{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}
-.primary{background:var(--main);color:#fff}
-.secondary,.method-btn,.login-social button{background:var(--soft);color:var(--text)}
-.hidden{display:none!important}
-.tabs{display:flex;gap:8px;margin:16px 0}
-.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800;cursor:pointer}
-.tabs button.active{background:var(--main);color:#fff}
-.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:16px 0}
-.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}
-.provider-badge{display:inline-flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft);font-weight:800;min-height:42px}
-.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}
-.methods{border-top:1px solid var(--border);margin-top:20px;padding-top:2px}
-.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.method-btn{min-height:58px}
-.login-social{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
-.popup-backdrop{position:fixed;inset:0;background:rgba(22,28,27,.52);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999}
-.popup-card{width:min(430px,94vw);background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.28);border:1px solid var(--border)}
-.popup-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;background:var(--soft)}
-.popup-card.error .popup-icon{background:#f6e7e7;color:var(--danger)}
-.popup-card.success .popup-icon{background:#e8f2eb;color:var(--success)}
-.popup-card.info .popup-icon{background:#eef2ef;color:var(--main)}
-.popup-card h3{font-size:20px;margin:0 0 8px}
-.popup-card p{white-space:pre-line;line-height:1.5;margin:0 0 18px;color:var(--text)}
-.popup-actions{display:flex;justify-content:flex-end}
-.popup-actions button{border:0;border-radius:10px;background:var(--main);color:#fff;font-weight:800;padding:10px 18px;cursor:pointer}
-.input-error{border-color:var(--danger)!important;box-shadow:0 0 0 2px rgba(155,79,79,.10)}
-@media(max-width:700px){.method-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.grid,.login-social{grid-template-columns:1fr}.method-grid{grid-template-columns:1fr 1fr}}
+:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f;--success:#527160;--warn:#8a6a2f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(760px,94vw);margin:34px auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.top a{color:var(--main);font-weight:800;text-decoration:none}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08);margin-bottom:16px}h1{margin:0 0 8px}h2{font-size:17px;margin:20px 0 10px}p{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field.full{grid-column:1/-1}.field-title{display:block;min-height:20px}.field input,.field select{width:100%;height:42px;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:#fff;font:inherit}.field-help{font-size:11px;color:var(--muted);line-height:1.35;min-height:15px}.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.primary,.secondary,.method-btn,.login-social button{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}.primary{background:var(--main);color:#fff}.secondary,.method-btn,.login-social button{background:var(--soft);color:var(--text)}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin:16px 0}.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800;cursor:pointer}.tabs button.active{background:var(--main);color:#fff}.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:16px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}.provider-badge{display:inline-flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft);font-weight:800;min-height:42px}.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}.methods{border-top:1px solid var(--border);margin-top:20px;padding-top:2px}.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.method-btn{min-height:58px}.login-social{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.support-link{font-size:13px;margin-top:14px}.support-link a{color:var(--main);font-weight:800}.temp-warning{border:1px solid #d6c08f;background:#fff8e8;border-radius:14px;padding:14px;margin-bottom:16px}.temp-warning strong{display:block;color:var(--warn);margin-bottom:5px}.popup-backdrop{position:fixed;inset:0;background:rgba(22,28,27,.52);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999}.popup-card{width:min(430px,94vw);background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.28);border:1px solid var(--border)}.popup-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;background:var(--soft)}.popup-card.error .popup-icon{background:#f6e7e7;color:var(--danger)}.popup-card.success .popup-icon{background:#e8f2eb;color:var(--success)}.popup-card.info .popup-icon{background:#eef2ef;color:var(--main)}.popup-card h3{font-size:20px;margin:0 0 8px}.popup-card p{white-space:pre-line;line-height:1.5;margin:0 0 18px;color:var(--text)}.popup-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.popup-actions button{border:0;border-radius:10px;background:var(--main);color:#fff;font-weight:800;padding:10px 18px;cursor:pointer}.input-error{border-color:var(--danger)!important;box-shadow:0 0 0 2px rgba(155,79,79,.10)}@media(max-width:700px){.method-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.grid,.login-social{grid-template-columns:1fr}.method-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top"><a href="/">← Volver a WOMAN 656</a><strong>WOMAN 656</strong></div>
-
-  <section class="card" id="authCard">
-    <h1>Tu cuenta WOMAN 656</h1>
-    <p>Guarda tus favoritos, recibe información de pedidos y administra tus datos.</p>
-
-    <div class="tabs"><button id="loginTab" class="active">Ingresar</button><button id="signupTab">Crear cuenta</button></div>
-
-    <div id="loginPane">
-      <h2>Ingresar con tu cuenta</h2>
-      <div class="login-social"><button id="loginGoogleBtn">Continuar con Google</button><button id="loginFacebookBtn">Continuar con Facebook</button></div>
-      <div class="divider">o con correo y contraseña</div>
-      <div class="grid">
-        <label class="field full"><span class="field-title">Correo</span><input id="loginEmail" type="email" autocomplete="email"></label>
-        <label class="field full"><span class="field-title">Contraseña</span><input id="loginPassword" type="password" autocomplete="current-password"></label>
-      </div>
-      <div class="actions"><button class="primary" id="loginBtn">Ingresar</button><button class="secondary" id="forgotBtn">Olvidé mi contraseña</button></div>
-    </div>
-
-    <div id="signupPane" class="hidden">
-      <h2>1. Tus datos</h2>
-      <div class="grid">
-        <label class="field"><span class="field-title">Nombre</span><input id="signupFirst" autocomplete="given-name"></label>
-        <label class="field"><span class="field-title">Apellido</span><input id="signupLast" autocomplete="family-name"></label>
-        <label class="field"><span class="field-title">WhatsApp / teléfono</span><input id="signupPhone" type="tel" autocomplete="tel" placeholder="+526561234567"></label>
-        <label class="field"><span class="field-title">Correo</span><input id="signupEmail" type="email" autocomplete="email" placeholder="nombre@gmail.com"></label>
-        <label class="field"><span class="field-title">Edad</span><select id="signupAge"></select><span class="field-help"></span></label>
-        <label class="field"><span class="field-title">Contraseña</span><input id="signupPassword" type="password" autocomplete="new-password" minlength="8"><span class="field-help">Mínimo 8 caracteres.</span></label>
-        <label class="check full"><input id="signupMarketing" type="checkbox"><span>Quiero recibir promociones y ofertas de WOMAN 656 por correo. Solo se habilita para mayores de 18 años.</span></label>
-      </div>
-      <div class="actions"><button class="primary" id="continueSignupBtn">Continuar</button></div>
-
-      <section id="signupMethods" class="methods hidden">
-        <h2>2. Elige cómo crear tu cuenta</h2>
-        <div class="method-grid">
-          <button class="method-btn" id="signupBtn">Crear cuenta con correo</button>
-          <button class="method-btn" id="signupGoogleBtn">Registrarme con Google</button>
-          <button class="method-btn" id="signupInstagramBtn">Registrarme con Instagram</button>
-          <button class="method-btn" id="signupFacebookBtn">Registrarme con Facebook</button>
-        </div>
-        <div class="note">Los datos que llenaste arriba se conservan. Si eliges Google, Instagram o Facebook, la identidad de acceso se autoriza con esa cuenta.</div>
-      </section>
-    </div>
-  </section>
-
-  <section class="card hidden" id="profileCard">
-    <h1>Mi perfil</h1><p id="profileIntro"></p>
-    <div class="grid">
-      <label class="field"><span class="field-title">Nombre</span><input id="firstName" autocomplete="given-name"></label>
-      <label class="field"><span class="field-title">Apellido</span><input id="lastName" autocomplete="family-name"></label>
-      <label class="field"><span class="field-title">WhatsApp / teléfono</span><input id="phone" type="tel" autocomplete="tel"></label>
-      <label class="field"><span class="field-title">Correo de contacto</span><input id="contactEmail" type="email" autocomplete="email"></label>
-      <label class="field"><span class="field-title">Edad</span><select id="age"></select></label>
-      <div class="field"><span class="field-title">Método de acceso</span><div class="provider-badge" id="providerBadge">—</div></div>
-      <label class="check full"><input id="marketing" type="checkbox"><span>Acepto recibir promociones y ofertas de WOMAN 656 por correo. Solo disponible para mayores de 18 años.</span></label>
-    </div>
-    <div class="actions"><button class="primary" id="saveProfileBtn">Guardar perfil</button><button class="secondary" id="logoutBtn">Cerrar sesión</button></div>
-  </section>
+<div class="wrap"><div class="top"><a href="/">← Volver a WOMAN 656</a><strong>WOMAN 656</strong></div>
+<section class="card" id="authCard">
+<h1>Tu cuenta WOMAN 656</h1><p>Guarda tus favoritos, recibe información de pedidos y administra tus datos.</p>
+<div class="tabs"><button id="loginTab" class="active">Ingresar</button><button id="signupTab">Crear cuenta</button></div>
+<div id="loginPane">
+<h2>Ingresar con tu cuenta</h2><div class="login-social"><button id="loginGoogleBtn">Continuar con Google</button><button id="loginFacebookBtn">Continuar con Facebook</button></div><div class="divider">o con correo y contraseña</div>
+<div class="grid"><label class="field full"><span class="field-title">Correo</span><input id="loginEmail" type="email" autocomplete="email"></label><label class="field full"><span class="field-title">Contraseña</span><input id="loginPassword" type="password" autocomplete="current-password"></label></div>
+<div class="actions"><button class="primary" id="loginBtn">Ingresar</button><button class="secondary" id="forgotBtn">Olvidé mi contraseña</button></div>
+<div class="support-link">¿No recibiste el correo o sigues sin poder entrar? <a id="helpLink" href="ayuda-cuenta.html">Ayuda de acceso / WhatsApp</a></div>
 </div>
-
-<div id="popupBackdrop" class="popup-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
-  <div id="popupCard" class="popup-card info">
-    <div id="popupIcon" class="popup-icon">i</div>
-    <h3 id="popupTitle">Aviso</h3>
-    <p id="popupMessage"></p>
-    <div class="popup-actions"><button id="popupOkBtn" type="button">Aceptar</button></div>
-  </div>
+<div id="signupPane" class="hidden"><h2>1. Tus datos</h2><div class="grid">
+<label class="field"><span class="field-title">Nombre</span><input id="signupFirst" autocomplete="given-name"></label><label class="field"><span class="field-title">Apellido</span><input id="signupLast" autocomplete="family-name"></label>
+<label class="field"><span class="field-title">WhatsApp / teléfono</span><input id="signupPhone" type="tel" autocomplete="tel" placeholder="+526561234567"></label><label class="field"><span class="field-title">Correo</span><input id="signupEmail" type="email" autocomplete="email" placeholder="nombre@gmail.com"></label>
+<label class="field"><span class="field-title">Edad</span><select id="signupAge"></select><span class="field-help"></span></label><label class="field"><span class="field-title">Contraseña</span><input id="signupPassword" type="password" autocomplete="new-password" minlength="8"><span class="field-help">Mínimo 8 caracteres.</span></label>
+<label class="check full"><input id="signupMarketing" type="checkbox"><span>Quiero recibir promociones y ofertas de WOMAN 656 por correo. Solo se habilita para mayores de 18 años.</span></label></div>
+<div class="actions"><button class="primary" id="continueSignupBtn">Continuar</button></div>
+<section id="signupMethods" class="methods hidden"><h2>2. Elige cómo crear tu cuenta</h2><div class="method-grid"><button class="method-btn" id="signupBtn">Crear cuenta con correo</button><button class="method-btn" id="signupGoogleBtn">Registrarme con Google</button><button class="method-btn" id="signupInstagramBtn">Registrarme con Instagram</button><button class="method-btn" id="signupFacebookBtn">Registrarme con Facebook</button></div><div class="note">Los datos que llenaste arriba se conservan. Si eliges Google, Instagram o Facebook, la identidad de acceso se autoriza con esa cuenta.</div></section>
+</div></section>
+<section class="card hidden" id="profileCard"><div id="tempWarning" class="temp-warning hidden"><strong>Contraseña temporal de soporte</strong><span>Estás usando una contraseña temporal. Por seguridad, cámbiala por una contraseña que solo tú conozcas.</span><div class="actions"><button class="primary" id="changePasswordBtn">Cambiar contraseña ahora</button></div></div><h1>Mi perfil</h1><p id="profileIntro"></p><div class="grid">
+<label class="field"><span class="field-title">Nombre</span><input id="firstName" autocomplete="given-name"></label><label class="field"><span class="field-title">Apellido</span><input id="lastName" autocomplete="family-name"></label><label class="field"><span class="field-title">WhatsApp / teléfono</span><input id="phone" type="tel" autocomplete="tel"></label><label class="field"><span class="field-title">Correo de contacto</span><input id="contactEmail" type="email" autocomplete="email"></label><label class="field"><span class="field-title">Edad</span><select id="age"></select></label><div class="field"><span class="field-title">Método de acceso</span><div class="provider-badge" id="providerBadge">—</div></div><label class="check full"><input id="marketing" type="checkbox"><span>Acepto recibir promociones y ofertas de WOMAN 656 por correo. Solo disponible para mayores de 18 años.</span></label></div><div class="actions"><button class="primary" id="saveProfileBtn">Guardar perfil</button><button class="secondary" id="changePasswordNormalBtn">Cambiar contraseña</button><button class="secondary" id="logoutBtn">Cerrar sesión</button></div></section>
 </div>
-
+<div id="popupBackdrop" class="popup-backdrop hidden" role="dialog" aria-modal="true"><div id="popupCard" class="popup-card info"><div id="popupIcon" class="popup-icon">i</div><h3 id="popupTitle">Aviso</h3><p id="popupMessage"></p><div class="popup-actions"><button id="popupOkBtn" type="button">Aceptar</button></div></div></div>
 <script>
-const SUPABASE_URL='https://snkuvxpddxcmbfhgabbx.supabase.co';
-const SUPABASE_KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
-const CUSTOMER_STORAGE_KEY='woman656-customer-auth-token-v1';
-const PENDING_PROFILE_KEY='woman656-pending-social-profile';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:CUSTOMER_STORAGE_KEY}});
-const $=id=>document.getElementById(id);
-let popupResolver=null;
-
-function showPopup(title,message,type='info'){
-  return new Promise(resolve=>{
-    popupResolver=resolve;
-    $('popupTitle').textContent=title;
-    $('popupMessage').textContent=message;
-    $('popupCard').className=`popup-card ${type}`;
-    $('popupIcon').textContent=type==='error'?'!':type==='success'?'✓':'i';
-    $('popupBackdrop').classList.remove('hidden');
-    setTimeout(()=>$('popupOkBtn').focus(),0);
-  });
-}
-function closePopup(){
-  $('popupBackdrop').classList.add('hidden');
-  const resolve=popupResolver;popupResolver=null;if(resolve)resolve();
-}
-$('popupOkBtn').onclick=closePopup;
-$('popupBackdrop').addEventListener('click',e=>{if(e.target===$('popupBackdrop'))closePopup()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('popupBackdrop').classList.contains('hidden'))closePopup()});
-
-function fillAges(){for(const id of ['signupAge','age']){$(id).innerHTML='<option value="">Edad</option>'+Array.from({length:68},(_,i)=>i+13).map(n=>`<option value="${n}">${n} años</option>`).join('')}}
-function marketingAgeGuard(ageId,checkId){const age=Number($(ageId).value||0);if(age<18){$(checkId).checked=false;$(checkId).disabled=true}else{$(checkId).disabled=false}}
-function providerLabel(value){const v=String(value||'email').toLowerCase();if(v==='google')return 'Google';if(v==='facebook')return 'Facebook';if(v==='instagram')return 'Instagram';return 'Correo y contraseña'}
-function isValidEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim())}
-function signupProfileValues(){return{first_name:$('signupFirst').value.trim(),last_name:$('signupLast').value.trim(),phone:$('signupPhone').value.trim(),email:$('signupEmail').value.trim(),age:Number($('signupAge').value),password:$('signupPassword').value,marketing_consent:$('signupMarketing').checked}}
-function clearFieldErrors(){['signupFirst','signupLast','signupPhone','signupEmail','signupAge','signupPassword','loginEmail','loginPassword'].forEach(id=>$(id)?.classList.remove('input-error'))}
-function hideMethodsIfInvalid(){if(!registrationIsComplete())$('signupMethods').classList.add('hidden')}
-function registrationIsComplete(){const p=signupProfileValues();return !!(p.first_name&&p.last_name&&p.phone&&isValidEmail(p.email)&&p.age>=13&&p.age<=80&&p.password.length>=8)}
-
-async function validateSignupProfile(){
-  clearFieldErrors();
-  const p=signupProfileValues();
-  const missing=[];
-  if(!p.first_name){missing.push('Nombre');$('signupFirst').classList.add('input-error')}
-  if(!p.last_name){missing.push('Apellido');$('signupLast').classList.add('input-error')}
-  if(!p.phone){missing.push('WhatsApp / teléfono');$('signupPhone').classList.add('input-error')}
-  if(!p.email){missing.push('Correo');$('signupEmail').classList.add('input-error')}
-  if(!p.age){missing.push('Edad');$('signupAge').classList.add('input-error')}
-  if(!p.password){missing.push('Contraseña');$('signupPassword').classList.add('input-error')}
-  if(missing.length){await showPopup('Faltan datos',`Completa los siguientes campos:\n\n• ${missing.join('\n• ')}`,'error');return null}
-  if(!isValidEmail(p.email)){$('signupEmail').classList.add('input-error');await showPopup('Correo inválido','Escribe una dirección de correo válida.','error');return null}
-  if(p.password.length<8){$('signupPassword').classList.add('input-error');await showPopup('Contraseña incompleta','La contraseña debe tener al menos 8 caracteres.','error');return null}
-  if(p.age<13||p.age>80){$('signupAge').classList.add('input-error');await showPopup('Edad inválida','Selecciona una edad entre 13 y 80 años.','error');return null}
-  if(p.age<18)p.marketing_consent=false;
-  return p;
-}
-
-function friendlyAuthError(error){
-  const msg=String(error?.message||'').toLowerCase();
-  if(msg.includes('invalid login credentials'))return 'El correo o la contraseña no coinciden, o esa cuenta no está registrada.';
-  if(msg.includes('email not confirmed'))return 'Primero debes confirmar tu correo. Revisa tu bandeja de entrada o Spam.';
-  if(msg.includes('user already registered')||msg.includes('already registered'))return 'Ese correo ya está registrado. Usa la opción Ingresar o recupera tu contraseña.';
-  if(msg.includes('provider is not enabled')||msg.includes('unsupported provider'))return 'Ese método de acceso todavía no está habilitado.';
-  if(msg.includes('password'))return 'Revisa la contraseña e inténtalo nuevamente.';
-  return error?.message||'Ocurrió un error. Inténtalo nuevamente.';
-}
-
-async function oauth(provider,{signup=false}={}){
-  if(signup){
-    const pending=await validateSignupProfile();if(!pending)return;
-    localStorage.setItem(PENDING_PROFILE_KEY,JSON.stringify({first_name:pending.first_name,last_name:pending.last_name,phone:pending.phone,age:pending.age,marketing_consent:pending.marketing_consent,provider,created_at:Date.now()}));
-  }else{localStorage.removeItem(PENDING_PROFILE_KEY)}
-  const redirectTo=location.origin+'/cuenta.html';
-  const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo}});
-  if(error)await showPopup('No se pudo ingresar',friendlyAuthError(error),'error');
-}
-
-async function applyPendingSocialProfile(user){
-  let pending=null;try{pending=JSON.parse(localStorage.getItem(PENDING_PROFILE_KEY)||'null')}catch(_){pending=null}
-  if(!pending)return;
-  if(!pending.created_at||Date.now()-Number(pending.created_at)>30*60*1000){localStorage.removeItem(PENDING_PROFILE_KEY);return}
-  const age=Number(pending.age);
-  const {error}=await sb.rpc('set_my_profile',{p_first_name:String(pending.first_name||'').trim(),p_last_name:String(pending.last_name||'').trim(),p_contact_email:user.email||'',p_phone:String(pending.phone||'').trim(),p_age:age,p_marketing_consent:!!pending.marketing_consent&&age>=18});
-  if(!error)localStorage.removeItem(PENDING_PROFILE_KEY);
-  else await showPopup('No se pudo guardar tu perfil',friendlyAuthError(error),'error');
-}
-
-async function refresh(){
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session?.user){$('authCard').classList.remove('hidden');$('profileCard').classList.add('hidden');return}
-  const u=session.user;await applyPendingSocialProfile(u);
-  const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();
-  $('authCard').classList.add('hidden');$('profileCard').classList.remove('hidden');
-  $('firstName').value=p?.first_name||u.user_metadata?.given_name||u.user_metadata?.first_name||'';
-  $('lastName').value=p?.last_name||u.user_metadata?.family_name||u.user_metadata?.last_name||'';
-  $('contactEmail').value=p?.contact_email||p?.email||u.email||'';
-  $('phone').value=p?.phone||'';$('age').value=p?.age||'';
-  $('providerBadge').textContent=providerLabel(p?.auth_provider||u.app_metadata?.provider||'email');
-  $('marketing').checked=!!p?.marketing_consent;$('profileIntro').textContent=`Sesión: ${u.email||'cuenta social'}`;marketingAgeGuard('age','marketing');
-}
-
-$('loginTab').onclick=()=>{$('loginTab').classList.add('active');$('signupTab').classList.remove('active');$('loginPane').classList.remove('hidden');$('signupPane').classList.add('hidden')};
-$('signupTab').onclick=()=>{$('signupTab').classList.add('active');$('loginTab').classList.remove('active');$('signupPane').classList.remove('hidden');$('loginPane').classList.add('hidden')};
-$('continueSignupBtn').onclick=async()=>{const p=await validateSignupProfile();if(!p)return;$('signupMethods').classList.remove('hidden');$('signupMethods').scrollIntoView({behavior:'smooth',block:'nearest'})};
-$('loginGoogleBtn').onclick=()=>oauth('google');$('loginFacebookBtn').onclick=()=>oauth('facebook');
-$('signupGoogleBtn').onclick=()=>oauth('google',{signup:true});$('signupFacebookBtn').onclick=()=>oauth('facebook',{signup:true});
-$('signupInstagramBtn').onclick=async()=>{const p=await validateSignupProfile();if(!p)return;await showPopup('Instagram aún no está conectado','El registro con Instagram ya está contemplado, pero todavía falta conectar la autorización con Meta. Tus datos no se enviaron ni se creó ninguna cuenta.','info')};
-
-$('loginBtn').onclick=async()=>{
-  clearFieldErrors();const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
-  const missing=[];if(!email){missing.push('Correo');$('loginEmail').classList.add('input-error')}if(!password){missing.push('Contraseña');$('loginPassword').classList.add('input-error')}
-  if(missing.length){await showPopup('Faltan datos',`Completa:\n\n• ${missing.join('\n• ')}`,'error');return}
-  if(!isValidEmail(email)){$('loginEmail').classList.add('input-error');await showPopup('Correo inválido','Escribe una dirección de correo válida.','error');return}
-  const {error}=await sb.auth.signInWithPassword({email,password});
-  if(error){await showPopup('No se pudo ingresar',friendlyAuthError(error),'error');return}
-  refresh();
-};
-
-$('forgotBtn').onclick=async()=>{
-  const email=$('loginEmail').value.trim();
-  if(!email){$('loginEmail').classList.add('input-error');await showPopup('Escribe tu correo','Necesitamos tu correo para enviarte la recuperación de contraseña.','error');return}
-  if(!isValidEmail(email)){$('loginEmail').classList.add('input-error');await showPopup('Correo inválido','Escribe una dirección de correo válida.','error');return}
-  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/cuenta.html'});
-  if(error){await showPopup('No se pudo enviar',friendlyAuthError(error),'error');return}
-  await showPopup('Revisa tu correo','Si existe una cuenta registrada con ese correo, recibirás un enlace para recuperar tu contraseña. Revisa también Spam.','success');
-};
-
-['signupFirst','signupLast','signupPhone','signupEmail','signupPassword'].forEach(id=>$(id).addEventListener('input',()=>{$(id).classList.remove('input-error');hideMethodsIfInvalid()}));
-$('signupAge').onchange=()=>{$('signupAge').classList.remove('input-error');marketingAgeGuard('signupAge','signupMarketing');hideMethodsIfInvalid()};
-$('age').onchange=()=>marketingAgeGuard('age','marketing');
-
-$('signupBtn').onclick=async()=>{
-  const p=await validateSignupProfile();if(!p)return;
-  const {error}=await sb.auth.signUp({email:p.email,password:p.password,options:{emailRedirectTo:location.origin+'/cuenta.html',data:{first_name:p.first_name,last_name:p.last_name,phone:p.phone,age:p.age,marketing_consent:p.marketing_consent&&p.age>=18}}});
-  if(error){await showPopup('No se pudo crear la cuenta',friendlyAuthError(error),'error');return}
-  await showPopup('Cuenta creada','Te enviamos un correo para confirmar tu cuenta de WOMAN 656. Revisa tu bandeja de entrada y también Spam.','success');
-};
-
-$('saveProfileBtn').onclick=async()=>{
-  const age=Number($('age').value),first=$('firstName').value.trim(),last=$('lastName').value.trim(),email=$('contactEmail').value.trim(),phone=$('phone').value.trim();
-  const missing=[];if(!first)missing.push('Nombre');if(!last)missing.push('Apellido');if(!phone)missing.push('WhatsApp / teléfono');if(!email)missing.push('Correo');if(!age)missing.push('Edad');
-  if(missing.length){await showPopup('Faltan datos',`Completa:\n\n• ${missing.join('\n• ')}`,'error');return}
-  if(!isValidEmail(email)){await showPopup('Correo inválido','Escribe una dirección de correo válida.','error');return}
-  const {error}=await sb.rpc('set_my_profile',{p_first_name:first,p_last_name:last,p_contact_email:email,p_phone:phone,p_age:age,p_marketing_consent:$('marketing').checked&&age>=18});
-  if(error){await showPopup('No se pudo guardar',friendlyAuthError(error),'error');return}
-  await showPopup('Perfil guardado','Tus datos se actualizaron correctamente.','success');refresh();
-};
-
-$('logoutBtn').onclick=async()=>{await sb.auth.signOut();localStorage.removeItem(PENDING_PROFILE_KEY);location.href='/'};
+const SUPABASE_URL='https://snkuvxpddxcmbfhgabbx.supabase.co',SUPABASE_KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK',CUSTOMER_STORAGE_KEY='woman656-customer-auth-token-v1',PENDING_PROFILE_KEY='woman656-pending-social-profile';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:CUSTOMER_STORAGE_KEY}}),$=id=>document.getElementById(id);let popupResolver=null,tempPopupShown=false;
+function showPopup(title,message,type='info'){return new Promise(resolve=>{popupResolver=resolve;$('popupTitle').textContent=title;$('popupMessage').textContent=message;$('popupCard').className=`popup-card ${type}`;$('popupIcon').textContent=type==='error'?'!':type==='success'?'✓':'i';$('popupBackdrop').classList.remove('hidden');setTimeout(()=>$('popupOkBtn').focus(),0)})}function closePopup(){$('popupBackdrop').classList.add('hidden');const r=popupResolver;popupResolver=null;if(r)r()}$('popupOkBtn').onclick=closePopup;$('popupBackdrop').onclick=e=>{if(e.target===$('popupBackdrop'))closePopup()};
+function fillAges(){for(const id of ['signupAge','age']){$(id).innerHTML='<option value="">Edad</option>'+Array.from({length:68},(_,i)=>i+13).map(n=>`<option value="${n}">${n} años</option>`).join('')}}function marketingAgeGuard(ageId,checkId){const age=Number($(ageId).value||0);if(age<18){$(checkId).checked=false;$(checkId).disabled=true}else $(checkId).disabled=false}function providerLabel(v){v=String(v||'email').toLowerCase();return v==='google'?'Google':v==='facebook'?'Facebook':v==='instagram'?'Instagram':'Correo y contraseña'}function isValidEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
+function signupProfileValues(){return{first_name:$('signupFirst').value.trim(),last_name:$('signupLast').value.trim(),phone:$('signupPhone').value.trim(),email:$('signupEmail').value.trim(),age:Number($('signupAge').value),password:$('signupPassword').value,marketing_consent:$('signupMarketing').checked}}function clearFieldErrors(){['signupFirst','signupLast','signupPhone','signupEmail','signupAge','signupPassword','loginEmail','loginPassword'].forEach(id=>$(id)?.classList.remove('input-error'))}function registrationIsComplete(){const p=signupProfileValues();return !!(p.first_name&&p.last_name&&p.phone&&isValidEmail(p.email)&&p.age>=13&&p.age<=80&&p.password.length>=8)}function hideMethodsIfInvalid(){if(!registrationIsComplete())$('signupMethods').classList.add('hidden')}
+async function validateSignupProfile(){clearFieldErrors();const p=signupProfileValues(),missing=[];if(!p.first_name){missing.push('Nombre');$('signupFirst').classList.add('input-error')}if(!p.last_name){missing.push('Apellido');$('signupLast').classList.add('input-error')}if(!p.phone){missing.push('WhatsApp / teléfono');$('signupPhone').classList.add('input-error')}if(!p.email){missing.push('Correo');$('signupEmail').classList.add('input-error')}if(!p.age){missing.push('Edad');$('signupAge').classList.add('input-error')}if(!p.password){missing.push('Contraseña');$('signupPassword').classList.add('input-error')}if(missing.length){await showPopup('Faltan datos',`Completa los siguientes campos:\n\n• ${missing.join('\n• ')}`,'error');return null}if(!isValidEmail(p.email)){await showPopup('Correo inválido','Escribe una dirección de correo válida.','error');return null}if(p.password.length<8){await showPopup('Contraseña incompleta','La contraseña debe tener al menos 8 caracteres.','error');return null}if(p.age<13||p.age>80){await showPopup('Edad inválida','Selecciona una edad entre 13 y 80 años.','error');return null}if(p.age<18)p.marketing_consent=false;return p}
+function friendlyAuthError(error){const msg=String(error?.message||'').toLowerCase();if(msg.includes('invalid login credentials'))return 'El correo o la contraseña no coinciden, o esa cuenta no está registrada.';if(msg.includes('email not confirmed'))return 'Tu correo todavía no está confirmado. Puedes reenviar el correo o pedir ayuda por WhatsApp.';if(msg.includes('already registered'))return 'Ese correo ya está registrado. Usa Ingresar o la ayuda de acceso.';if(msg.includes('provider is not enabled')||msg.includes('unsupported provider'))return 'Ese método de acceso todavía no está habilitado.';return error?.message||'Ocurrió un error.'}
+async function oauth(provider,{signup=false}={}){if(signup){const p=await validateSignupProfile();if(!p)return;localStorage.setItem(PENDING_PROFILE_KEY,JSON.stringify({first_name:p.first_name,last_name:p.last_name,phone:p.phone,age:p.age,marketing_consent:p.marketing_consent,provider,created_at:Date.now()}))}else localStorage.removeItem(PENDING_PROFILE_KEY);const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:location.origin+'/cuenta.html'}});if(error)await showPopup('No se pudo ingresar',friendlyAuthError(error),'error')}
+async function applyPendingSocialProfile(user){let p=null;try{p=JSON.parse(localStorage.getItem(PENDING_PROFILE_KEY)||'null')}catch{}if(!p)return;if(!p.created_at||Date.now()-Number(p.created_at)>30*60*1000){localStorage.removeItem(PENDING_PROFILE_KEY);return}const age=Number(p.age);const {error}=await sb.rpc('set_my_profile',{p_first_name:String(p.first_name||'').trim(),p_last_name:String(p.last_name||'').trim(),p_contact_email:user.email||'',p_phone:String(p.phone||'').trim(),p_age:age,p_marketing_consent:!!p.marketing_consent&&age>=18});if(!error)localStorage.removeItem(PENDING_PROFILE_KEY)}
+async function refresh(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){$('authCard').classList.remove('hidden');$('profileCard').classList.add('hidden');return}const u=session.user;await applyPendingSocialProfile(u);const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();$('authCard').classList.add('hidden');$('profileCard').classList.remove('hidden');$('firstName').value=p?.first_name||u.user_metadata?.given_name||'';$('lastName').value=p?.last_name||u.user_metadata?.family_name||'';$('contactEmail').value=p?.contact_email||p?.email||u.email||'';$('phone').value=p?.phone||'';$('age').value=p?.age||'';$('providerBadge').textContent=providerLabel(p?.auth_provider||u.app_metadata?.provider);$('marketing').checked=!!p?.marketing_consent;$('profileIntro').textContent=`Sesión: ${u.email||'cuenta social'}`;marketingAgeGuard('age','marketing');const must=!!p?.must_change_password;$('tempWarning').classList.toggle('hidden',!must);if(must&&!tempPopupShown){tempPopupShown=true;await showPopup('Cambia tu contraseña temporal','Soporte te dio acceso con una contraseña temporal. Cámbiala ahora por una contraseña que solo tú conozcas.','info')}}
+$('loginTab').onclick=()=>{$('loginTab').classList.add('active');$('signupTab').classList.remove('active');$('loginPane').classList.remove('hidden');$('signupPane').classList.add('hidden')};$('signupTab').onclick=()=>{$('signupTab').classList.add('active');$('loginTab').classList.remove('active');$('signupPane').classList.remove('hidden');$('loginPane').classList.add('hidden')};$('continueSignupBtn').onclick=async()=>{if(await validateSignupProfile())$('signupMethods').classList.remove('hidden')};$('loginGoogleBtn').onclick=()=>oauth('google');$('loginFacebookBtn').onclick=()=>oauth('facebook');$('signupGoogleBtn').onclick=()=>oauth('google',{signup:true});$('signupFacebookBtn').onclick=()=>oauth('facebook',{signup:true});$('signupInstagramBtn').onclick=async()=>{if(await validateSignupProfile())await showPopup('Instagram aún no está conectado','El registro con Instagram está contemplado, pero todavía falta conectar la autorización con Meta.','info')};
+$('loginBtn').onclick=async()=>{clearFieldErrors();const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){await showPopup('Faltan datos','Escribe correo y contraseña.','error');return}const {error}=await sb.auth.signInWithPassword({email,password});if(error){if(String(error.message||'').toLowerCase().includes('email not confirmed'))sessionStorage.setItem('woman656-help-email',email);await showPopup('No se pudo ingresar',friendlyAuthError(error),'error');return}refresh()};
+$('forgotBtn').onclick=async()=>{const email=$('loginEmail').value.trim();if(!isValidEmail(email)){await showPopup('Escribe tu correo','Necesitamos un correo válido para enviarte la recuperación.','error');return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/cambiar-contrasena.html'});if(error){await showPopup('No se pudo enviar',friendlyAuthError(error),'error');return}await showPopup('Revisa tu correo','Si existe una cuenta con ese correo, enviamos un enlace de recuperación. Revisa también Spam.','success')};
+['signupFirst','signupLast','signupPhone','signupEmail','signupPassword'].forEach(id=>$(id).addEventListener('input',()=>{hideMethodsIfInvalid()}));$('signupAge').onchange=()=>{marketingAgeGuard('signupAge','signupMarketing');hideMethodsIfInvalid()};$('age').onchange=()=>marketingAgeGuard('age','marketing');
+$('signupBtn').onclick=async()=>{const p=await validateSignupProfile();if(!p)return;const {error}=await sb.auth.signUp({email:p.email,password:p.password,options:{emailRedirectTo:location.origin+'/cuenta.html',data:{first_name:p.first_name,last_name:p.last_name,phone:p.phone,age:p.age,marketing_consent:p.marketing_consent&&p.age>=18}}});if(error){await showPopup('No se pudo crear la cuenta',friendlyAuthError(error),'error');return}sessionStorage.setItem('woman656-help-email',p.email);await showPopup('Cuenta creada','Te enviamos un correo para confirmar tu cuenta. Si no llega, usa “Ayuda de acceso / WhatsApp” para reenviarlo o pedir soporte.','success')};
+$('saveProfileBtn').onclick=async()=>{const age=Number($('age').value),first=$('firstName').value.trim(),last=$('lastName').value.trim(),email=$('contactEmail').value.trim(),phone=$('phone').value.trim();if(!first||!last||!email||!phone||!age){await showPopup('Faltan datos','Completa todos los datos del perfil.','error');return}const {error}=await sb.rpc('set_my_profile',{p_first_name:first,p_last_name:last,p_contact_email:email,p_phone:phone,p_age:age,p_marketing_consent:$('marketing').checked&&age>=18});if(error){await showPopup('No se pudo guardar',error.message,'error');return}await showPopup('Perfil guardado','Tus datos se actualizaron correctamente.','success');refresh()};
+$('changePasswordBtn').onclick=$('changePasswordNormalBtn').onclick=()=>location.href='cambiar-contrasena.html';$('logoutBtn').onclick=async()=>{await sb.auth.signOut();localStorage.removeItem(PENDING_PROFILE_KEY);location.href='/'};
+$('helpLink').onclick=e=>{e.preventDefault();const email=$('loginEmail').value.trim()||sessionStorage.getItem('woman656-help-email')||'';location.href='ayuda-cuenta.html'+(email?`?email=${encodeURIComponent(email)}`:'')};
 fillAges();refresh();sb.auth.onAuthStateChange(()=>setTimeout(refresh,0));
 </script>
-</body>
-</html>
+</body></html>
