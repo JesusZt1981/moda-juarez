@@ -5,7 +5,7 @@
 <title>Mi cuenta · WOMAN 656</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(760px,94vw);margin:34px auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.top a{color:var(--main);font-weight:800;text-decoration:none}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08)}h1{margin:0 0 8px}h2{font-size:17px;margin:20px 0 10px}p{color:var(--muted)}.social{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.social button,.primary,.secondary{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}.social button,.secondary{background:var(--soft);color:var(--text)}.primary{background:var(--main);color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field input,.field select{padding:11px;border:1px solid var(--border);border-radius:9px;background:#fff}.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.status{margin-top:12px;font-size:13px;min-height:18px}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin:16px 0}.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800}.tabs button.active{background:var(--main);color:#fff}.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:16px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}.provider-badge{display:inline-flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft);font-weight:800;min-height:42px}.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}@media(max-width:650px){.grid,.social{grid-template-columns:1fr}}
+:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(760px,94vw);margin:34px auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.top a{color:var(--main);font-weight:800;text-decoration:none}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08)}h1{margin:0 0 8px}h2{font-size:17px;margin:20px 0 10px}p{color:var(--muted)}.social{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.social button,.primary,.secondary{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}.social button,.secondary{background:var(--soft);color:var(--text)}.primary{background:var(--main);color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field input,.field select{padding:11px;border:1px solid var(--border);border-radius:9px;background:#fff}.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.status{margin-top:12px;font-size:13px;min-height:18px}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin:16px 0}.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800}.tabs button.active{background:var(--main);color:#fff}.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:16px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}.provider-badge{display:inline-flex;align-items:center;padding:10px 12px;border-radius:10px;background:var(--soft);font-weight:800;min-height:42px}.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}.methods{border-top:1px solid var(--border);margin-top:20px;padding-top:2px}.methods-title{margin-bottom:8px}.method-btn.primary{background:var(--main);color:#fff}.method-btn:disabled{opacity:.45;cursor:not-allowed}@media(max-width:650px){.grid,.social{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -20,7 +20,7 @@
 
     <div id="loginPane">
       <h2>Ingresar con tu cuenta</h2>
-      <div class="social"><button id="loginGoogleBtn">Continuar con Google</button><button id="loginFacebookBtn">Continuar con Facebook</button></div>
+      <div class="social" style="grid-template-columns:1fr 1fr"><button id="loginGoogleBtn">Continuar con Google</button><button id="loginFacebookBtn">Continuar con Facebook</button></div>
       <div class="divider">o con correo y contraseña</div>
       <div class="grid">
         <label class="field full">Correo<input id="loginEmail" type="email" autocomplete="email"></label>
@@ -34,20 +34,22 @@
       <div class="grid">
         <label class="field">Nombre<input id="signupFirst" autocomplete="given-name"></label>
         <label class="field">Apellido<input id="signupLast" autocomplete="family-name"></label>
-        <label class="field full">WhatsApp / teléfono<input id="signupPhone" type="tel" autocomplete="tel" placeholder="6561234567"></label>
+        <label class="field full">WhatsApp / teléfono<input id="signupPhone" type="tel" autocomplete="tel" placeholder="+526561234567"></label>
         <label class="field">Edad<select id="signupAge"></select></label>
+        <label class="field">Contraseña <span class="note">(solo si usarás correo)</span><input id="signupPassword" type="password" autocomplete="new-password" minlength="8"></label>
+        <label class="field full">Correo <span class="note">(para Google/Facebook usaremos el correo autorizado por esa cuenta)</span><input id="signupEmail" type="email" autocomplete="email"></label>
         <label class="check full"><input id="signupMarketing" type="checkbox"><span>Quiero recibir promociones y ofertas de WOMAN 656 por correo. Solo se habilita para mayores de 18 años.</span></label>
       </div>
 
-      <h2>2. Elige cómo crear tu cuenta</h2>
-      <div class="social"><button id="signupGoogleBtn">Registrarme con Google</button><button id="signupFacebookBtn">Registrarme con Facebook</button></div>
-      <div class="divider">o con correo y contraseña</div>
-      <div class="grid">
-        <label class="field full">Correo<input id="signupEmail" type="email" autocomplete="email"></label>
-        <label class="field full">Contraseña<input id="signupPassword" type="password" autocomplete="new-password" minlength="8"></label>
-      </div>
-      <div class="actions"><button class="primary" id="signupBtn">Crear cuenta con correo</button></div>
-      <div class="note">Si eliges Google o Facebook, primero guardamos Nombre, Apellido, Teléfono y Edad; después te llevamos al proveedor para autorizar la cuenta.</div>
+      <section id="signupMethods" class="methods hidden">
+        <h2 class="methods-title">2. Elige cómo crear tu cuenta</h2>
+        <div class="social">
+          <button class="method-btn primary" id="signupBtn">Crear cuenta con correo</button>
+          <button class="method-btn" id="signupGoogleBtn">Registrarme con Google (Gmail)</button>
+          <button class="method-btn" id="signupFacebookBtn">Registrarme con Facebook</button>
+        </div>
+        <div class="note">Tus datos de Nombre, Apellido, Teléfono y Edad se conservan aunque elijas Google o Facebook. El proveedor confirma la identidad y aporta el correo real de esa cuenta.</div>
+      </section>
     </div>
     <div class="status" id="authStatus"></div>
   </section>
@@ -88,6 +90,17 @@ function signupProfileValues(){
     age:Number($('signupAge').value),
     marketing_consent:$('signupMarketing').checked
   };
+}
+function baseSignupComplete(){
+  const p=signupProfileValues();
+  return !!(p.first_name && p.last_name && p.phone && p.age>=13 && p.age<=80);
+}
+function updateSignupMethods(){
+  const ready=baseSignupComplete();
+  $('signupMethods').classList.toggle('hidden',!ready);
+  const email=$('signupEmail').value.trim();
+  const password=$('signupPassword').value;
+  $('signupBtn').disabled=!(ready && email && password.length>=8);
 }
 function validateSignupProfile(){
   const p=signupProfileValues();
@@ -146,21 +159,23 @@ async function refresh(){
 }
 
 $('loginTab').onclick=()=>{$('loginTab').classList.add('active');$('signupTab').classList.remove('active');$('loginPane').classList.remove('hidden');$('signupPane').classList.add('hidden')};
-$('signupTab').onclick=()=>{$('signupTab').classList.add('active');$('loginTab').classList.remove('active');$('signupPane').classList.remove('hidden');$('loginPane').classList.add('hidden')};
+$('signupTab').onclick=()=>{$('signupTab').classList.add('active');$('loginTab').classList.remove('active');$('signupPane').classList.remove('hidden');$('loginPane').classList.add('hidden');updateSignupMethods()};
 $('loginGoogleBtn').onclick=()=>oauth('google');$('loginFacebookBtn').onclick=()=>oauth('facebook');
 $('signupGoogleBtn').onclick=()=>oauth('google',{signup:true});$('signupFacebookBtn').onclick=()=>oauth('facebook',{signup:true});
 $('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)status('authStatus',error.message,true);else refresh()};
 $('forgotBtn').onclick=async()=>{const email=$('loginEmail').value.trim();if(!email)return status('authStatus','Escribe primero tu correo.',true);const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/cuenta.html'});status('authStatus',error?error.message:'Te enviamos un correo para recuperar tu contraseña.',!!error)};
-$('signupAge').onchange=()=>marketingAgeGuard('signupAge','signupMarketing');$('age').onchange=()=>marketingAgeGuard('age','marketing');
+['signupFirst','signupLast','signupPhone','signupEmail','signupPassword'].forEach(id=>$(id).addEventListener('input',updateSignupMethods));
+$('signupAge').onchange=()=>{marketingAgeGuard('signupAge','signupMarketing');updateSignupMethods()};
+$('age').onchange=()=>marketingAgeGuard('age','marketing');
 $('signupBtn').onclick=async()=>{
   const p=validateSignupProfile();if(!p)return;
   const email=$('signupEmail').value.trim(),password=$('signupPassword').value;
-  if(!email||!password)return status('authStatus','Escribe correo y contraseña para crear la cuenta.',true);
+  if(!email||password.length<8)return status('authStatus','Para crear la cuenta con correo escribe un correo válido y una contraseña de al menos 8 caracteres.',true);
   const {error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/cuenta.html',data:{first_name:p.first_name,last_name:p.last_name,phone:p.phone,age:p.age,marketing_consent:p.marketing_consent&&p.age>=18}}});
   status('authStatus',error?error.message:'Cuenta creada. Revisa tu correo para confirmar el registro.',!!error)
 };
 $('saveProfileBtn').onclick=async()=>{const age=Number($('age').value);const args={p_first_name:$('firstName').value.trim(),p_last_name:$('lastName').value.trim(),p_contact_email:$('contactEmail').value.trim(),p_phone:$('phone').value.trim(),p_age:age,p_marketing_consent:$('marketing').checked&&age>=18};const {error}=await sb.rpc('set_my_profile',args);status('profileStatus',error?error.message:'Perfil guardado correctamente.',!!error);if(!error)refresh()};
 $('logoutBtn').onclick=async()=>{await sb.auth.signOut();localStorage.removeItem(PENDING_PROFILE_KEY);location.href='/'};
-fillAges();refresh();sb.auth.onAuthStateChange(()=>setTimeout(refresh,0));
+fillAges();updateSignupMethods();refresh();sb.auth.onAuthStateChange(()=>setTimeout(refresh,0));
 </script>
 </body></html>
