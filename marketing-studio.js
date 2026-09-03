@@ -11,5 +11,6 @@
   }
   loadScript('marketing-studio-original.js')
     .catch(error=>console.error(error))
-    .finally(()=>loadScript('store-analytics.js').catch(error=>console.error(error)));
+    .finally(()=>loadScript('store-analytics.js').catch(error=>console.error(error)))
+    .finally(()=>loadScript('ui-polish.js').catch(error=>console.error(error)));
 })();
