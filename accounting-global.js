@@ -1,7 +1,8 @@
 (() => {
   const originalItemRow=typeof itemRow==='function'?itemRow:null;
   const originalRender=typeof render==='function'?render:null;
-  if(!originalItemRow||!originalRender)return;
+  const originalLoad=typeof load==='function'?load:null;
+  if(!originalItemRow||!originalRender||!originalLoad)return;
 
   function globalTax(){return Number(document.getElementById('globalTaxRate')?.value ?? settings.sales_tax_rate ?? 16)}
   function globalMargin(){return Number(document.getElementById('globalMargin')?.value ?? settings.default_margin_percent ?? 50)}
@@ -15,8 +16,8 @@
       <td class="col-size"><input data-k="size" placeholder="Talla" value="${esc(i.size)}"></td>
       <td class="col-qty"><input data-k="quantity" type="number" min="1" value="${i.quantity}"></td>
       <td class="col-money"><input data-k="unit_cost" type="number" min="0" step=".01" value="${i.unit_cost}"></td>
-      <td class="col-money"><input data-k="duties_allocated" type="number" min="0" step=".01" value="${i.duties_allocated||0}"></td>
       <td class="col-money"><input data-k="shipping_allocated" type="number" min="0" step=".01" value="${i.shipping_allocated||0}"></td>
+      <td class="col-money"><input data-k="duties_allocated" type="number" min="0" step=".01" value="${i.duties_allocated||0}"></td>
       <td class="col-money"><input data-k="other_allocated" type="number" min="0" step=".01" value="${i.other_allocated||0}"></td>
       <td class="col-total">${money(c.real)}</td>
       <td class="col-suggested">${money(c.suggested)}</td>
@@ -31,6 +32,16 @@
     const empty=document.querySelector('#itemsBody td[colspan="13"]');
     if(empty)empty.colSpan=10;
     syncGlobalControls();
+  };
+
+  load=async function(){
+    await originalLoad();
+    const {data,error}=await db.from('purchase_items').select('id,tax_included,tax_creditable');
+    if(!error&&data){
+      const flags=new Map(data.map(row=>[String(row.id),row]));
+      items.forEach(item=>{const row=flags.get(String(item.id));if(row){item.tax_included=!!row.tax_included;item.tax_creditable=!!row.tax_creditable}});
+      render();
+    }
   };
 
   function syncGlobalControls(){
