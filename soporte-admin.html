@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soporte de cuentas · WOMAN 656</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f;--good:#527160}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(900px,94vw);margin:30px auto}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{color:var(--main);font-weight:800;text-decoration:none}.card{margin-top:16px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 10px 30px rgba(44,52,52,.07)}.row{display:grid;grid-template-columns:1fr auto;gap:10px}.row input{height:44px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font:inherit}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:800;cursor:pointer;background:var(--main);color:#fff}.btn.secondary{background:var(--soft);color:var(--text)}.btn.danger{background:var(--danger)}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.item{background:var(--soft);border-radius:12px;padding:12px}.item small{display:block;color:var(--muted);margin-bottom:4px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.status{margin-top:12px;color:var(--muted)}.ok{color:var(--good)}.bad{color:var(--danger)}.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:12px}.temp{margin-top:14px;padding:14px;border:1px dashed var(--main);border-radius:12px;background:#fbfcfb}.temp code{font-size:18px;font-weight:800;word-break:break-all}.hidden{display:none!important}@media(max-width:650px){.row,.grid{grid-template-columns:1fr}.row .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><a href="/">← Volver a WOMAN 656</a><h1>Soporte de cuentas</h1></div><a href="estadisticas.html">📊 Estadísticas</a></div>
+  <section class="card">
+    <h2>Buscar cliente</h2>
+    <p>Busca por el correo exacto registrado. Solo una sesión ADMIN puede usar estas acciones.</p>
+    <div class="row"><input id="email" type="email" placeholder="cliente@gmail.com"><button class="btn" id="search">Buscar</button></div>
+    <div id="status" class="status">Comprobando sesión ADMIN…</div>
+  </section>
+
+  <section class="card hidden" id="result">
+    <h2 id="name">Cliente</h2>
+    <div class="grid">
+      <div class="item"><small>Correo</small><strong id="rEmail">—</strong></div>
+      <div class="item"><small>Correo confirmado</small><strong id="rConfirmed">—</strong></div>
+      <div class="item"><small>WhatsApp registrado</small><strong id="rPhone">—</strong></div>
+      <div class="item"><small>Método de acceso</small><strong id="rProvider">—</strong></div>
+      <div class="item"><small>Último ingreso</small><strong id="rLast">—</strong></div>
+      <div class="item"><small>Cambio de contraseña pendiente</small><strong id="rMust">—</strong></div>
+    </div>
+
+    <div class="actions"><button class="btn secondary" id="resend">Reenviar confirmación</button></div>
+
+    <h3>Contraseña temporal por soporte</h3>
+    <p>Antes de generarla, confirma manualmente que la persona escribe desde el mismo WhatsApp que registró.</p>
+    <label class="check"><input type="checkbox" id="verifyPhone"> <span>Confirmo que verifiqué que el WhatsApp de la persona coincide con el número registrado.</span></label>
+    <label class="check"><input type="checkbox" id="confirmEmail"> <span>El correo nunca llegó y autorizo habilitar la cuenta por soporte. Esto marcará el correo como confirmado.</span></label>
+    <div class="actions"><button class="btn danger" id="generate">Generar contraseña temporal</button></div>
+
+    <div class="temp hidden" id="tempBox">
+      <div><strong>Contraseña temporal — se muestra solo aquí:</strong></div>
+      <code id="tempPassword"></code>
+      <div class="actions"><button class="btn secondary" id="copy">Copiar</button><button class="btn" id="whatsapp">Abrir WhatsApp con mensaje</button></div>
+      <p>La clienta debe iniciar sesión con esta contraseña y cambiarla inmediatamente.</p>
+    </div>
+  </section>
+</div>
+<script>
+const SUPABASE_URL='https://snkuvxpddxcmbfhgabbx.supabase.co';
+const SUPABASE_KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});
+const $=id=>document.getElementById(id); let current=null;
+const fmt=v=>v?new Date(v).toLocaleString('es-MX'):'—';
+async function ensureAdmin(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){location.href='/?admin=1';return null}const {data:p}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();if(String(p?.role||'').toLowerCase()!=='admin')throw new Error('Esta cuenta no tiene permisos ADMIN.');return session}
+async function call(action,extra={}){const session=await ensureAdmin();if(!session)return null;const res=await fetch(`${SUPABASE_URL}/functions/v1/admin-user-support`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${session.access_token}`},body:JSON.stringify({action,...extra})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Error de soporte');return data}
+async function lookup(){try{$('status').textContent='Buscando…';const email=$('email').value.trim().toLowerCase();if(!email)throw new Error('Escribe el correo del cliente.');const data=await call('lookup',{email});if(!data?.found){$('result').classList.add('hidden');$('status').textContent='No existe un usuario con ese correo.';return}current=data.user;const p=current.profile||{};$('name').textContent=`${p.first_name||''} ${p.last_name||''}`.trim()||'Cliente';$('rEmail').textContent=current.email||'—';$('rConfirmed').textContent=current.email_confirmed_at?'Sí':'No';$('rConfirmed').className=current.email_confirmed_at?'ok':'bad';$('rPhone').textContent=p.phone||'—';$('rProvider').textContent=p.auth_provider||'—';$('rLast').textContent=fmt(current.last_sign_in_at);$('rMust').textContent=p.must_change_password?'Sí':'No';$('result').classList.remove('hidden');$('tempBox').classList.add('hidden');$('verifyPhone').checked=false;$('confirmEmail').checked=false;$('status').textContent='Usuario localizado.'}catch(e){$('status').textContent=`Error: ${e.message}`}}
+$('search').onclick=lookup;$('email').addEventListener('keydown',e=>{if(e.key==='Enter')lookup()});
+$('resend').onclick=async()=>{try{if(!current)return;await call('resend_confirmation',{user_id:current.id});$('status').textContent='Correo de confirmación reenviado.'}catch(e){$('status').textContent=`Error: ${e.message}`}};
+$('generate').onclick=async()=>{try{if(!current)return;if(!$('verifyPhone').checked)throw new Error('Primero confirma que verificaste el WhatsApp registrado.');const phone=String(current.profile?.phone||'');const data=await call('generate_temp_password',{user_id:current.id,phone,phone_verified:true,confirm_email:$('confirmEmail').checked});$('tempPassword').textContent=data.temporary_password;$('tempBox').classList.remove('hidden');$('status').textContent='Contraseña temporal generada. La contraseña anterior dejó de funcionar.';current.profile.must_change_password=true;if($('confirmEmail').checked)current.email_confirmed_at=new Date().toISOString()}catch(e){$('status').textContent=`Error: ${e.message}`}};
+$('copy').onclick=async()=>{await navigator.clipboard.writeText($('tempPassword').textContent);$('status').textContent='Contraseña copiada.'};
+$('whatsapp').onclick=()=>{if(!current)return;const phone=String(current.profile?.phone||'').replace(/\D+/g,'');const pass=$('tempPassword').textContent;const name=`${current.profile?.first_name||''}`.trim();const msg=`Hola${name?' '+name:''}. Somos soporte de WOMAN 656. Tu contraseña temporal es: ${pass}\n\nIngresa en https://woman656.com/cuenta.html y después cambia tu contraseña en https://woman656.com/cambiar-contrasena.html\n\nPor seguridad, esta contraseña es temporal.`;window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener')};
+ensureAdmin().then(()=>{$('status').textContent='Sesión ADMIN verificada.'}).catch(e=>$('status').textContent=`Error: ${e.message}`);
+</script>
+</body></html>
