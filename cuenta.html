@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi cuenta · WOMAN 656</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#303638;--muted:#6d7474;--border:#d9dfdc;--main:#73877a;--soft:#eef2ef;--danger:#9b4f4f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(760px,94vw);margin:34px auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.top a{color:var(--main);font-weight:800;text-decoration:none}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(44,52,52,.08)}h1{margin:0 0 8px}p{color:var(--muted)}.social{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.social button,.primary,.secondary{border:0;border-radius:10px;padding:12px 14px;font-weight:800;cursor:pointer}.social button,.secondary{background:var(--soft);color:var(--text)}.primary{background:var(--main);color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field input,.field select{padding:11px;border:1px solid var(--border);border-radius:9px;background:#fff}.check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.4}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.status{margin-top:12px;font-size:13px;min-height:18px}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin:16px 0}.tabs button{border:0;background:var(--soft);padding:9px 12px;border-radius:9px;font-weight:800}.tabs button.active{background:var(--main);color:#fff}@media(max-width:650px){.grid,.social{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="/">← Volver a WOMAN 656</a><strong>WOMAN 656</strong></div>
+  <section class="card" id="authCard">
+    <h1>Tu cuenta WOMAN 656</h1><p>Guarda tus favoritos, recibe información de pedidos y administra tus datos.</p>
+    <div class="social"><button id="googleBtn">Continuar con Google</button><button id="facebookBtn">Continuar con Facebook</button></div>
+    <div class="tabs"><button id="loginTab" class="active">Ingresar</button><button id="signupTab">Crear cuenta</button></div>
+    <div id="loginPane">
+      <div class="grid"><label class="field full">Correo<input id="loginEmail" type="email" autocomplete="email"></label><label class="field full">Contraseña<input id="loginPassword" type="password" autocomplete="current-password"></label></div>
+      <div class="actions"><button class="primary" id="loginBtn">Ingresar</button><button class="secondary" id="forgotBtn">Olvidé mi contraseña</button></div>
+    </div>
+    <div id="signupPane" class="hidden">
+      <div class="grid">
+        <label class="field">Nombre<input id="signupFirst" autocomplete="given-name"></label>
+        <label class="field">Apellido<input id="signupLast" autocomplete="family-name"></label>
+        <label class="field full">Correo<input id="signupEmail" type="email" autocomplete="email"></label>
+        <label class="field full">WhatsApp / teléfono<input id="signupPhone" type="tel" autocomplete="tel" placeholder="6561234567"></label>
+        <label class="field">Edad<select id="signupAge"></select></label>
+        <label class="field">Contraseña<input id="signupPassword" type="password" autocomplete="new-password" minlength="8"></label>
+        <label class="check full"><input id="signupMarketing" type="checkbox"><span>Quiero recibir promociones y ofertas de WOMAN 656 por correo. Esta opción solo se habilita para mayores de 18 años.</span></label>
+      </div>
+      <div class="actions"><button class="primary" id="signupBtn">Crear cuenta</button></div>
+    </div>
+    <div class="status" id="authStatus"></div>
+  </section>
+
+  <section class="card hidden" id="profileCard">
+    <h1>Completa tu perfil</h1><p id="profileIntro"></p>
+    <div class="grid">
+      <label class="field">Nombre<input id="firstName" autocomplete="given-name"></label>
+      <label class="field">Apellido<input id="lastName" autocomplete="family-name"></label>
+      <label class="field full">Correo de contacto<input id="contactEmail" type="email" autocomplete="email"></label>
+      <label class="field full">WhatsApp / teléfono<input id="phone" type="tel" autocomplete="tel"></label>
+      <label class="field">Edad<select id="age"></select></label>
+      <label class="field">Método de acceso<input id="provider" readonly></label>
+      <label class="check full"><input id="marketing" type="checkbox"><span>Acepto recibir promociones y ofertas de WOMAN 656 por correo. Solo disponible para mayores de 18 años.</span></label>
+    </div>
+    <div class="actions"><button class="primary" id="saveProfileBtn">Guardar perfil</button><button class="secondary" id="logoutBtn">Cerrar sesión</button></div>
+    <div class="status" id="profileStatus"></div>
+  </section>
+</div>
+<script>
+const URL='https://snkuvxpddxcmbfhgabbx.supabase.co';
+const KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});
+const $=id=>document.getElementById(id);
+function fillAges(){for(const id of ['signupAge','age']){$(id).innerHTML='<option value="">Edad</option>'+Array.from({length:68},(_,i)=>i+13).map(n=>`<option value="${n}">${n} años</option>`).join('');}}
+function status(id,msg,error=false){$(id).textContent=msg;$(id).style.color=error?'#9b4f4f':'#527160'}
+function marketingAgeGuard(ageId,checkId){const age=Number($(ageId).value||0);if(age<18){$(checkId).checked=false;$(checkId).disabled=true}else{$(checkId).disabled=false}}
+async function oauth(provider){const redirectTo=location.origin+'/cuenta.html';const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo}});if(error)status('authStatus',error.message,true)}
+async function refresh(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){$('authCard').classList.remove('hidden');$('profileCard').classList.add('hidden');return}const u=session.user;const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();$('authCard').classList.add('hidden');$('profileCard').classList.remove('hidden');$('firstName').value=p?.first_name||u.user_metadata?.given_name||u.user_metadata?.first_name||'';$('lastName').value=p?.last_name||u.user_metadata?.family_name||u.user_metadata?.last_name||'';$('contactEmail').value=p?.contact_email||p?.email||u.email||'';$('phone').value=p?.phone||'';$('age').value=p?.age||'';$('provider').value=p?.auth_provider||u.app_metadata?.provider||'email';$('marketing').checked=!!p?.marketing_consent;$('profileIntro').textContent=`Sesión: ${u.email||'cuenta social'}`;marketingAgeGuard('age','marketing')}
+$('loginTab').onclick=()=>{$('loginTab').classList.add('active');$('signupTab').classList.remove('active');$('loginPane').classList.remove('hidden');$('signupPane').classList.add('hidden')};
+$('signupTab').onclick=()=>{$('signupTab').classList.add('active');$('loginTab').classList.remove('active');$('signupPane').classList.remove('hidden');$('loginPane').classList.add('hidden')};
+$('googleBtn').onclick=()=>oauth('google');$('facebookBtn').onclick=()=>oauth('facebook');
+$('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)status('authStatus',error.message,true);else refresh()};
+$('forgotBtn').onclick=async()=>{const email=$('loginEmail').value.trim();if(!email)return status('authStatus','Escribe primero tu correo.',true);const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/cuenta.html'});status('authStatus',error?error.message:'Te enviamos un correo para recuperar tu contraseña.',!!error)};
+$('signupAge').onchange=()=>marketingAgeGuard('signupAge','signupMarketing');$('age').onchange=()=>marketingAgeGuard('age','marketing');
+$('signupBtn').onclick=async()=>{const first=$('signupFirst').value.trim(),last=$('signupLast').value.trim(),email=$('signupEmail').value.trim(),phone=$('signupPhone').value.trim(),age=Number($('signupAge').value),password=$('signupPassword').value,marketing=$('signupMarketing').checked&&age>=18;if(!first||!last||!email||!phone||!age||!password)return status('authStatus','Completa nombre, apellido, correo, teléfono, edad y contraseña.',true);const {error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/cuenta.html',data:{first_name:first,last_name:last,phone,age,marketing_consent:marketing}}});status('authStatus',error?error.message:'Cuenta creada. Revisa tu correo para confirmar el registro.',!!error)};
+$('saveProfileBtn').onclick=async()=>{const age=Number($('age').value);const args={p_first_name:$('firstName').value.trim(),p_last_name:$('lastName').value.trim(),p_contact_email:$('contactEmail').value.trim(),p_phone:$('phone').value.trim(),p_age:age,p_marketing_consent:$('marketing').checked&&age>=18};const {error}=await sb.rpc('set_my_profile',args);status('profileStatus',error?error.message:'Perfil guardado correctamente.',!!error);if(!error)refresh()};
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.href='/'};
+fillAges();refresh();sb.auth.onAuthStateChange(()=>setTimeout(refresh,0));
+</script>
+</body></html>
