@@ -35,8 +35,8 @@
 
 <div class="modal hidden" id="modal"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">Actividad</h2><button id="closeModal">×</button></div><div id="modalBody"></div></div></div>
 <script>
-const URL='https://snkuvxpddxcmbfhgabbx.supabase.co';const KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
-const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});const $=id=>document.getElementById(id);
+const SUPABASE_URL='https://snkuvxpddxcmbfhgabbx.supabase.co';const SUPABASE_KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});const $=id=>document.getElementById(id);
 const fmtDate=v=>v?new Date(v).toLocaleString('es-MX'):'—';const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 async function ensureAdmin(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){location.href='/?admin=1';return false}const {data:p}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();if(String(p?.role).toLowerCase()!=='admin'){throw new Error('Esta cuenta no tiene permisos ADMIN.')}return true}
 function renderAges(rows){const max=Math.max(1,...(rows||[]).map(x=>Number(x.users)||0));$('ages').innerHTML=(rows||[]).map(x=>`<div class="agebar"><span style="width:70px">${esc(x.range)}</span><div style="width:${Math.max(2,(Number(x.users)||0)/max*75)}%"></div><strong>${Number(x.users)||0}</strong></div>`).join('')||'<p class="muted">Sin datos de edad todavía.</p>'}
