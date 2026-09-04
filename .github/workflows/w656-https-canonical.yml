@@ -1,0 +1,38 @@
+name: WOMAN 656 HTTPS canonical
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/w656_https_canonical_patch.py'
+      - '.github/workflows/w656-https-canonical.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply HTTPS canonical patch
+        run: python .github/scripts/w656_https_canonical_patch.py
+      - name: Validate patch
+        run: |
+          grep -q 'WOMAN656_HTTPS_CANONICAL_V1' index.html
+          grep -q 'https://woman656.com' index.html
+          git diff --check
+      - name: Commit patched index
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'No changes needed.'
+          else
+            git commit -m 'Force HTTPS canonical URL for WOMAN 656 [skip ci]'
+            git push origin main
+          fi
