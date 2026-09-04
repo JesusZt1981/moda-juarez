@@ -6,13 +6,18 @@
 <title>WOMAN 656 · Moda con actitud</title>
 <meta name="theme-color" content="#0d0b0d">
 <meta name="description" content="WOMAN 656 · Moda femenina con actitud.">
+<link rel="preconnect" href="https://snkuvxpddxcmbfhgabbx.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="//snkuvxpddxcmbfhgabbx.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 <link rel="icon" type="image/png" href="assets/woman-656-logo.png">
 
 <!-- SheetJS para leer archivos .xlsx directamente en el navegador -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <link rel="stylesheet" href="marketing-studio.css">
 
 <style>
@@ -596,8 +601,10 @@ body:not(.admin-mode) #resultCount{display:none!important}
 }
 
 </style>
+<link rel="stylesheet" href="assets/client-performance.css?v=1">
 </head>
 
+<!-- WOMAN656_CLIENT_PERFORMANCE_V1 -->
 <body>
 
 <div class="promo-bar">
@@ -1342,7 +1349,7 @@ const state = {
   admin: false,
   adminEmail: null,
   page: 1,
-  pageSize: 20
+  pageSize: window.matchMedia("(max-width:700px)").matches ? 12 : 20
 };
 
 const $ = id => document.getElementById(id);
@@ -1685,7 +1692,7 @@ function renderProducts(){
   const from = (state.page - 1) * state.pageSize;
   const visible = state.filtered.slice(from, from + state.pageSize);
 
-  visible.forEach(product=>{
+  visible.forEach((product,visibleIndex)=>{
     const card = document.createElement("article");
     card.className = "product-card";
 
@@ -1711,7 +1718,7 @@ function renderProducts(){
 
     card.innerHTML = `
       <div class="image-wrap">
-        <img class="product-image" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}">
+        <img class="product-image" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" width="600" height="800" loading="${visibleIndex < 2 ? "eager" : "lazy"}" decoding="async" fetchpriority="${visibleIndex < 2 ? "high" : "low"}">
         ${badge}
         <button class="favorite-btn ${favorite ? "active" : ""}" type="button" aria-label="${favorite ? "Quitar de favoritos" : "Agregar a favoritos"}">${favorite ? "♥" : "♡"}</button>
       </div>
@@ -1828,7 +1835,7 @@ function renderQuickViewMedia(product){
     button.setAttribute("aria-label",item.type === "video" ? "Ver video" : `Ver imagen ${index+1}`);
     button.innerHTML = item.type === "video"
       ? `<video src="${escapeHtml(item.url)}" muted playsinline preload="metadata"></video>`
-      : `<img src="${escapeHtml(item.url)}" alt="Miniatura ${index+1}">`;
+      : `<img src="${escapeHtml(item.url)}" alt="Miniatura ${index+1}" loading="lazy" decoding="async" fetchpriority="low">`;
     button.querySelector("img")?.addEventListener("error",event=>showMediaFallback(event.currentTarget,`Imagen ${index+1}`));
     const previewVideo = button.querySelector("video");
     if(previewVideo){
@@ -2830,7 +2837,7 @@ async function uploadProductVideo(slot,file){
   const ext = file.type === "video/webm" ? "webm" : "mp4";
   const path = `${safeFilePart(sku)}/${Date.now()}-video-${slot}-3s.${ext}`;
   setAdminEditorStatus(`Subiendo video ${slot}…`);
-  const {error} = await shopSupabase.storage.from(PRODUCT_IMAGE_BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+  const {error} = await shopSupabase.storage.from(PRODUCT_IMAGE_BUCKET).upload(path,file,{cacheControl:"31536000",upsert:false,contentType:file.type});
   if(error) throw error;
   const {data} = shopSupabase.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
   if(!data?.publicUrl) throw new Error("Supabase no devolvió la URL pública del video.");
@@ -2853,6 +2860,43 @@ async function clearProductVideo(slot){
   setAdminEditorStatus(`Video ${slot} quitado. Guarda el producto para confirmar.`,"ok");
 }
 
+
+async function optimizeProductImageForWeb(file){
+  try{
+    if(!file || !file.type?.startsWith("image/")) return file;
+    if(file.type === "image/webp" && file.size <= 700 * 1024) return file;
+
+    const url = URL.createObjectURL(file);
+    const image = await new Promise((resolve,reject)=>{
+      const img = new Image();
+      img.onload = ()=>resolve(img);
+      img.onerror = ()=>reject(new Error("No se pudo preparar la imagen para web."));
+      img.src = url;
+    });
+
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
+    const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+    const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d",{alpha:true});
+    ctx.drawImage(image,0,0,width,height);
+    URL.revokeObjectURL(url);
+
+    const blob = await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",0.82));
+    if(!blob) return file;
+    if(blob.size >= file.size && file.size <= 900 * 1024) return file;
+
+    const baseName = String(file.name || "producto").replace(/\.[^.]+$/,'');
+    return new File([blob],`${baseName}.webp`,{type:"image/webp",lastModified:Date.now()});
+  }catch(error){
+    console.warn("WOMAN 656: no se pudo optimizar la imagen; se conserva el archivo original.",error);
+    return file;
+  }
+}
+
 async function uploadProductImage(slot,file){
   await requireShopAdmin();
 
@@ -2866,8 +2910,10 @@ async function uploadProductImage(slot,file){
     throw new Error("Solo se permiten JPG, PNG o WEBP.");
   }
 
-  if(file.size > 5 * 1024 * 1024){
-    throw new Error("La imagen supera el límite de 5 MB.");
+  file = await optimizeProductImageForWeb(file);
+
+  if(file.size > 2500 * 1024){
+    throw new Error("La imagen sigue siendo demasiado pesada después de optimizarla. Usa una imagen menor a 2.5 MB.");
   }
 
   const sku = $("adminSku").value.trim();
@@ -2891,7 +2937,7 @@ async function uploadProductImage(slot,file){
     .storage
     .from(PRODUCT_IMAGE_BUCKET)
     .upload(path,file,{
-      cacheControl:"3600",
+      cacheControl:"31536000",
       upsert:false,
       contentType:file.type
     });
@@ -3812,6 +3858,7 @@ $("whatsappBtn").onclick = sendWhatsApp;
 
 </script>
 
+<script src="assets/client-performance.js?v=1"></script>
 <script src="marketing-studio.js"></script>
 
 </body>
