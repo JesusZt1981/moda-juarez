@@ -1,0 +1,38 @@
+/* WOMAN 656 · optimización de carga para clientes */
+
+/* El navegador puede omitir pintura de tarjetas que aún están lejos del viewport. */
+.product-card{
+  content-visibility:auto;
+  contain-intrinsic-size:220px 520px;
+}
+
+/* Evita trabajo visual innecesario en dispositivos táctiles. */
+@media (hover:none), (pointer:coarse){
+  .product-card:hover{
+    transform:none!important;
+    box-shadow:var(--shadow)!important;
+  }
+}
+
+/* Safari/iPhone: el blur fijo en varias capas puede costar GPU durante scroll. */
+@media (max-width:760px){
+  .site-header{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    background:rgba(255,255,255,.985)!important;
+  }
+  .overlay{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
+
+/* Respeta usuarios/dispositivos que solicitan menos movimiento. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
