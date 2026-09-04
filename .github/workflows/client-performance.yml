@@ -1,0 +1,46 @@
+name: WOMAN 656 client performance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/client_performance_patch.py'
+      - '.github/workflows/client-performance.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply client performance patch
+        run: python .github/scripts/client_performance_patch.py
+
+      - name: Validate standalone JavaScript
+        run: |
+          node --check marketing-studio.js
+          node --check assets/client-performance.js
+
+      - name: Validate generated index markers
+        run: |
+          grep -q 'WOMAN656_CLIENT_PERFORMANCE_V1' index.html
+          grep -q 'loading="${visibleIndex < 2 ? "eager" : "lazy"}"' index.html
+          grep -q 'assets/client-performance.css?v=1' index.html
+          grep -q 'assets/client-performance.js?v=1' index.html
+          git diff --check
+
+      - name: Commit optimized index
+        run: |
+          if git diff --quiet; then
+            echo 'No index changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Optimize WOMAN 656 customer loading [skip ci]'
+          git push
