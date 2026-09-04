@@ -8,10 +8,24 @@
   let activeInvoiceId=null;
   let draftTotals=null;
 
+  function invoiceForItem(item){
+    return invoices.find(x=>String(x.id)===String(item?.invoice_id))||null;
+  }
+
   calc=function(i){
-    const base=originalCalc(i);
+    const invoice=invoiceForItem(i);
     const promotion=num(i.promotion_allocated);
-    const real=base.real-promotion;
+    let real;
+    let base;
+    if(invoice?.amounts_include_tax){
+      const paid=num(i.unit_cost);
+      const extras=num(i.shipping_allocated)+num(i.duties_allocated)+num(i.other_allocated);
+      real=paid+extras-promotion;
+      base={base:paid,tax:0,creditableTax:0,real,suggested:0};
+    }else{
+      base=originalCalc(i);
+      real=base.real-promotion;
+    }
     const rounding=Number(i.rounding||settings.price_rounding)||1;
     const suggested=Math.ceil((real*(1+(Number(i.margin_percent)||0)/100))/rounding)*rounding;
     return {...base,real,suggested,promotion};
@@ -49,17 +63,19 @@
         <label>Otros gastos<input id="orderOtherTotal" type="number" min="0" step=".01"></label>
         <label>Total factura<input id="orderGrandTotal" type="number" min="0" step=".01"></label>
       </div>
+      <label class="order-tax-flag"><input id="orderAmountsIncludeTax" type="checkbox"> Los importes del comprobante ya incluyen IVA; no sumar otro IVA al costo real.</label>
       <div class="order-cost-check" id="orderCostCheck"></div>
       <div class="order-cost-note">El reparto usa el valor de cada partida como peso. Dos prendas con el mismo costo reciben la misma proporción. La promoción se resta del costo; envío, importación y otros se suman.</div>`;
     pricing.parentElement.insertBefore(box,pricing);
 
     const style=document.createElement('style');
     style.textContent=`
-      .order-cost-box{margin:16px 0;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#121217}.order-cost-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.order-cost-head strong{display:block;font-size:15px}.order-cost-head span{display:block;margin-top:3px;color:var(--muted);font-size:12px;line-height:1.4}.order-cost-head button{white-space:nowrap;background:var(--pink);color:#171217;font-weight:800}.order-cost-grid{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:9px}.order-cost-grid label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:700}.order-cost-grid input{width:100%;padding:9px 8px}.order-cost-check{margin-top:10px;font-size:12px;font-weight:800}.order-cost-note{margin-top:6px;color:var(--muted);font-size:11px}.allocation-ok{color:#8ee0a7}.allocation-warn{color:#ffca7a}.accounting-items-table .col-promo{width:90px}.accounting-items-table{min-width:1020px!important}@media(max-width:900px){.order-cost-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}.order-cost-head{align-items:flex-start;flex-direction:column}.order-cost-head button{width:100%}}
+      .order-cost-box{margin:16px 0;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#121217}.order-cost-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.order-cost-head strong{display:block;font-size:15px}.order-cost-head span{display:block;margin-top:3px;color:var(--muted);font-size:12px;line-height:1.4}.order-cost-head button{white-space:nowrap;background:var(--pink);color:#171217;font-weight:800}.order-cost-grid{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:9px}.order-cost-grid label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:700}.order-cost-grid input{width:100%;padding:9px 8px}.order-tax-flag{display:flex;align-items:center;gap:7px;margin-top:10px;color:#ddd;font-size:12px}.order-tax-flag input{width:auto}.order-cost-check{margin-top:10px;font-size:12px;font-weight:800}.order-cost-note{margin-top:6px;color:var(--muted);font-size:11px}.allocation-ok{color:#8ee0a7}.allocation-warn{color:#ffca7a}.accounting-items-table .col-promo{width:90px}.accounting-items-table{min-width:1020px!important}@media(max-width:900px){.order-cost-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}.order-cost-head{align-items:flex-start;flex-direction:column}.order-cost-head button{width:100%}}
     `;
     document.head.appendChild(style);
 
     ['orderProductsTotal','orderShippingTotal','orderPromotionTotal','orderDutiesTotal','orderOtherTotal','orderGrandTotal'].forEach(id=>byId(id)?.addEventListener('input',previewTotals));
+    byId('orderAmountsIncludeTax')?.addEventListener('change',()=>{previewTotals();try{render()}catch(_){}});
     byId('allocateOrderCostsBtn').addEventListener('click',allocateAndSave);
   }
 
@@ -74,30 +90,30 @@
       return;
     }
     box.querySelectorAll('input,button').forEach(el=>el.disabled=false);
-    draftTotals={
-      subtotal:num(invoice.subtotal),shipping:num(invoice.shipping_total),promotion:num(invoice.promotion_total),duties:num(invoice.duties_total),other:num(invoice.other_total),grand:num(invoice.grand_total)
-    };
+    draftTotals={subtotal:num(invoice.subtotal),shipping:num(invoice.shipping_total),promotion:num(invoice.promotion_total),duties:num(invoice.duties_total),other:num(invoice.other_total),grand:num(invoice.grand_total)};
     byId('orderProductsTotal').value=draftTotals.subtotal.toFixed(2);
     byId('orderShippingTotal').value=draftTotals.shipping.toFixed(2);
     byId('orderPromotionTotal').value=draftTotals.promotion.toFixed(2);
     byId('orderDutiesTotal').value=draftTotals.duties.toFixed(2);
     byId('orderOtherTotal').value=draftTotals.other.toFixed(2);
     byId('orderGrandTotal').value=draftTotals.grand.toFixed(2);
+    if(byId('orderAmountsIncludeTax'))byId('orderAmountsIncludeTax').checked=!!invoice.amounts_include_tax;
     previewTotals();
   }
 
-  function readTotals(){return{
-    subtotal:num(byId('orderProductsTotal')?.value),shipping:num(byId('orderShippingTotal')?.value),promotion:num(byId('orderPromotionTotal')?.value),duties:num(byId('orderDutiesTotal')?.value),other:num(byId('orderOtherTotal')?.value),grand:num(byId('orderGrandTotal')?.value)
-  }}
+  function readTotals(){return{subtotal:num(byId('orderProductsTotal')?.value),shipping:num(byId('orderShippingTotal')?.value),promotion:num(byId('orderPromotionTotal')?.value),duties:num(byId('orderDutiesTotal')?.value),other:num(byId('orderOtherTotal')?.value),grand:num(byId('orderGrandTotal')?.value),includeTax:!!byId('orderAmountsIncludeTax')?.checked}}
 
   function previewTotals(){
     const t=readTotals();
     const calculated=round2(t.subtotal+t.shipping-t.promotion+t.duties+t.other);
     const diff=round2(t.grand-calculated);
-    const lineBase=round2(items.reduce((s,i)=>s+num(i.unit_cost)*num(i.quantity),0));
+    const invoice=currentInvoice();
+    const rows=invoice?items.filter(i=>String(i.invoice_id)===String(invoice.id)):items;
+    const lineBase=round2(rows.reduce((s,i)=>s+num(i.unit_cost)*num(i.quantity),0));
     const parts=[`Calculado: ${money(calculated)}`,`Factura: ${money(t.grand)}`];
     if(Math.abs(diff)<.01)parts.push('✅ Cuadra');else parts.push(`⚠️ Diferencia ${money(diff)}`);
     if(Math.abs(lineBase-t.subtotal)>=.01)parts.push(`· Suma de partidas: ${money(lineBase)} (diferencia vs Productos: ${money(round2(lineBase-t.subtotal))})`);
+    if(t.includeTax)parts.push('· IVA ya incluido: no se duplica');
     const el=byId('orderCostCheck');if(el){el.textContent=parts.join(' · ');el.className=`order-cost-check ${Math.abs(diff)<.01?'allocation-ok':'allocation-warn'}`}
   }
 
@@ -123,8 +139,9 @@
     if(Math.abs(calculated-t.grand)>=.01&&!confirm(`El total calculado (${money(calculated)}) no coincide con la factura (${money(t.grand)}).\n\n¿Guardar y repartir de todos modos?`))return;
     const btn=byId('allocateOrderCostsBtn');btn.disabled=true;btn.textContent='Guardando…';
     try{
-      const invoiceUpdate=await db.from('purchase_invoices').update({subtotal:t.subtotal,shipping_total:t.shipping,promotion_total:t.promotion,duties_total:t.duties,other_total:t.other,grand_total:t.grand}).eq('id',invoice.id);
+      const invoiceUpdate=await db.from('purchase_invoices').update({subtotal:t.subtotal,shipping_total:t.shipping,promotion_total:t.promotion,duties_total:t.duties,other_total:t.other,grand_total:t.grand,amounts_include_tax:t.includeTax}).eq('id',invoice.id);
       if(invoiceUpdate.error)throw invoiceUpdate.error;
+      Object.assign(invoice,{subtotal:t.subtotal,shipping_total:t.shipping,promotion_total:t.promotion,duties_total:t.duties,other_total:t.other,grand_total:t.grand,amounts_include_tax:t.includeTax});
       const shipping=allocations(t.shipping,rows),duties=allocations(t.duties,rows),promotion=allocations(t.promotion,rows),other=allocations(t.other,rows);
       for(let idx=0;idx<rows.length;idx++){
         const item=rows[idx];
@@ -136,8 +153,7 @@
         if(q.error)throw q.error;
         Object.assign(item,patch);
       }
-      Object.assign(invoice,{subtotal:t.subtotal,shipping_total:t.shipping,promotion_total:t.promotion,duties_total:t.duties,other_total:t.other,grand_total:t.grand});
-      alert(`✅ Costos repartidos y guardados.\n\nEnvío: ${money(t.shipping)}\nPromoción: -${money(t.promotion)}\nImportación: ${money(t.duties)}\nOtros: ${money(t.other)}\n\nLos costos reales y precios sugeridos fueron recalculados.`);
+      alert(`✅ Costos repartidos y guardados.\n\nEnvío: ${money(t.shipping)}\nPromoción: -${money(t.promotion)}\nImportación: ${money(t.duties)}\nOtros: ${money(t.other)}\nIVA ya incluido: ${t.includeTax?'Sí':'No'}\n\nLos costos reales y precios sugeridos fueron recalculados.`);
       render();loadInvoiceTotals();
     }catch(error){console.error(error);alert(`❌ No se pudo completar el reparto.\n\n${error.message||error}`)}
     finally{btn.disabled=false;btn.textContent='Repartir y guardar'}
