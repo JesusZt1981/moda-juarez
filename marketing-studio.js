@@ -24,6 +24,13 @@
   }
 
   function start(){
+    const params=new URLSearchParams(location.search);
+
+    /* Cuando se llega desde Contabilidad, localiza primero el producto exacto. */
+    if(params.has('product')){
+      loadScript('product-deeplink.js').catch(error=>console.error(error));
+    }
+
     /* El pulido visual es pequeño y se aplica primero. */
     loadScript('ui-polish.js').catch(error=>console.error(error));
 
