@@ -12,9 +12,7 @@
 
     let products = state.products.filter(product=>{
       const text = `${product.name} ${product.sku} ${product.category} ${product.description}`.toLowerCase();
-      const visibleForRole = state.admin
-        ? true
-        : (product.active !== false && Number(product.totalStock || 0) > 0);
+      const visibleForRole = state.admin ? true : (product.active !== false && Number(product.totalStock || 0) > 0);
       return (
         visibleForRole &&
         (!search || text.includes(search)) &&
@@ -34,7 +32,7 @@
     state.filtered = products;
     state.page = 1;
     renderProducts();
-    updateCatalogDiagnostic?.();
+    if(typeof updateCatalogDiagnostic === "function") updateCatalogDiagnostic();
   }
 
   applyFilters = adminAwareApplyFilters;
@@ -45,7 +43,7 @@
     const button = document.createElement("button");
     button.type = "button";
     button.id = "deleteAdminProduct";
-    button.className = "danger-btn";
+    button.className = "danger-btn hidden";
     button.textContent = "🗑 Eliminar producto";
     button.style.background = "#b92f45";
     button.style.color = "#fff";
@@ -98,17 +96,17 @@
         return;
       }
 
-      setAdminEditorStatus?.("Eliminando producto…");
+      if(typeof setAdminEditorStatus === "function") setAdminEditorStatus("Eliminando producto…");
       const {error} = await shopSupabase.from("shop_products").delete().eq("id",dbId);
       if(error) throw error;
 
       await removeProductMedia(product);
       await loadCatalogFromSupabase();
-      closeAdminEditor?.();
+      if(typeof closeAdminEditor === "function") closeAdminEditor();
       alert(`✅ ${sku} fue eliminado del catálogo.\n\nLas partidas históricas de Contabilidad se conservaron.`);
     }catch(error){
       console.error(error);
-      setAdminEditorStatus?.(`❌ ${error.message||error}`,"error");
+      if(typeof setAdminEditorStatus === "function") setAdminEditorStatus(`❌ ${error.message||error}`,"error");
     }
   }
 
@@ -118,7 +116,6 @@
     style.id = "w656AdminVisibilityStyles";
     style.textContent = `
       body.admin-mode .product-card{position:relative}
-      body.admin-mode .product-card:has(.stock-line b){opacity:1}
       body.admin-mode .product-card .badge{z-index:3}
       #deleteAdminProduct{font-weight:900}
     `;
@@ -127,5 +124,5 @@
 
   addAdminStatusStyles();
   ensureDeleteButton();
-  if(state?.admin) applyFilters();
+  if(typeof state !== "undefined" && state.admin) applyFilters();
 })();
