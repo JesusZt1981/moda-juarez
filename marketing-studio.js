@@ -26,6 +26,10 @@
   function start(){
     const params=new URLSearchParams(location.search);
 
+    /* Controles administrativos ligeros: permiten ver también productos
+       ocultos/sin stock y gestionar su eliminación desde el editor. */
+    loadScript('admin-catalog-controls.js').catch(error=>console.error(error));
+
     /* Cuando se llega desde Contabilidad, localiza primero el producto exacto. */
     if(params.has('product')){
       loadScript('product-deeplink.js').catch(error=>console.error(error));
