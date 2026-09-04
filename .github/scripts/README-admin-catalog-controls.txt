@@ -1,0 +1,1 @@
+WOMAN 656 admin catalog controls are loaded through marketing-studio.js. The module lets administrators see all catalog products regardless of active/stock state and adds guarded permanent deletion while preserving purchase_items history via the existing SET NULL foreign key.
