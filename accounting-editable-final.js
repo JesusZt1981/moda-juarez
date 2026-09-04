@@ -61,6 +61,20 @@
       if(empty&&items.length===0)empty.colSpan=12;
     };
 
+    const body=document.getElementById('itemsBody');
+    if(body){
+      body.onchange=event=>{
+        const row=event.target.closest('tr[data-id]');
+        const item=items.find(x=>String(x.id)===String(row?.dataset.id));
+        if(!item)return;
+        const key=event.target.dataset.k;
+        if(!key)return;
+        item[key]=event.target.type==='checkbox'?event.target.checked:event.target.value;
+        if(key==='sku'||key==='size')return;
+        render();
+      };
+    }
+
     const style=document.createElement('style');
     style.textContent='.accounting-items-table{min-width:1140px!important}.accounting-items-table .col-actions{width:118px!important}@media(max-width:760px){.accounting-items-table{min-width:1080px!important}}';
     document.head.appendChild(style);
