@@ -6,6 +6,7 @@
   const purchaseCostRaw=params.get('purchase_cost');
   const purchaseCost=purchaseCostRaw!==null?Number(purchaseCostRaw):null;
   const normalize=value=>String(value||'').trim().toLowerCase();
+  const html=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const targetSku=normalize(requestedSku);
   let attempts=0;
 
@@ -41,11 +42,12 @@
     if(!host)return;
     let notice=document.getElementById('w656AccountingVerify');
     if(!notice){notice=document.createElement('div');notice.id='w656AccountingVerify';notice.className='w656-accounting-verify';host.insertBefore(notice,toolbar||host.firstChild)}
+    const safeSku=html(requestedSku);
     if(product){
       const cost=Number.isFinite(purchaseCost)?` · Costo de compra registrado: <b>${money(purchaseCost)}</b>`:'';
-      notice.innerHTML=`<strong>Validación desde Contabilidad</strong> · ${requestedSku}${cost} · Precio actual en tienda: <b>${money(product.price)}</b><span class="w656-verify-note">Verifica que sea la misma prenda. Si algo no corresponde, usa <b>Editar producto</b> en esta tarjeta; el SKU ya no se modifica desde Contabilidad.</span>`;
+      notice.innerHTML=`<strong>Validación desde Contabilidad</strong> · ${safeSku}${cost} · Precio actual en tienda: <b>${money(product.price)}</b><span class="w656-verify-note">Verifica que sea la misma prenda. Si algo no corresponde, usa <b>Editar producto</b> en esta tarjeta; el SKU ya no se modifica desde Contabilidad.</span>`;
     }else{
-      notice.innerHTML=`<strong>No se encontró ${requestedSku} en la tienda.</strong><span class="w656-verify-note">El SKU de Contabilidad está protegido. Corrige o crea el producto desde ADMIN y después vuelve a Contabilidad.</span>`;
+      notice.innerHTML=`<strong>No se encontró ${safeSku} en la tienda.</strong><span class="w656-verify-note">El SKU de Contabilidad está protegido. Corrige o crea el producto desde ADMIN y después vuelve a Contabilidad.</span>`;
     }
   }
 
