@@ -4,6 +4,8 @@
   const originalLoad=typeof load==='function'?load:null;
   if(!originalItemRow||!originalRender||!originalLoad)return;
 
+  const skuCollator=new Intl.Collator('es',{numeric:true,sensitivity:'base'});
+
   function globalTax(){return Number(document.getElementById('globalTaxRate')?.value ?? settings.sales_tax_rate ?? 16)}
   function globalMargin(){return Number(document.getElementById('globalMargin')?.value ?? settings.default_margin_percent ?? 50)}
   function globalIncluded(){return !!document.getElementById('globalTaxIncluded')?.checked}
@@ -19,13 +21,24 @@
     return `index.html?${params.toString()}`;
   }
 
+  function sortItemsBySku(){
+    items.sort((a,b)=>{
+      const aSku=String(a?.sku||'').trim();
+      const bSku=String(b?.sku||'').trim();
+      if(!aSku&&!bSku)return 0;
+      if(!aSku)return 1;
+      if(!bSku)return -1;
+      return skuCollator.compare(aSku,bSku);
+    });
+  }
+
   function skuCell(item){
     const sku=String(item?.sku||'').trim();
-    if(!sku){
-      return '<span class="accounting-product-unlinked" title="Esta partida todavía no tiene un SKU de producto vinculado">Sin SKU</span>';
-    }
-    const href=productHref(item);
-    return `<a class="accounting-product-link" href="${esc(href)}" target="_blank" rel="noopener" title="Abrir ${esc(sku)} en la tienda para verificarlo. El SKU se corrige únicamente desde el producto."><span>${esc(sku)}</span><span class="accounting-product-link-icon" aria-hidden="true">↗</span></a>`;
+    const href=sku?productHref(item):'';
+    return `<div class="accounting-sku-edit-wrap">
+      <input class="accounting-sku-input" data-k="sku" placeholder="SKU" value="${esc(sku)}" autocomplete="off" spellcheck="false">
+      ${href?`<a class="accounting-product-open" href="${esc(href)}" target="_blank" rel="noopener" title="Abrir ${esc(sku)} en la tienda para verificarlo">↗</a>`:''}
+    </div><span class="accounting-sku-hint">Editable · guardar después del cambio</span>`;
   }
 
   itemRow=function(i){
@@ -41,15 +54,21 @@
       <td class="col-total">${money(c.real)}</td>
       <td class="col-suggested">${money(c.suggested)}</td>
       <td class="col-price"><input data-k="final_price" type="number" min="0" step=".01" value="${i.final_price||c.suggested}"></td>
+      <td class="col-actions"><div class="accounting-row-actions"><button type="button" data-save-item>Guardar</button><button type="button" class="accounting-delete-item" data-delete-item>Eliminar</button></div></td>
     </tr>`;
   };
 
   render=function(){
+    sortItemsBySku();
     originalRender();
     const table=document.querySelector('#purchases .tableWrap table');
-    if(table)table.classList.add('accounting-items-table');
+    if(table){
+      table.classList.add('accounting-items-table');
+      const head=table.querySelector('thead tr');
+      if(head&&!head.querySelector('.col-actions'))head.insertAdjacentHTML('beforeend','<th class="col-actions">Acciones</th>');
+    }
     const empty=document.querySelector('#itemsBody td[colspan="13"]');
-    if(empty)empty.colSpan=10;
+    if(empty)empty.colSpan=11;
     syncGlobalControls();
   };
 
@@ -59,8 +78,9 @@
     if(!error&&data){
       const flags=new Map(data.map(row=>[String(row.id),row]));
       items.forEach(item=>{const row=flags.get(String(item.id));if(row){item.tax_included=!!row.tax_included;item.tax_creditable=!!row.tax_creditable}});
-      render();
     }
+    sortItemsBySku();
+    render();
   };
 
   function syncGlobalControls(){
@@ -92,15 +112,46 @@
     settings={...settings,...data};
   }
 
+  function normalizedSku(value){return String(value||'').trim().toLocaleUpperCase('es-MX')}
+
+  function findShopProductForSku(sku){
+    const wanted=normalizedSku(sku);
+    if(!wanted)return null;
+    const matches=shopProducts.filter(product=>normalizedSku(product?.sku)===wanted);
+    if(matches.length>1)throw new Error(`Hay más de un producto de tienda con el SKU ${sku}. Corrige el catálogo antes de vincular esta partida.`);
+    return matches[0]||null;
+  }
+
+  async function saveEditableItem(item,row,{reload=false}={}){
+    syncItemFromRow(item,row);
+    item.sku=String(item.sku||'').trim();
+    const linked=findShopProductForSku(item.sku);
+    const payload={...accountingPayload(item),shop_product_id:linked?.id??null};
+    const {data,error}=await db.from('purchase_items')
+      .update(payload)
+      .eq('id',item.id)
+      .select('id,sku,final_price,shop_product_id')
+      .single();
+    if(error)throw error;
+    if(!data)throw new Error('Supabase no confirmó el guardado de la partida contable.');
+    Object.assign(item,payload,data);
+    if(linked){
+      item.description=linked.name||item.description;
+      item.category=linked.category||item.category;
+    }
+    if(reload)await load();
+    return data;
+  }
+
   async function saveAllItems(){
     applyGlobalsToMemory();
     await saveGlobalSettings();
     const rows=[...document.querySelectorAll('#itemsBody tr[data-id]')];
     let saved=0;
     for(const row of rows){
-      const item=items.find(x=>x.id===row.dataset.id);
+      const item=items.find(x=>String(x.id)===String(row.dataset.id));
       if(!item)continue;
-      await saveAccountingItem(item,row,{reload:false});
+      await saveEditableItem(item,row,{reload:false});
       saved++;
     }
     return saved;
@@ -112,12 +163,37 @@
     const rows=[...document.querySelectorAll('#itemsBody tr[data-id]')];
     let applied=0;const failures=[];
     for(const row of rows){
-      const item=items.find(x=>x.id===row.dataset.id);
+      const item=items.find(x=>String(x.id)===String(row.dataset.id));
       if(!item)continue;
-      try{await applyAccountingPrice(item,row);applied++}
-      catch(error){failures.push(`${item.sku||'sin SKU'}: ${String(error?.message||error)}`)}
+      try{
+        await saveEditableItem(item,row,{reload:false});
+        if(!item.sku)throw new Error('La partida no tiene SKU.');
+        if(!item.shop_product_id)throw new Error(`El SKU ${item.sku} no existe en el catálogo de la tienda; la partida se guardó, pero no hay producto al cual aplicar el precio.`);
+        await applyAccountingPrice(item,row);
+        applied++;
+      }catch(error){failures.push(`${item.sku||'sin SKU'}: ${String(error?.message||error)}`)}
     }
     return {applied,failures};
+  }
+
+  function invoiceForItem(item){return invoices.find(invoice=>String(invoice.id)===String(item?.invoice_id))||null}
+
+  function postedPurchaseForItem(item){
+    const invoice=invoiceForItem(item);
+    if(!invoice)return null;
+    const reference=invoice.invoice_number||`FACTURA-${String(invoice.id).slice(0,8)}`;
+    return transactions.find(t=>t.operation_type==='purchase'&&t.reference===reference&&t.status==='posted')||null;
+  }
+
+  async function deleteAccountingItem(item){
+    if(postedPurchaseForItem(item)){
+      throw new Error('Esta partida pertenece a una factura que ya fue contabilizada. No se puede borrar porque alteraría el historial contable; primero debe corregirse mediante un ajuste o reversa.');
+    }
+    const sku=String(item?.sku||'Sin SKU').trim()||'Sin SKU';
+    if(!confirm(`Se eliminará ${sku} de las partidas de Contabilidad.\n\nEsto NO borra ningún producto de la tienda y no se puede deshacer.\n\n¿Eliminar esta partida?`))return false;
+    const {error}=await db.from('purchase_items').delete().eq('id',item.id);
+    if(error)throw error;
+    return true;
   }
 
   function setStatus(message,ok=true){
@@ -129,10 +205,34 @@
     const tax=document.getElementById('globalTaxRate'),margin=document.getElementById('globalMargin');
     const included=document.getElementById('globalTaxIncluded'),creditable=document.getElementById('globalTaxCreditable');
     const save=document.getElementById('saveAllItemsBtn'),apply=document.getElementById('applyAllItemsBtn');
-    if(!tax||!margin||!save||!apply)return;
+    const body=document.getElementById('itemsBody');
+    if(!tax||!margin||!save||!apply||!body)return;
 
     const recalc=()=>{applyGlobalsToMemory({resetPrices:true});render()};
     tax.addEventListener('change',recalc);margin.addEventListener('change',recalc);included?.addEventListener('change',recalc);creditable?.addEventListener('change',recalc);
+
+    body.addEventListener('click',async event=>{
+      const button=event.target.closest('button[data-save-item],button[data-delete-item]');
+      if(!button)return;
+      const row=button.closest('tr[data-id]');
+      const item=items.find(x=>String(x.id)===String(row?.dataset.id));
+      if(!row||!item)return;
+
+      button.disabled=true;
+      try{
+        if(button.hasAttribute('data-save-item')){
+          await saveEditableItem(item,row,{reload:true});
+          setStatus(`✅ ${item.sku||'Partida'} guardada.`,true);
+          return;
+        }
+        const deleted=await deleteAccountingItem(item);
+        if(deleted){setStatus(`✅ ${item.sku||'Partida'} eliminada de Contabilidad.`,true);await load()}
+      }catch(error){
+        console.error(error);
+        setStatus(`❌ ${error.message||error}`,false);
+        alert(error.message||error);
+      }finally{button.disabled=false}
+    });
 
     save.addEventListener('click',async()=>{
       save.disabled=true;apply.disabled=true;setStatus('Guardando todas las partidas…',true);
