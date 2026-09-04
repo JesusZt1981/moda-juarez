@@ -9,10 +9,29 @@
   function globalIncluded(){return !!document.getElementById('globalTaxIncluded')?.checked}
   function globalCreditable(){return !!document.getElementById('globalTaxCreditable')?.checked}
 
+  function productHref(item){
+    const sku=String(item?.sku||'').trim();
+    if(!sku)return '';
+    const params=new URLSearchParams({admin:'1',product:sku});
+    const purchaseCost=Number(item?.unit_cost);
+    if(Number.isFinite(purchaseCost))params.set('purchase_cost',String(purchaseCost));
+    if(item?.shop_product_id)params.set('product_id',String(item.shop_product_id));
+    return `index.html?${params.toString()}`;
+  }
+
+  function skuCell(item){
+    const sku=String(item?.sku||'').trim();
+    if(!sku){
+      return '<span class="accounting-product-unlinked" title="Esta partida todavía no tiene un SKU de producto vinculado">Sin SKU</span>';
+    }
+    const href=productHref(item);
+    return `<a class="accounting-product-link" href="${esc(href)}" target="_blank" rel="noopener" title="Abrir ${esc(sku)} en la tienda para verificarlo. El SKU se corrige únicamente desde el producto."><span>${esc(sku)}</span><span class="accounting-product-link-icon" aria-hidden="true">↗</span></a>`;
+  }
+
   itemRow=function(i){
     const c=calc(i);
     return `<tr data-id="${i.id}">
-      <td class="col-sku"><input data-k="sku" placeholder="SKU" value="${esc(i.sku)}"></td>
+      <td class="col-sku">${skuCell(i)}</td>
       <td class="col-size"><input data-k="size" placeholder="Talla" value="${esc(i.size)}"></td>
       <td class="col-qty"><input data-k="quantity" type="number" min="1" value="${i.quantity}"></td>
       <td class="col-money"><input data-k="unit_cost" type="number" min="0" step=".01" value="${i.unit_cost}"></td>
