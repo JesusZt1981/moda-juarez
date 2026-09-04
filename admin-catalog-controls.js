@@ -2,7 +2,9 @@
   const originalApplyFilters = typeof applyFilters === "function" ? applyFilters : null;
   const originalOpenNewProductEditor = typeof openNewProductEditor === "function" ? openNewProductEditor : null;
   const originalOpenAdminEditor = typeof openAdminEditor === "function" ? openAdminEditor : null;
-  if(!originalApplyFilters || !originalOpenNewProductEditor || !originalOpenAdminEditor) return;
+  const originalRenderProducts = typeof renderProducts === "function" ? renderProducts : null;
+  const originalRefreshSupabaseStatus = typeof refreshSupabaseStatus === "function" ? refreshSupabaseStatus : null;
+  if(!originalApplyFilters || !originalOpenNewProductEditor || !originalOpenAdminEditor || !originalRenderProducts) return;
 
   function adminAwareApplyFilters(){
     const search = document.getElementById("searchInput")?.value.trim().toLowerCase() || "";
@@ -35,7 +37,50 @@
     if(typeof updateCatalogDiagnostic === "function") updateCatalogDiagnostic();
   }
 
+  function decorateAdminCards(){
+    if(!state.admin) return;
+    const visibleProducts = state.filtered.slice((state.page-1)*state.pageSize, state.page*state.pageSize);
+    const cards = [...document.querySelectorAll("#productGrid .product-card")];
+    cards.forEach((card,index)=>{
+      const product = visibleProducts[index];
+      if(!product) return;
+      const status = card.querySelector(".product-info .stock-line b");
+      const stock = Number(product.totalStock || 0);
+      if(status){
+        if(product.active === false){
+          status.textContent = "⚠️ Oculto al público";
+        }else if(stock <= 0){
+          status.textContent = "⚠️ Sin existencias · oculto a clientes";
+        }else{
+          status.textContent = "✅ Visible para clientes";
+        }
+      }
+      if(stock <= 0){
+        let badge = card.querySelector(".badge");
+        if(!badge){
+          badge = document.createElement("span");
+          badge.className = "badge";
+          card.querySelector(".image-wrap")?.appendChild(badge);
+        }
+        if(product.active !== false) badge.textContent = "SIN STOCK";
+      }
+    });
+  }
+
+  renderProducts = function(){
+    originalRenderProducts();
+    decorateAdminCards();
+  };
+
   applyFilters = adminAwareApplyFilters;
+
+  if(originalRefreshSupabaseStatus){
+    refreshSupabaseStatus = async function(){
+      const result = await originalRefreshSupabaseStatus();
+      if(typeof state !== "undefined" && state.admin) applyFilters();
+      return result;
+    };
+  }
 
   function ensureDeleteButton(){
     const actions = document.querySelector(".admin-modal-actions");
