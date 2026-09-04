@@ -2,6 +2,8 @@
 (() => {
   'use strict';
 
+  const FILTERS_STORAGE_KEY='w656_catalog_filters_collapsed';
+
   function tuneProductImages(scope=document){
     const images=[...scope.querySelectorAll?.('.product-image')||[]];
     images.forEach((img,index)=>{
@@ -34,8 +36,52 @@
     },350);
   },true);
 
+  function readFiltersCollapsed(){
+    try{return localStorage.getItem(FILTERS_STORAGE_KEY)==='1';}
+    catch(_){return false;}
+  }
+
+  function saveFiltersCollapsed(collapsed){
+    try{localStorage.setItem(FILTERS_STORAGE_KEY,collapsed?'1':'0');}
+    catch(_){}
+  }
+
+  function setupFilterPanelToggle(){
+    const shell=document.querySelector('.page-shell');
+    const sidebar=shell?.querySelector('.sidebar');
+    const catalogSection=shell?.querySelector('.catalog-section');
+    if(!shell || !sidebar || !catalogSection) return;
+    if(document.getElementById('catalogFilterToggle')) return;
+
+    const button=document.createElement('button');
+    button.id='catalogFilterToggle';
+    button.type='button';
+    button.className='catalog-filter-toggle';
+    button.setAttribute('aria-controls','catalogFilterSidebar');
+    sidebar.id=sidebar.id||'catalogFilterSidebar';
+
+    const applyState=(collapsed,{persist=false}={})=>{
+      shell.classList.toggle('filters-collapsed',collapsed);
+      button.setAttribute('aria-expanded',String(!collapsed));
+      button.innerHTML=collapsed
+        ? '<span aria-hidden="true">☰</span> Mostrar filtros'
+        : '<span aria-hidden="true">‹</span> Ocultar filtros';
+      button.title=collapsed?'Mostrar panel Comprar por':'Ocultar panel Comprar por';
+      if(persist) saveFiltersCollapsed(collapsed);
+    };
+
+    applyState(readFiltersCollapsed());
+    button.addEventListener('click',()=>{
+      applyState(!shell.classList.contains('filters-collapsed'),{persist:true});
+    });
+
+    catalogSection.prepend(button);
+  }
+
   function start(){
     tuneProductImages(document);
+    setupFilterPanelToggle();
+
     const grid=document.getElementById('productGrid');
     if(grid && 'MutationObserver' in window){
       const observer=new MutationObserver(records=>{
