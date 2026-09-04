@@ -6,6 +6,42 @@
   contain-intrinsic-size:220px 520px;
 }
 
+/* Control compacto para ocultar/mostrar el panel izquierdo de filtros. */
+.catalog-section{min-width:0}
+.catalog-filter-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin:0 0 12px;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 3px 10px rgba(44,52,52,.06);
+}
+.catalog-filter-toggle:hover{
+  border-color:var(--sage-dark);
+  color:var(--sage-dark);
+  background:#f7faf8;
+}
+.page-shell.filters-collapsed{
+  grid-template-columns:minmax(0,1fr)!important;
+}
+.page-shell.filters-collapsed .sidebar{
+  display:none!important;
+}
+
+/* El SKU estaba demasiado pequeño en las tarjetas del catálogo. */
+.sku{
+  font-size:11.5px!important;
+  line-height:1.3;
+  font-weight:600;
+}
+
 /* Evita trabajo visual innecesario en dispositivos táctiles. */
 @media (hover:none), (pointer:coarse){
   .product-card:hover{
@@ -24,6 +60,24 @@
   .overlay{
     -webkit-backdrop-filter:none!important;
     backdrop-filter:none!important;
+  }
+}
+
+@media (max-width:900px){
+  .catalog-filter-toggle{
+    margin-bottom:10px;
+  }
+  .page-shell.filters-collapsed .catalog-section{
+    order:1;
+  }
+}
+
+@media (max-width:560px){
+  .catalog-filter-toggle{
+    width:100%;
+    justify-content:center;
+    padding:10px 12px;
+    font-size:11px;
   }
 }
 
