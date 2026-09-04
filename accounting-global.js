@@ -159,3 +159,10 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
+
+(()=>{
+  const script=document.createElement('script');
+  script.src='accounting-order-allocation.js';
+  script.defer=true;
+  document.head.appendChild(script);
+})();
