@@ -1,7 +1,9 @@
 (() => {
   const params=new URLSearchParams(location.search);
   const requestedSku=String(params.get('product')||'').trim();
-  if(!requestedSku)return;
+  const requestedProductIdRaw=params.get('product_id');
+  const requestedProductId=requestedProductIdRaw!==null?Number(requestedProductIdRaw):null;
+  if(!requestedSku && !Number.isFinite(requestedProductId))return;
 
   const purchaseCostRaw=params.get('purchase_cost');
   const purchaseCost=purchaseCostRaw!==null?Number(purchaseCostRaw):null;
@@ -31,8 +33,20 @@
     try{return (typeof state!=='undefined'&&Array.isArray(state.products))?state.products:[]}catch(_){return []}
   }
 
+  function productDbId(product){
+    const value=product?.dbId ?? product?.id;
+    const id=Number(value);
+    return Number.isFinite(id)?id:null;
+  }
+
   function findProduct(){
-    return products().find(product=>normalize(product?.sku)===targetSku)||null;
+    const list=products();
+    if(Number.isFinite(requestedProductId)){
+      const byId=list.find(product=>productDbId(product)===requestedProductId);
+      if(byId)return byId;
+    }
+    if(!targetSku)return null;
+    return list.find(product=>normalize(product?.sku)===targetSku)||null;
   }
 
   function showNotice(product){
@@ -42,23 +56,28 @@
     if(!host)return;
     let notice=document.getElementById('w656AccountingVerify');
     if(!notice){notice=document.createElement('div');notice.id='w656AccountingVerify';notice.className='w656-accounting-verify';host.insertBefore(notice,toolbar||host.firstChild)}
-    const safeSku=html(requestedSku);
+    const safeSku=html(requestedSku||'Producto vinculado');
     if(product){
+      const currentSku=String(product.sku||'').trim();
+      const skuChanged=requestedSku && normalize(currentSku)!==targetSku;
       const cost=Number.isFinite(purchaseCost)?` · Costo de compra registrado: <b>${money(purchaseCost)}</b>`:'';
-      notice.innerHTML=`<strong>Validación desde Contabilidad</strong> · ${safeSku}${cost} · Precio actual en tienda: <b>${money(product.price)}</b><span class="w656-verify-note">Verifica que sea la misma prenda. Si algo no corresponde, usa <b>Editar producto</b> en esta tarjeta; el SKU ya no se modifica desde Contabilidad.</span>`;
+      const linkage=skuChanged?` · SKU actual en tienda: <b>${html(currentSku)}</b>`:'';
+      notice.innerHTML=`<strong>Validación desde Contabilidad</strong> · ${safeSku}${linkage}${cost} · Precio actual en tienda: <b>${money(product.price)}</b><span class="w656-verify-note">${skuChanged?'La partida estaba vinculada a este producto por su ID; por eso se abrió el producto correcto aunque el SKU haya cambiado. ':''}Verifica que sea la misma prenda. Si algo no corresponde, usa <b>Editar producto</b> en esta tarjeta.</span>`;
     }else{
-      notice.innerHTML=`<strong>No se encontró ${safeSku} en la tienda.</strong><span class="w656-verify-note">El SKU de Contabilidad está protegido. Corrige o crea el producto desde ADMIN y después vuelve a Contabilidad.</span>`;
+      notice.innerHTML=`<strong>No se encontró ${safeSku} en la tienda.</strong><span class="w656-verify-note">No existe un producto con ese SKU ni con el ID vinculado desde Contabilidad. Corrige o crea el producto desde ADMIN y después vuelve a Contabilidad.</span>`;
     }
   }
 
   function reveal(product){
+    const resolvedSku=String(product?.sku||requestedSku||'').trim();
     const search=document.getElementById('searchInput');
-    if(search)search.value=requestedSku;
+    if(search)search.value=resolvedSku;
     try{if(typeof applyFilters==='function')applyFilters()}catch(error){console.warn('WOMAN 656 deeplink:',error)}
 
     window.setTimeout(()=>{
+      const resolvedTarget=normalize(resolvedSku);
       const cards=[...document.querySelectorAll('.product-card')];
-      const card=cards.find(node=>normalize(node.querySelector('.sku')?.textContent)===targetSku);
+      const card=cards.find(node=>normalize(node.querySelector('.sku')?.textContent)===resolvedTarget);
       if(card){
         card.classList.add('w656-accounting-target');
         card.scrollIntoView({behavior:'smooth',block:'center'});
