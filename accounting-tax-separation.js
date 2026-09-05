@@ -20,6 +20,7 @@
 
   function setLabelText(label,input,text){
     if(!label||!input)return;
+    if(String(label.textContent||'').trim()===text)return;
     [...label.childNodes].forEach(node=>{
       if(node!==input)node.remove();
     });
@@ -36,7 +37,8 @@
       note.style.cssText='grid-column:1/-1;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.45';
       bar.appendChild(note);
     }
-    note.textContent='IVA de mercancía y costos logísticos son conceptos distintos: C/envío y C/impo se suman al costo real, pero NO se convierten automáticamente en IVA. “IVA acreditable” sólo separa el IVA de la mercancía cuando corresponda y exista soporte fiscal.';
+    const text='IVA de mercancía y costos logísticos son conceptos distintos: C/envío y C/impo se suman al costo real, pero NO se convierten automáticamente en IVA. “IVA acreditable” sólo separa el IVA de la mercancía cuando corresponda y exista soporte fiscal.';
+    if(note.textContent!==text)note.textContent=text;
   }
 
   function refreshLabels(){
