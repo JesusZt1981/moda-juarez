@@ -78,7 +78,33 @@
     catalogSection.prepend(button);
   }
 
+  function resetCatalogSearchOnReload(){
+    let isReload=false;
+    try{
+      const navigation=performance.getEntriesByType?.('navigation')?.[0];
+      isReload=navigation?.type==='reload';
+    }catch(_){}
+    if(!isReload)return;
+
+    const search=document.getElementById('searchInput');
+    if(search)search.value='';
+
+    try{
+      const clean=new URL(location.href);
+      clean.searchParams.delete('product');
+      clean.searchParams.delete('product_id');
+      clean.searchParams.delete('purchase_cost');
+      history.replaceState(history.state,'',clean.pathname+(clean.searchParams.toString()?`?${clean.searchParams.toString()}`:'')+clean.hash);
+    }catch(_){}
+
+    try{
+      if(typeof window.applyFilters==='function')window.applyFilters();
+      else if(typeof applyFilters==='function')applyFilters();
+    }catch(_){}
+  }
+
   function start(){
+    resetCatalogSearchOnReload();
     tuneProductImages(document);
     setupFilterPanelToggle();
 
