@@ -1,7 +1,6 @@
 (() => {
   const XLSX_SRC = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
   const collator = new Intl.Collator('es', { numeric:true, sensitivity:'base' });
-  const DEFAULT_SIZES = ['XS','S','M','G','XG'];
   const normalize = value => String(value ?? '').trim();
   const key = value => normalize(value).toLocaleUpperCase('es-MX');
   const numberOrNull = value => {
@@ -69,11 +68,7 @@
   function chooseSizes(product){
     const variants=Array.isArray(product?.variants) ? product.variants : [];
     const existing=[...new Set(variants.map(v=>normalize(v.size||'UNITALLA')).filter(Boolean))];
-    if(existing.length===1 && key(existing[0])==='UNITALLA') return existing;
-    const hasStandard=existing.some(size=>DEFAULT_SIZES.includes(key(size)));
-    if(hasStandard) return [...new Set([...DEFAULT_SIZES,...existing])];
-    if(existing.length) return existing;
-    return DEFAULT_SIZES;
+    return existing.length ? existing : ['UNITALLA'];
   }
 
   async function loadLatestCosts(){
