@@ -16,6 +16,18 @@
     return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(value)||0);
   }
 
+  function clearProductQuery(){
+    try{
+      const clean=new URL(location.href);
+      clean.searchParams.delete('product');
+      clean.searchParams.delete('product_id');
+      clean.searchParams.delete('purchase_cost');
+      history.replaceState(history.state,'',clean.pathname+(clean.searchParams.toString()?`?${clean.searchParams.toString()}`:'')+clean.hash);
+    }catch(error){
+      console.warn('WOMAN 656 · no se pudo limpiar el enlace temporal:',error);
+    }
+  }
+
   function ensureStyles(){
     if(document.getElementById('w656AccountingDeepLinkStyles'))return;
     const style=document.createElement('style');
@@ -64,20 +76,20 @@
       const linkage=skuChanged?` · SKU actual en tienda: <b>${html(currentSku)}</b>`:'';
       notice.innerHTML=`<strong>Validación desde Contabilidad</strong> · ${safeSku}${linkage}${cost} · Precio actual en tienda: <b>${money(product.price)}</b><span class="w656-verify-note">${skuChanged?'La partida estaba vinculada a este producto por su ID; por eso se abrió el producto correcto aunque el SKU haya cambiado. ':''}Verifica que sea la misma prenda. Si algo no corresponde, usa <b>Editar producto</b> en esta tarjeta.</span>`;
     }else{
-      notice.innerHTML=`<strong>No se encontró ${safeSku} en la tienda.</strong><span class="w656-verify-note">No existe un producto con ese SKU ni con el ID vinculado desde Contabilidad. Corrige o crea el producto desde ADMIN y después vuelve a Contabilidad.</span>`;
+      notice.innerHTML=`<strong>No se encontró ${safeSku} en la tienda.</strong><span class="w656-verify-note">Ese producto ya no existe o cambió. Al recargar, el catálogo volverá a mostrarse sin este filtro.</span>`;
     }
   }
 
   function reveal(product){
     const resolvedSku=String(product?.sku||requestedSku||'').trim();
     const search=document.getElementById('searchInput');
-    if(search)search.value=resolvedSku;
+    if(search)search.value=product?resolvedSku:'';
     try{if(typeof applyFilters==='function')applyFilters()}catch(error){console.warn('WOMAN 656 deeplink:',error)}
 
     window.setTimeout(()=>{
       const resolvedTarget=normalize(resolvedSku);
       const cards=[...document.querySelectorAll('.product-card')];
-      const card=cards.find(node=>normalize(node.querySelector('.sku')?.textContent)===resolvedTarget);
+      const card=product?cards.find(node=>normalize(node.querySelector('.sku')?.textContent)===resolvedTarget):null;
       if(card){
         card.classList.add('w656-accounting-target');
         card.scrollIntoView({behavior:'smooth',block:'center'});
@@ -87,6 +99,7 @@
         document.querySelector('.catalog-section')?.scrollIntoView({behavior:'smooth',block:'start'});
       }
       showNotice(product);
+      clearProductQuery();
     },120);
   }
 
@@ -96,7 +109,11 @@
     const ready=products().length>0 && typeof applyFilters==='function';
     if(ready){reveal(product);return}
     if(attempts<80){window.setTimeout(tryOpen,125);return}
+    const search=document.getElementById('searchInput');
+    if(search)search.value='';
+    try{if(typeof applyFilters==='function')applyFilters()}catch(_){ }
     showNotice(product);
+    clearProductQuery();
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tryOpen,{once:true});else tryOpen();
