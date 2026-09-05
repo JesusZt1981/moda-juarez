@@ -106,3 +106,13 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
+
+(() => {
+  if(document.querySelector('script[data-accounting-excel-sync]'))return;
+  const script=document.createElement('script');
+  script.src='accounting-excel-sync.js';
+  script.async=true;
+  script.dataset.accountingExcelSync='1';
+  script.onerror=()=>console.error('No se pudo cargar accounting-excel-sync.js');
+  document.body.appendChild(script);
+})();
