@@ -116,3 +116,13 @@
   script.onerror=()=>console.error('No se pudo cargar accounting-excel-sync.js');
   document.body.appendChild(script);
 })();
+
+(() => {
+  if(document.querySelector('script[data-accounting-tax-separation]'))return;
+  const script=document.createElement('script');
+  script.src='accounting-tax-separation.js';
+  script.async=true;
+  script.dataset.accountingTaxSeparation='1';
+  script.onerror=()=>console.error('No se pudo cargar accounting-tax-separation.js');
+  document.body.appendChild(script);
+})();
