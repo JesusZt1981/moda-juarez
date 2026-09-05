@@ -30,6 +30,10 @@
        ocultos/sin stock y gestionar su eliminación desde el editor. */
     loadScript('admin-catalog-controls.js').catch(error=>console.error(error));
 
+    /* Importación/exportación de inventario por Excel. Se mantiene separada
+       del catálogo principal para no cargar esta lógica a las clientas. */
+    loadScript('admin-excel-sync.js').catch(error=>console.error(error));
+
     /* Cuando se llega desde Contabilidad, localiza primero el producto exacto. */
     if(params.has('product')){
       loadScript('product-deeplink.js').catch(error=>console.error(error));
