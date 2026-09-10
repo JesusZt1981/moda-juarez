@@ -1,14 +1,23 @@
-/* WOMAN 656 · rendimiento, resiliencia y carga de analítica */
+/* WOMAN 656 · rendimiento, resiliencia, analítica y UX de cliente */
 (() => {
   'use strict';
 
   const FILTERS_STORAGE_KEY='w656_catalog_filters_collapsed';
 
+  function loadCustomerGlassUi(){
+    if(document.querySelector('script[data-w656-glass-ui]'))return;
+    const s=document.createElement('script');
+    s.src='assets/customer-glass-ui.js?v=1';
+    s.async=false;
+    s.dataset.w656GlassUi='1';
+    document.head.appendChild(s);
+  }
+
   function loadUnifiedAnalytics(){
     if(window.__W656_UNIFIED_ANALYTICS__||document.querySelector('script[data-w656-analytics]'))return;
     const s=document.createElement('script');
     s.src='analytics-unified.js?v=1';
-    s.async=true;
+    s.async=false;
     s.dataset.w656Analytics='1';
     document.head.appendChild(s);
   }
@@ -78,6 +87,7 @@
   }
 
   function start(){
+    loadCustomerGlassUi();
     loadUnifiedAnalytics();
     resetCatalogSearchOnReload();
     tuneProductImages(document);
