@@ -88,7 +88,7 @@
     };
     applyState(readFiltersCollapsed());
     button.addEventListener('click',()=>applyState(!shell.classList.contains('filters-collapsed'),{persist:true}));
-    CatalogSection?.prepend(button);
+    catalogSection.prepend(button);
   }
 
   function resetCatalogSearchOnReload(){
