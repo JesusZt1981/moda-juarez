@@ -12,7 +12,7 @@
   const OWNER_EMAIL='jzutenorio@gmail.com';
   const CUSTOMER_STORAGE_KEY='woman656-customer-auth-token-v1';
   const ADMIN_STORAGE_KEY='woman656-auth-token-v1';
-  const META_PIXEL_ID=String(window.WOMAN656_META_PIXEL_ID||'').trim();
+  const META_PIXEL_ID=String(window.WOMAN656_META_PIXEL_ID||'2155333555413490').trim();
   const uuid=()=>globalThis.crypto?.randomUUID?.()||`w656-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   let sbCustomer=null,sbAdmin=null,trackingDisabled=false,metaReady=false;
 
@@ -102,7 +102,7 @@
     return true;
   }
 
-  function sendMeta(eventName,sku,metadata){
+  function sendMeta(eventName,sku,metadata={}){
     const map={store_visit:'PageView',product_view:'ViewContent',add_to_cart:'AddToCart',begin_checkout:'InitiateCheckout',purchase:'Purchase',lead:'Lead'};
     const metaName=map[eventName];
     if(!metaName||!initMeta())return;
@@ -136,14 +136,15 @@
   function sku(target){return card(target)?.querySelector?.('.sku')?.textContent?.trim()||null}
   function size(target){return card(target)?.querySelector?.('.size-select')?.value?.trim()||''}
 
-  function injectMetaConsent(){
-    if(!META_PIXEL_ID||trackingDisabled||localStorage.getItem(META_CONSENT_KEY))return;
-    if(document.getElementById('w656MetaConsent'))return;
-    const wrap=document.createElement('div');wrap.id='w656MetaConsent';
-    wrap.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:10000;background:#fff;border:1px solid #d9dfdc;border-radius:14px;padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.2);font:13px system-ui;color:#303638;max-width:760px;margin:auto';
-    wrap.innerHTML='<strong>Privacidad y medición publicitaria</strong><p style="margin:6px 0 10px">Usamos analítica propia para operar y mejorar la tienda. Con tu permiso también podemos usar Meta Pixel para medir campañas de Facebook e Instagram.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button data-meta="yes" style="padding:9px 12px;border:0;border-radius:9px;background:#73877a;color:#fff;font-weight:700">Aceptar Meta</button><button data-meta="no" style="padding:9px 12px;border:1px solid #d9dfdc;border-radius:9px;background:#fff;font-weight:700">Solo analítica propia</button><a href="privacidad.html" style="padding:9px 4px;color:#5b6e61">Aviso de Privacidad</a></div>';
-    wrap.addEventListener('click',e=>{const v=e.target?.dataset?.meta;if(!v)return;localStorage.setItem(META_CONSENT_KEY,v==='yes'?'granted':'denied');wrap.remove();if(v==='yes'){initMeta();sendMeta('store_visit',null,{event_id:uuid()})}});
-    document.body.appendChild(wrap);
+  function bindUnifiedCookieConsent(){
+    const button=document.getElementById('cookieAccept');
+    if(!button||button.dataset.w656MetaBound==='1')return;
+    button.dataset.w656MetaBound='1';
+    button.addEventListener('click',()=>{
+      window.setTimeout(()=>{
+        if(!trackingDisabled&&metaConsentGranted())sendMeta('store_visit',null,{event_id:uuid()});
+      },0);
+    });
   }
 
   document.addEventListener('click',e=>{
@@ -169,8 +170,8 @@
     captureAttribution();
     trackingDisabled=await isOwnerLoggedIn();
     if(trackingDisabled){console.info('WOMAN 656 analytics: propietario excluido');return}
+    bindUnifiedCookieConsent();
     await record('store_visit',null,{source:'storefront'});
-    injectMetaConsent();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
