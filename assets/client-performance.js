@@ -25,7 +25,7 @@
   function loadUnifiedAnalytics(){
     if(window.__W656_UNIFIED_ANALYTICS__||document.querySelector('script[data-w656-analytics]'))return;
     const s=document.createElement('script');
-    s.src='analytics-unified.js?v=1';
+    s.src='analytics-unified.js?v=2';
     s.async=false;
     s.dataset.w656Analytics='1';
     document.head.appendChild(s);
