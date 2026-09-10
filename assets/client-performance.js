@@ -22,6 +22,15 @@
     document.head.appendChild(s);
   }
 
+  function loadQuickViewCart(){
+    if(document.querySelector('script[data-w656-quick-cart]'))return;
+    const s=document.createElement('script');
+    s.src='assets/quick-view-cart.js?v=1';
+    s.async=false;
+    s.dataset.w656QuickCart='1';
+    document.head.appendChild(s);
+  }
+
   function loadUnifiedAnalytics(){
     if(window.__W656_UNIFIED_ANALYTICS__||document.querySelector('script[data-w656-analytics]'))return;
     const s=document.createElement('script');
@@ -79,7 +88,7 @@
     };
     applyState(readFiltersCollapsed());
     button.addEventListener('click',()=>applyState(!shell.classList.contains('filters-collapsed'),{persist:true}));
-    catalogSection.prepend(button);
+    CatalogSection?.prepend(button);
   }
 
   function resetCatalogSearchOnReload(){
@@ -98,6 +107,7 @@
   function start(){
     loadCustomerGlassUi();
     loadPrivacyCookieUi();
+    loadQuickViewCart();
     loadUnifiedAnalytics();
     resetCatalogSearchOnReload();
     tuneProductImages(document);
