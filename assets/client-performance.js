@@ -13,6 +13,15 @@
     document.head.appendChild(s);
   }
 
+  function loadPrivacyCookieUi(){
+    if(document.querySelector('script[data-w656-cookie-privacy]'))return;
+    const s=document.createElement('script');
+    s.src='assets/privacy-cookie-ui.js?v=1';
+    s.async=false;
+    s.dataset.w656CookiePrivacy='1';
+    document.head.appendChild(s);
+  }
+
   function loadUnifiedAnalytics(){
     if(window.__W656_UNIFIED_ANALYTICS__||document.querySelector('script[data-w656-analytics]'))return;
     const s=document.createElement('script');
@@ -88,6 +97,7 @@
 
   function start(){
     loadCustomerGlassUi();
+    loadPrivacyCookieUi();
     loadUnifiedAnalytics();
     resetCatalogSearchOnReload();
     tuneProductImages(document);
