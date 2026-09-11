@@ -31,6 +31,15 @@
     document.head.appendChild(s);
   }
 
+  function loadCheckoutPayment(){
+    if(document.querySelector('script[data-w656-checkout-payment]'))return;
+    const s=document.createElement('script');
+    s.src='assets/checkout-payment.js?v=1';
+    s.async=false;
+    s.dataset.w656CheckoutPayment='1';
+    document.head.appendChild(s);
+  }
+
   function loadUnifiedAnalytics(){
     if(window.__W656_UNIFIED_ANALYTICS__||document.querySelector('script[data-w656-analytics]'))return;
     const s=document.createElement('script');
@@ -108,6 +117,7 @@
     loadCustomerGlassUi();
     loadPrivacyCookieUi();
     loadQuickViewCart();
+    loadCheckoutPayment();
     loadUnifiedAnalytics();
     resetCatalogSearchOnReload();
     tuneProductImages(document);
