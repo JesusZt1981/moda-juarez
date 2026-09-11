@@ -34,7 +34,7 @@
   function loadCheckoutPayment(){
     if(document.querySelector('script[data-w656-checkout-payment]'))return;
     const s=document.createElement('script');
-    s.src='assets/checkout-payment.js?v=2';
+    s.src='assets/checkout-payment.js?v=3';
     s.async=false;
     s.dataset.w656CheckoutPayment='1';
     document.head.appendChild(s);
