@@ -91,7 +91,8 @@
 
   function metaConsentGranted(){return localStorage.getItem(META_CONSENT_KEY)==='granted'}
   function initMeta(){
-    if(metaReady||!META_PIXEL_ID||!metaConsentGranted()||trackingDisabled)return false;
+    if(metaReady)return true;
+    if(!META_PIXEL_ID||!metaConsentGranted()||trackingDisabled)return false;
     if(!window.fbq){
       const f=function(){f.callMethod?f.callMethod.apply(f,arguments):f.queue.push(arguments)};
       f.push=f;f.loaded=true;f.version='2.0';f.queue=[];window.fbq=f;
