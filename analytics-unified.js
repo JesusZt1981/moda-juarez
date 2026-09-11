@@ -12,7 +12,7 @@
   const OWNER_EMAIL='jzutenorio@gmail.com';
   const CUSTOMER_STORAGE_KEY='woman656-customer-auth-token-v1';
   const ADMIN_STORAGE_KEY='woman656-auth-token-v1';
-  const META_PIXEL_ID=String(window.WOMAN656_META_PIXEL_ID||'1087645153771143').trim();
+  const META_PIXEL_ID=String(window.WOMAN656_META_PIXEL_ID||'1718082895946410').trim();
   const uuid=()=>globalThis.crypto?.randomUUID?.()||`w656-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   let sbCustomer=null,sbAdmin=null,trackingDisabled=false,metaReady=false;
 
