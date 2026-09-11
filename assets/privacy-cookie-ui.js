@@ -1,6 +1,8 @@
-/* WOMAN 656 · enlace de privacidad en aviso compacto de cookies */
+/* WOMAN 656 · enlace de privacidad y consentimiento de analítica publicitaria */
 (() => {
   'use strict';
+
+  const META_CONSENT_KEY='woman656_meta_consent';
 
   function injectStyles(){
     if(document.getElementById('w656CookiePrivacyStyles'))return;
@@ -28,14 +30,29 @@
   function enhanceCookieBanner(){
     const banner=document.getElementById('cookieBanner');
     if(!banner)return false;
-    if(document.getElementById('w656CookiePrivacy'))return true;
 
-    const link=document.createElement('a');
-    link.id='w656CookiePrivacy';
-    link.href='privacidad.html';
-    link.textContent='Privacidad';
-    link.setAttribute('aria-label','Ver aviso de privacidad de WOMAN 656');
-    banner.appendChild(link);
+    const text=banner.querySelector('p');
+    if(text){
+      text.textContent='Usamos almacenamiento local y Meta Pixel para medir visitas, productos vistos, carrito y compras, y mejorar nuestros anuncios. Consulta nuestro aviso de privacidad.';
+    }
+
+    const accept=document.getElementById('cookieAccept');
+    if(accept && accept.dataset.w656MetaConsentBound!=='1'){
+      accept.dataset.w656MetaConsentBound='1';
+      accept.textContent='Aceptar';
+      accept.addEventListener('click',()=>{
+        try{localStorage.setItem(META_CONSENT_KEY,'granted');}catch(_){}
+      },true);
+    }
+
+    if(!document.getElementById('w656CookiePrivacy')){
+      const link=document.createElement('a');
+      link.id='w656CookiePrivacy';
+      link.href='privacidad.html';
+      link.textContent='Privacidad';
+      link.setAttribute('aria-label','Ver aviso de privacidad de WOMAN 656');
+      banner.appendChild(link);
+    }
     return true;
   }
 
