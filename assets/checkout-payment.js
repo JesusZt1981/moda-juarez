@@ -5,12 +5,7 @@
   window.__W656_CHECKOUT_ROUTER__=true;
 
   function openCheckout(){
-    const target='checkout.html';
-    if(window.matchMedia('(min-width:821px)').matches){
-      window.open(target,'_blank','noopener,noreferrer');
-    }else{
-      window.location.href=target;
-    }
+    window.location.href='checkout.html';
   }
 
   function replaceDrawerAction(){
