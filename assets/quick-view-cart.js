@@ -92,7 +92,7 @@
         }
         if(!added){alert('No fue posible agregar el producto al carrito.');return;}
 
-        try{window.W656Analytics?.record?.('add_to_cart',product.sku||null,{size,source:'quick_view'});}catch(_){}
+        try{window.W656Analytics?.record?.('add_to_cart',product.sku||null,{size,source:'quick_view',value:Number(product.price)||0});}catch(_){}
         button.textContent='Agregado ✓';
         window.setTimeout(()=>{button.textContent='Agregar al carrito';refresh();},900);
       });
