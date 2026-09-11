@@ -77,10 +77,7 @@
     let saved={};
     try{saved=JSON.parse(localStorage.getItem(ATTR_KEY)||'{}')||{}}catch(_){}
     const hasCampaign=current.fbclid||current.campaign||current.ad_id||q.get('utm_source');
-    const result={
-      first_touch:saved.first_touch||current,
-      last_touch:hasCampaign?current:(saved.last_touch||current)
-    };
+    const result={first_touch:saved.first_touch||current,last_touch:hasCampaign?current:(saved.last_touch||current)};
     localStorage.setItem(ATTR_KEY,JSON.stringify(result));
     return result;
   }
@@ -137,6 +134,13 @@
   function card(target){return target?.closest?.('.product-card')||null}
   function sku(target){return card(target)?.querySelector?.('.sku')?.textContent?.trim()||null}
   function size(target){return card(target)?.querySelector?.('.size-select')?.value?.trim()||''}
+  function parseMoneyText(value){
+    const cleaned=String(value||'').replace(/[^0-9.,-]/g,'').replace(/,/g,'');
+    const number=Number(cleaned);
+    return Number.isFinite(number)?number:0;
+  }
+  function productValue(target){return parseMoneyText(card(target)?.querySelector?.('.product-price')?.textContent||'0')}
+  function cartValue(){return parseMoneyText(document.getElementById('cartTotal')?.textContent||'0')}
 
   function bindUnifiedCookieConsent(){
     const button=document.getElementById('cookieAccept');
@@ -144,18 +148,28 @@
     button.dataset.w656MetaBound='1';
     button.addEventListener('click',()=>{
       window.setTimeout(()=>{
-        if(!trackingDisabled&&metaConsentGranted())sendMeta('store_visit',null,{event_id:uuid()});
+        if(!trackingDisabled&&metaConsentGranted())sendMeta('store_visit',null,{event_id:uuid(),value:0});
       },0);
     });
   }
 
   document.addEventListener('click',e=>{
     const t=e.target;
-    if(t?.matches?.('.product-image,.product-name')){const s=sku(t);if(s)record('product_view',s,{size:size(t)||null,source:'catalog'})}
-    if(t?.matches?.('.add-btn')){const s=sku(t),z=size(t);if(s&&z)record('add_to_cart',s,{size:z,source:'catalog'})}
-    if(t?.id==='whatsappBtn')record('begin_checkout',null,{channel:'whatsapp'});
+    if(t?.matches?.('.product-image,.product-name')){
+      const s=sku(t);if(s)record('product_view',s,{size:size(t)||null,source:'catalog',value:productValue(t)})
+    }
+    if(t?.matches?.('.add-btn')){
+      const s=sku(t),z=size(t);if(s&&z)record('add_to_cart',s,{size:z,source:'catalog',value:productValue(t)})
+    }
+    if(t?.id==='whatsappBtn')record('begin_checkout',null,{channel:'whatsapp',value:cartValue()});
   },true);
-  document.addEventListener('change',e=>{const t=e.target;if(t?.matches?.('.size-select')){const s=sku(t),z=t.value?.trim()||'';if(s&&z)record('size_select',s,{size:z,source:'catalog'})}},true);
+  document.addEventListener('change',e=>{
+    const t=e.target;
+    if(t?.matches?.('.size-select')){
+      const s=sku(t),z=t.value?.trim()||'';
+      if(s&&z)record('size_select',s,{size:z,source:'catalog',value:productValue(t)})
+    }
+  },true);
 
   window.W656Analytics={
     visitorId:getVisitorId,
@@ -173,7 +187,7 @@
     trackingDisabled=await isOwnerLoggedIn();
     if(trackingDisabled){console.info('WOMAN 656 analytics: propietario excluido');return}
     bindUnifiedCookieConsent();
-    await record('store_visit',null,{source:'storefront'});
+    await record('store_visit',null,{source:'storefront',value:0});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
