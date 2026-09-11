@@ -11,6 +11,12 @@
     spei_delivery:'Contraentrega · SPEI'
   };
 
+  const ICONS={
+    spei_prepaid:'↗',
+    cash_delivery:'$',
+    spei_delivery:'✓'
+  };
+
   function moneySafe(value){
     try{return typeof money==='function'?money(value):new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(value)||0)}catch(_){return `$${Number(value||0).toFixed(2)}`}
   }
@@ -20,17 +26,180 @@
     const style=document.createElement('style');
     style.id='w656CheckoutPaymentStyles';
     style.textContent=`
-      .w656-payment-box{margin:12px 0 4px;padding:12px;border:1px solid var(--border,#d9dfdc);border-radius:12px;background:#fff}
-      .w656-payment-box>strong{display:block;margin-bottom:8px;font-size:12px;color:var(--text,#303638)}
-      .w656-payment-options{display:grid;gap:7px}
-      .w656-payment-option{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border:1px solid var(--border,#d9dfdc);border-radius:10px;background:var(--surface-soft,#eef2ef);cursor:pointer}
-      .w656-payment-option input{margin-top:2px;accent-color:var(--sage-dark,#73877a)}
-      .w656-payment-option span{display:block;font-size:11px;font-weight:800;color:var(--text,#303638);line-height:1.3}
-      .w656-payment-option small{display:block;margin-top:2px;font-size:9.5px;font-weight:600;color:var(--muted,#6d7474);line-height:1.3}
-      .w656-payment-option.disabled{opacity:.48;cursor:not-allowed}
-      .w656-payment-note{margin:8px 1px 0;font-size:10px;line-height:1.4;color:var(--muted,#6d7474)}
-      .w656-payment-note strong{color:var(--text,#303638)}
-      #whatsappBtn.w656-checkout-btn{background:var(--sage-dark,#73877a);color:#fff}
+      .w656-payment-box{
+        margin:16px 0 8px;
+        padding:0;
+        border:0;
+        background:transparent;
+      }
+      .w656-payment-heading{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        margin:0 0 10px;
+      }
+      .w656-payment-heading strong{
+        font-size:13px;
+        font-weight:800;
+        color:var(--text,#303638);
+        letter-spacing:.01em;
+      }
+      .w656-payment-heading span{
+        font-size:9.5px;
+        font-weight:700;
+        color:var(--muted,#6d7474);
+        letter-spacing:.03em;
+        text-transform:uppercase;
+      }
+      .w656-payment-options{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:8px;
+      }
+      .w656-payment-option{
+        position:relative;
+        display:block;
+        cursor:pointer;
+        min-width:0;
+      }
+      .w656-payment-option input{
+        position:absolute;
+        opacity:0;
+        pointer-events:none;
+      }
+      .w656-payment-card{
+        display:grid;
+        grid-template-columns:34px minmax(0,1fr) 18px;
+        align-items:center;
+        gap:10px;
+        min-height:58px;
+        padding:10px 12px;
+        border:1px solid rgba(115,135,122,.18);
+        border-radius:14px;
+        background:rgba(255,255,255,.82);
+        box-shadow:0 5px 16px rgba(36,39,38,.045);
+        transition:border-color .18s ease,box-shadow .18s ease,background .18s ease,transform .18s ease;
+      }
+      .w656-payment-option:hover .w656-payment-card{
+        border-color:rgba(115,135,122,.38);
+        transform:translateY(-1px);
+        box-shadow:0 8px 18px rgba(36,39,38,.07);
+      }
+      .w656-payment-option input:checked + .w656-payment-card{
+        border-color:rgba(176,113,139,.58);
+        background:linear-gradient(180deg,rgba(255,248,251,.98),rgba(255,255,255,.96));
+        box-shadow:0 8px 20px rgba(176,113,139,.10);
+      }
+      .w656-payment-icon{
+        width:34px;
+        height:34px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:10px;
+        background:#f6f1f3;
+        color:#7d6670;
+        font-size:14px;
+        font-weight:900;
+      }
+      .w656-payment-option input:checked + .w656-payment-card .w656-payment-icon{
+        background:#f5e8ee;
+        color:#8f5870;
+      }
+      .w656-payment-copy{
+        min-width:0;
+      }
+      .w656-payment-title{
+        display:block;
+        margin:0;
+        font-size:12px;
+        line-height:1.25;
+        font-weight:850;
+        color:var(--text,#303638);
+      }
+      .w656-payment-subtitle{
+        display:block;
+        margin-top:3px;
+        font-size:10px;
+        line-height:1.32;
+        font-weight:600;
+        color:var(--muted,#6d7474);
+      }
+      .w656-payment-radio{
+        width:17px;
+        height:17px;
+        border:1.5px solid #c9cfcc;
+        border-radius:50%;
+        background:#fff;
+        position:relative;
+      }
+      .w656-payment-option input:checked + .w656-payment-card .w656-payment-radio{
+        border-color:#b0718b;
+      }
+      .w656-payment-option input:checked + .w656-payment-card .w656-payment-radio::after{
+        content:'';
+        position:absolute;
+        inset:3px;
+        border-radius:50%;
+        background:#b0718b;
+      }
+      .w656-payment-option.disabled{
+        cursor:not-allowed;
+      }
+      .w656-payment-option.disabled .w656-payment-card{
+        opacity:.42;
+        box-shadow:none;
+        transform:none;
+      }
+      .w656-payment-note{
+        margin:9px 0 0;
+        padding:9px 11px;
+        border-radius:11px;
+        background:#f8f7f5;
+        color:var(--muted,#6d7474);
+        font-size:9.8px;
+        line-height:1.4;
+        border:1px solid rgba(115,135,122,.10);
+      }
+      .w656-payment-note strong{
+        color:var(--text,#303638);
+      }
+      #whatsappBtn.w656-checkout-btn{
+        width:100%;
+        min-height:44px;
+        margin-top:10px;
+        border:0;
+        border-radius:13px;
+        background:linear-gradient(135deg,#c78ca5,#b77a94);
+        color:#fff;
+        font-size:12px;
+        font-weight:850;
+        letter-spacing:.01em;
+        box-shadow:0 8px 18px rgba(183,122,148,.18);
+      }
+      #whatsappBtn.w656-checkout-btn:hover{
+        filter:brightness(.985);
+        transform:translateY(-1px);
+      }
+      @media(max-width:560px){
+        .w656-payment-box{margin-top:14px}
+        .w656-payment-heading{margin-bottom:8px}
+        .w656-payment-heading strong{font-size:12.5px}
+        .w656-payment-heading span{font-size:9px}
+        .w656-payment-card{
+          grid-template-columns:31px minmax(0,1fr) 17px;
+          min-height:54px;
+          padding:9px 10px;
+          border-radius:13px;
+          gap:9px;
+        }
+        .w656-payment-icon{width:31px;height:31px;border-radius:9px;font-size:13px}
+        .w656-payment-title{font-size:11.5px}
+        .w656-payment-subtitle{font-size:9.5px}
+        .w656-payment-note{font-size:9.4px;padding:8px 10px}
+        #whatsappBtn.w656-checkout-btn{min-height:43px;border-radius:12px;font-size:11.5px}
+      }
     `;
     document.head.appendChild(style);
   }
@@ -64,19 +233,35 @@
         if(fallback) fallback.checked=true;
       }
     });
+
     const note=document.getElementById('w656PaymentNote');
     if(!note)return;
     const method=selectedMethod();
     if(method==='spei_prepaid'){
-      note.innerHTML='<strong>SPEI:</strong> cuenta Santander. Los datos bancarios se mostrarán al confirmar el pedido; falta configurar la CLABE en la tienda.';
+      note.innerHTML='<strong>SPEI · Santander</strong><br>Pago anticipado. Los datos bancarios aparecerán al confirmar el pedido cuando configuremos la CLABE.';
     }else if(!hasCompleteCp){
-      note.textContent='Indica tu código postal para validar si la contraentrega está disponible.';
+      note.textContent='Ingresa tu código postal para validar la disponibilidad de contraentrega.';
     }else if(local){
-      note.textContent=method==='cash_delivery'?'Pagarás en efectivo al recibir tu pedido.':'Realizarás el SPEI al momento de recibir tu pedido.';
+      note.textContent=method==='cash_delivery'?'Pagas en efectivo al momento de recibir tu pedido.':'Realizas la transferencia SPEI al momento de recibir tu pedido.';
     }else{
-      note.textContent='La contraentrega está disponible solo para entregas locales en Ciudad Juárez.';
+      note.textContent='La contraentrega está disponible únicamente para entregas locales en Ciudad Juárez.';
     }
     saveSelection();
+  }
+
+  function paymentOption({value,title,subtitle,local=false,saved}){
+    return `
+      <label class="w656-payment-option" ${local?'data-w656-local-payment="1"':''}>
+        <input type="radio" name="w656PaymentMethod" value="${value}" ${saved===value?'checked':''}>
+        <span class="w656-payment-card">
+          <span class="w656-payment-icon" aria-hidden="true">${ICONS[value]||'•'}</span>
+          <span class="w656-payment-copy">
+            <span class="w656-payment-title">${title}</span>
+            <span class="w656-payment-subtitle">${subtitle}</span>
+          </span>
+          <span class="w656-payment-radio" aria-hidden="true"></span>
+        </span>
+      </label>`;
   }
 
   function injectPaymentBox(){
@@ -87,20 +272,14 @@
     box.className='w656-payment-box';
     const saved=(()=>{try{return localStorage.getItem(PAYMENT_KEY)||'spei_prepaid'}catch(_){return 'spei_prepaid'}})();
     box.innerHTML=`
-      <strong>Forma de pago</strong>
+      <div class="w656-payment-heading">
+        <strong>Forma de pago</strong>
+        <span>Selecciona una opción</span>
+      </div>
       <div class="w656-payment-options">
-        <label class="w656-payment-option">
-          <input type="radio" name="w656PaymentMethod" value="spei_prepaid" ${saved==='spei_prepaid'?'checked':''}>
-          <span>Transferencia SPEI<small>Transferencia bancaria antes de la entrega</small></span>
-        </label>
-        <label class="w656-payment-option" data-w656-local-payment="1">
-          <input type="radio" name="w656PaymentMethod" value="cash_delivery" ${saved==='cash_delivery'?'checked':''}>
-          <span>Contraentrega · Efectivo<small>Disponible para entrega local</small></span>
-        </label>
-        <label class="w656-payment-option" data-w656-local-payment="1">
-          <input type="radio" name="w656PaymentMethod" value="spei_delivery" ${saved==='spei_delivery'?'checked':''}>
-          <span>Contraentrega · SPEI<small>Transferencia al momento de recibir</small></span>
-        </label>
+        ${paymentOption({value:'spei_prepaid',title:'Transferencia SPEI',subtitle:'Pago anticipado por transferencia',saved})}
+        ${paymentOption({value:'cash_delivery',title:'Contraentrega · Efectivo',subtitle:'Pagas al recibir · Entrega local',local:true,saved})}
+        ${paymentOption({value:'spei_delivery',title:'Contraentrega · SPEI',subtitle:'Transfiere al momento de la entrega',local:true,saved})}
       </div>
       <div class="w656-payment-note" id="w656PaymentNote"></div>
     `;
