@@ -97,6 +97,7 @@
       f.push=f;f.loaded=true;f.version='2.0';f.queue=[];window.fbq=f;
       const s=document.createElement('script');s.async=true;s.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(s);
     }
+    window.fbq('set','autoConfig',false,META_PIXEL_ID);
     window.fbq('init',META_PIXEL_ID);
     metaReady=true;
     return true;
