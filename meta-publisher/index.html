@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publicar FB + IG · WOMAN 656</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--bg:#0f1115;--card:#191d24;--line:#2d3440;--muted:#aeb6c2;--accent:#9b587a;--ok:#8dd89c;--warn:#ffd479;--err:#ff9b9b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#eee;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.wrap{max-width:980px;margin:auto;padding:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:14px}h1,h2,h3{margin:0 0 8px}.muted{color:var(--muted)}a{color:#f2b7d4;text-decoration:none;font-weight:800}.drop{border:2px dashed #596477;border-radius:14px;padding:34px;text-align:center;background:#11161d;cursor:pointer}.drop.drag{border-color:#d7a7bf;background:#1b151b}.drop input{display:none}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button{padding:12px 16px;border:1px solid #414b5a;border-radius:10px;background:#262d39;color:#fff;font:inherit;font-weight:900;cursor:pointer}.primary{background:var(--accent);border-color:var(--accent)}button:disabled{opacity:.45;cursor:not-allowed}.status{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#11161d;margin-top:12px;white-space:pre-wrap}.ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}.config{display:grid;grid-template-columns:1fr 1fr;gap:10px}.destination{padding:14px;background:#11161d;border:1px solid var(--line);border-radius:10px}.destination .name{font-size:18px;font-weight:900;margin-top:5px}.destination .id{font-size:11px;color:var(--muted);margin-top:4px;word-break:break-all}.bar{height:14px;border-radius:999px;background:#11161d;border:1px solid var(--line);overflow:hidden;margin-top:12px}.bar>div{height:100%;width:0;background:var(--accent);transition:width .25s}.results{max-height:320px;overflow:auto;margin-top:12px}.row{padding:8px 10px;border-bottom:1px solid #2a3038;font-size:13px}.checks{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:12px}.checks label{display:flex;gap:7px;align-items:center;font-weight:800}.checks input{width:18px;height:18px}.target{margin-top:12px;padding:13px 14px;border-radius:10px;border:1px solid #3b5143;background:#132019;color:#b9efc4;font-weight:900}.who{font-size:12px;color:var(--muted);margin-top:4px}@media(max-width:650px){.wrap{padding:12px}.config{grid-template-columns:1fr}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/">← WOMAN 656</a>
+  <h1 style="margin-top:8px">🚀 Publicar Facebook + Instagram</h1>
+  <p class="muted">Estás dentro de woman656.com. Tu sesión ADMIN de la tienda se reutiliza automáticamente.</p>
+
+  <div class="card">
+    <h2>0. Sesión</h2>
+    <div id="sessionState" class="status warn">Comprobando tu sesión de WOMAN 656…</div>
+    <div id="sessionWho" class="who"></div>
+  </div>
+
+  <div class="card">
+    <h2>1. Destino de publicación</h2>
+    <div class="config">
+      <div class="destination">
+        <div>Facebook</div>
+        <div id="fbState" class="warn">Esperando sesión…</div>
+        <div id="fbName" class="name">—</div>
+        <div id="fbId" class="id"></div>
+      </div>
+      <div class="destination">
+        <div>Instagram</div>
+        <div id="igState" class="warn">Esperando sesión…</div>
+        <div id="igName" class="name">—</div>
+        <div id="igId" class="id"></div>
+      </div>
+    </div>
+    <div id="targetMsg" class="target" hidden></div>
+    <div id="configMsg" class="status warn">Primero comprobaré tu sesión y después las cuentas Meta.</div>
+  </div>
+
+  <div class="card">
+    <h2>2. Elige el ZIP</h2>
+    <div id="drop" class="drop">
+      <input id="file" type="file" accept=".zip,application/zip">
+      <h3 id="dropTitle">Haz clic aquí o arrastra el ZIP</h3>
+      <div id="fileInfo" class="muted">Usa el ZIP final generado para tus productos.</div>
+    </div>
+    <div class="checks">
+      <label><input id="fb" type="checkbox" checked> Facebook</label>
+      <label><input id="ig" type="checkbox" checked> Instagram</label>
+    </div>
+    <div class="actions"><button id="publish" class="primary" disabled>Publicar TODO en Facebook + Instagram</button></div>
+    <div id="status" class="status">Esperando archivo.</div>
+    <div class="bar"><div id="bar"></div></div>
+    <div id="results" class="results"></div>
+  </div>
+</div>
+<script>
+(() => {
+  const PUBLIC_SUPABASE_URL='https://snkuvxpddxcmbfhgabbx.supabase.co';
+  const PUBLIC_SUPABASE_KEY='sb_publishable_z2Z7BluzsEpaqPxyYWTxjg_kkcme7xK';
+  const API_BASE='https://bot-moda-juarez.onrender.com';
+  const sb=window.supabase.createClient(PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'woman656-auth-token-v1'}});
+  let token='',chosen=null,polling=null,metaReady={facebook:false,instagram:false},sessionReady=false;
+  const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const endpoint=path=>`${API_BASE}${path}`;
+
+  async function getSession(refresh=false){
+    let result;
+    if(refresh) result=await sb.auth.refreshSession(); else result=await sb.auth.getSession();
+    const session=result?.data?.session||null;
+    if(!session?.access_token) throw new Error('No encuentro una sesión iniciada en WOMAN 656. Regresa a la tienda e inicia sesión con tu cuenta ADMIN.');
+    token=session.access_token;
+    sessionReady=true;
+    $('sessionState').className='status ok';$('sessionState').textContent='✅ Sesión WOMAN 656 detectada.';
+    $('sessionWho').textContent=session.user?.email?`Usuario: ${session.user.email}`:'';
+    return session;
+  }
+
+  async function api(path,opt={},retry=true){
+    if(!token) await getSession(false);
+    const headers=new Headers(opt.headers||{});headers.set('Authorization',`Bearer ${token}`);
+    let r=await fetch(endpoint(path),{...opt,headers});
+    if(r.status===401&&retry){await getSession(true);return api(path,opt,false)}
+    const text=await r.text();let d;try{d=JSON.parse(text)}catch{d=text}
+    if(!r.ok)throw new Error(d?.detail||d||`Error ${r.status}`);return d;
+  }
+  function setStatus(text,cls=''){const e=$('status');e.className='status'+(cls?' '+cls:'');e.textContent=text}
+  function refreshPublishButton(){const selectedReady=($('fb').checked&&metaReady.facebook)||($('ig').checked&&metaReady.instagram);const selectedBad=($('fb').checked&&!metaReady.facebook)||($('ig').checked&&!metaReady.instagram);$('publish').disabled=!sessionReady||!chosen||!selectedReady||selectedBad}
+  function updateTargetMessage(){const names=[];if($('fb').checked&&metaReady.facebook)names.push(`Facebook: ${$('fbName').textContent}`);if($('ig').checked&&metaReady.instagram)names.push(`Instagram: ${$('igName').textContent}`);$('targetMsg').hidden=!names.length;$('targetMsg').textContent=names.length?`PUBLICARÁ EN → ${names.join('  ·  ')}`:'';refreshPublishButton()}
+
+  async function loadConfig(){
+    try{
+      await getSession(false);
+      const d=await api('/api/meta-publisher/status');const dest=d.destinations||{},fb=dest.facebook||{},ig=dest.instagram||{};
+      metaReady.facebook=!!fb.connected;metaReady.instagram=!!ig.connected;
+      $('fbState').textContent=fb.connected?'✅ CONECTADO':fb.configured?'⚠️ NO SE PUDO VALIDAR':'❌ FALTA CONFIGURAR';$('fbState').className=fb.connected?'ok':'err';$('fbName').textContent=fb.connected?(fb.name||'Página de Facebook'):'—';$('fbId').textContent=fb.id?`ID: ${fb.id}`:'';
+      $('igState').textContent=ig.connected?'✅ CONECTADO':ig.configured?'⚠️ NO SE PUDO VALIDAR':'❌ FALTA CONFIGURAR';$('igState').className=ig.connected?'ok':'err';$('igName').textContent=ig.connected?(ig.username?`@${ig.username}`:(ig.name||'Instagram')):'—';$('igId').textContent=ig.id?`ID: ${ig.id}`:'';
+      if(!fb.connected)$('fb').checked=false;if(!ig.connected)$('ig').checked=false;
+      const errors=[];if(!fb.connected&&fb.error)errors.push(`Facebook: ${fb.error}`);if(!ig.connected&&ig.error)errors.push(`Instagram: ${ig.error}`);
+      $('configMsg').className='status '+((fb.connected&&ig.connected)?'ok':'warn');$('configMsg').textContent=(fb.connected&&ig.connected)?'✅ Las dos cuentas están validadas.':(errors.join('\n')||'Falta completar la conexión de Meta.');updateTargetMessage();
+    }catch(e){sessionReady=false;$('sessionState').className='status err';$('sessionState').textContent=`❌ ${e.message}`;$('configMsg').className='status err';$('configMsg').textContent='No puedo comprobar Meta hasta validar tu sesión ADMIN.';refreshPublishButton()}
+  }
+
+  function choose(file){chosen=file;$('dropTitle').textContent=file.name;$('fileInfo').textContent=`${(file.size/1024/1024).toFixed(1)} MB · listo para publicar`;setStatus('ZIP cargado. Revisa arriba las cuentas destino y presiona Publicar TODO.','ok');refreshPublishButton()}
+  $('drop').onclick=()=> $('file').click();$('file').onchange=()=>{if($('file').files[0])choose($('file').files[0])};
+  ['dragenter','dragover'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('drag')}));['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('drag')}));$('drop').addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)choose(f)});
+  $('fb').addEventListener('change',updateTargetMessage);$('ig').addEventListener('change',updateTargetMessage);
+
+  async function poll(jobId){const d=await api(`/api/meta-publisher/job/${jobId}`);const total=Number(d.total||0),done=Number(d.processed||0);$('bar').style.width=total?`${Math.min(100,done/total*100)}%`:'3%';setStatus(d.message||d.status,d.status==='done'?'ok':d.status==='error'?'err':'warn');$('results').innerHTML=(d.results||[]).slice().reverse().map(r=>`<div class="row"><b>${esc(r.sku)}</b> · Facebook: ${r.facebook?'✅':'—'} · Instagram: ${r.instagram?'✅':'—'}${r.errors?.length?`<div class="err">${esc(r.errors.join(' | '))}</div>`:''}</div>`).join('');if(d.status==='done'||d.status==='error'){clearInterval(polling);polling=null;refreshPublishButton()}}
+  $('publish').onclick=async()=>{if(!chosen)return;const fb=$('fb').checked,ig=$('ig').checked;if(!fb&&!ig){setStatus('Selecciona Facebook, Instagram o ambos.','err');return}if((fb&&!metaReady.facebook)||(ig&&!metaReady.instagram)){setStatus('No publicaré hasta poder validar exactamente la cuenta seleccionada.','err');return}$('publish').disabled=true;$('results').innerHTML='';$('bar').style.width='2%';setStatus(`Subiendo ZIP. ${$('targetMsg').textContent}`,'warn');try{const fd=new FormData();fd.append('file',chosen);const d=await api(`/api/meta-publisher/publish-zip?publish_facebook=${fb}&publish_instagram=${ig}`,{method:'POST',body:fd});await poll(d.job_id);polling=setInterval(()=>poll(d.job_id).catch(e=>setStatus(e.message,'err')),2500)}catch(e){setStatus(e.message,'err');refreshPublishButton()}};
+  loadConfig();
+})();
+</script>
+</body>
+</html>
